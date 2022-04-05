@@ -1,55 +1,51 @@
 package mch
 
-class ProfilerResultsParser private constructor(text: String) {
-    private val lines: List<String> = text.lines()
-    private var line: Int = 0
-    private var character: Int = 0
+class ProfilerResultsParser private constructor(private val text: String) {
+    private var cursor: Int = 0
 
     private fun parseProfilerResults(): ProfilerResults {
-        !"---- Minecraft Profiler Results ----"
-        skipLine(3)
+        !"---- Minecraft Profiler Results ----\n"
+
+        parseComment()
+        !'\n'
 
         !"Version: "
-        val version = remaining()
-        skipLine()
+        val version = readUntil('\n')
+        skip()
 
         !"Time span: "
         val timeSpan = parseLong()
-        !" ms"
-        skipLine()
+        !" ms\n"
 
         !"Tick span: "
         val tickSpan = parseLong()
-        !" ticks"
-        skipLine(3)
+        !" ticks\n"
 
-        !"--- BEGIN PROFILE DUMP ---"
-        skipLine(2)
+        parseComment()
+        !'\n'
+
+        !"--- BEGIN PROFILE DUMP ---\n\n"
         val profilerResults = mutableMapOf<String, ProfilerResult>().also { profilerResults ->
-            while (!currentLine().startsWith("---")) {
+            while (!startsWith("---")) {
                 parseProfilerResult().let { profilerResults[it.name] = it }
-                skipLine()
+                !'\n'
             }
         }
-        !"--- END PROFILE DUMP ---"
-        skipLine(2)
+        !"--- END PROFILE DUMP ---\n\n"
 
-        !"--- BEGIN COUNTER DUMP ---"
-        skipLine(2)
+        !"--- BEGIN COUNTER DUMP ---\n\n"
         val counterResults = mutableMapOf<String, CounterResult>().also { counterResults ->
-            while (!currentLine().startsWith("---")) {
+            while (!startsWith("---")) {
                 !"-- Counter: "
                 val name = readUntil(' ')
-                !" --"
-                skipLine()
+                !" --\n"
                 counterResults[name] = parseCounterResult()
-                skipLine()
+                !"\n\n\n"
             }
         }
-        !"--- END COUNTER DUMP ---"
-        skipLine(3)
+        !"--- END COUNTER DUMP ---\n\n"
 
-        require(lines.size == line)
+        require(text.length == cursor)
 
         return ProfilerResults(version, timeSpan, tickSpan, profilerResults, counterResults)
     }
@@ -57,12 +53,12 @@ class ProfilerResultsParser private constructor(text: String) {
     private fun parseProfilerResult(): ProfilerResult {
         val indent = parseIndent() + 1
         return if (peek() == '#') { // TODO: parse from right
-            !'#'
+            skip()
             val name = readUntil(' ')
             skip()
             val totalCount = parseLong()
             !'/'
-            val averageCount = remaining().toLong()
+            val averageCount = readUntil('\n').toLong()
             ProfilerResult.Counter(name, totalCount, averageCount)
         } else {
             val name = readUntil('(')
@@ -70,16 +66,13 @@ class ProfilerResultsParser private constructor(text: String) {
             val totalCount = parseLong()
             !'/'
             val averageCount = parseLong()
-            !')'
-            !' '
-            !'-'
-            !' '
+            !") - "
             val percentage = parsePercentage()
             !'/'
             val globalPercentage = parsePercentage()
             val children = mutableMapOf<String, ProfilerResult>().also { children ->
                 while (peekIndent()?.let { it == indent } == true) {
-                    skipLine()
+                    !'\n'
                     parseProfilerResult().let { children[it.name] = it }
                 }
             }
@@ -89,7 +82,7 @@ class ProfilerResultsParser private constructor(text: String) {
 
     private fun parseCounterResult(): CounterResult {
         val indent = parseIndent() + 1
-        val parts = remaining().split(' ')
+        val parts = readUntil('\n').split(' ')
         val name = parts.dropLast(3).joinToString(" ")
         val (totalSelf, totalTotal) = parts[parts.size - 3].let { part ->
             require(part.startsWith("total:"))
@@ -99,7 +92,7 @@ class ProfilerResultsParser private constructor(text: String) {
         val (averageSelf, averageTotal) = parts[parts.size - 1].split('/').map { it.toLong() }
         val children = mutableMapOf<String, CounterResult>().also { children ->
             while (peekIndent()?.let { it == indent } == true) {
-                skipLine()
+                !'\n'
                 parseCounterResult().let { children[it.name] = it }
             }
         }
@@ -107,11 +100,11 @@ class ProfilerResultsParser private constructor(text: String) {
     }
 
     private fun parseLong(): Long {
-        val start = character
+        val start = cursor
         while (peek().isDigit()) {
             skip()
         }
-        return currentLine().substring(start, character).toLong()
+        return text.substring(start, cursor).toLong()
     }
 
     private fun parsePercentage(): Double {
@@ -121,35 +114,39 @@ class ProfilerResultsParser private constructor(text: String) {
     }
 
     private fun peekIndent(): Int? {
+        val start = cursor
         skipLine()
-        return if (currentLine().length <= character) {
-            null
-        } else if (peek() == '[') {
-            currentLine().substring(1, 3).toInt()
+        return if (cursor < text.length && peek() == '[') {
+            text.substring(cursor + 1, cursor + 3).toInt()
         } else {
             null
         }.also {
-            --line
-            character = 0
+            cursor = start
         }
     }
 
     private fun parseIndent(): Int {
         !'['
-        val indent = currentLine().substring(1, 3).toInt()
+        val indent = text.substring(cursor, cursor + 2).toInt()
         skip(2)
-        !']'
-        !' '
-        repeat(indent) { !"|   " }
+        !"] "
+        repeat(indent) {
+            !"|   "
+        }
         return indent
     }
 
+    private fun parseComment(): String {
+        !"// "
+        val comment = readUntil('\n')
+        skip()
+        return comment
+    }
+
     private fun readUntil(suffix: Char): String {
-        val start = character
-        while (peek() != suffix) {
-            skip()
-        }
-        return currentLine().substring(start, character)
+        val start = cursor
+        skipUntil(suffix)
+        return text.substring(start, cursor)
     }
 
     private operator fun Char.not() {
@@ -158,24 +155,28 @@ class ProfilerResultsParser private constructor(text: String) {
     }
 
     private operator fun String.not() {
-        require(remaining().startsWith(this))
+        require(this@ProfilerResultsParser.startsWith(this))
         skip(length)
     }
 
-    private fun peek(): Char = currentLine()[character]
+    private fun startsWith(prefix: String): Boolean = text.startsWith(prefix, cursor)
 
-    private fun remaining(): String = currentLine().substring(character)
+    private fun skipLine() {
+        skipUntil('\n')
+        skip()
+    }
 
-    private fun currentLine(): String = lines[line]
+    private fun skipUntil(suffix: Char) {
+        while (peek() != suffix) {
+            skip()
+        }
+    }
 
     private fun skip(count: Int = 1) {
-        character += count
+        cursor += count
     }
 
-    private fun skipLine(count: Int = 1) {
-        line += count
-        character = 0
-    }
+    private fun peek(): Char = text[cursor]
 
     companion object {
         operator fun invoke(text: String): ProfilerResults = ProfilerResultsParser(text).parseProfilerResults()
