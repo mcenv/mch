@@ -4,7 +4,7 @@ data class ProfilerResults(
     val version: String,
     val timeSpan: Long,
     val tickSpan: Long,
-    val profilerResults: List<ProfilerResult>,
+    val profilerResults: Map<String, ProfilerResult>,
     val counterResults: Map<String, CounterResult>,
 )
 

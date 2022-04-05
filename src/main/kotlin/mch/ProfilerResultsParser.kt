@@ -25,9 +25,9 @@ class ProfilerResultsParser private constructor(text: String) {
 
         !"--- BEGIN PROFILE DUMP ---"
         skipLine(2)
-        val profilerResults = mutableListOf<ProfilerResult>().also { profilerResults ->
+        val profilerResults = mutableMapOf<String, ProfilerResult>().also { profilerResults ->
             while (!currentLine().startsWith("---")) {
-                profilerResults += parseProfilerResult()
+                parseProfilerResult().let { profilerResults[it.name] = it }
                 skipLine()
             }
         }
