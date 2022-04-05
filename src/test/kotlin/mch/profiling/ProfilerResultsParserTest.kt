@@ -1,4 +1,4 @@
-package mch
+package mch.profiling
 
 import kotlin.test.Test
 

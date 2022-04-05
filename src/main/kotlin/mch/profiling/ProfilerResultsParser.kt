@@ -1,4 +1,4 @@
-package mch
+package mch.profiling
 
 class ProfilerResultsParser private constructor(private val text: String) {
     private var cursor: Int = 0

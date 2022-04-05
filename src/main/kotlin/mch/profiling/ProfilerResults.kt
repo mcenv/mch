@@ -1,4 +1,4 @@
-package mch
+package mch.profiling
 
 data class ProfilerResults(
     val version: String,
