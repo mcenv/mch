@@ -36,15 +36,16 @@ public class Transformer implements ClassFileTransformer {
         @Override
         public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
             var parent = super.visitMethod(access, name, descriptor, signature, exceptions);
-            return switch (name) {
-                case "getServerModName" -> new MethodVisitor(ASM9, parent) {
+            if (name.equals("getServerModName") && descriptor.equals("()Ljava/lang/String;")) {
+                return new MethodVisitor(ASM9, parent) {
                     @Override
                     public void visitLdcInsn(Object value) {
                         super.visitLdcInsn("mch");
                     }
                 };
-                default -> parent;
-            };
+            } else {
+                return parent;
+            }
         }
     }
 }
