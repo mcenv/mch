@@ -25,6 +25,11 @@ tasks.jar {
     }
 }
 
+tasks.shadowJar {
+    archiveClassifier.set("")
+    archiveVersion.set("")
+}
+
 tasks.test {
     useJUnitPlatform()
 }
