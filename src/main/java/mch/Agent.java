@@ -6,6 +6,6 @@ public class Agent {
     public static void agentmain(String args, Instrumentation instrumentation) {
         System.out.println("Starting mch.Agent");
 
-        instrumentation.addTransformer(new Injector());
+        instrumentation.addTransformer(new Transformer());
     }
 }
