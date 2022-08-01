@@ -11,11 +11,9 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation("org.ow2.asm:asm:9.3")
     implementation("org.ow2.asm:asm-commons:9.3")
     implementation("com.mojang:brigadier:1.0.18")
-    testImplementation(kotlin("test"))
 }
 
 tasks.jar {
