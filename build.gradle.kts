@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation("net.sf.jopt-simple:jopt-simple:5.0.4")
     implementation("org.ow2.asm:asm:9.3")
     implementation("com.mojang:brigadier:1.0.18")
 }

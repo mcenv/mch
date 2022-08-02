@@ -12,6 +12,12 @@ import java.util.function.Function;
 import static org.objectweb.asm.Opcodes.*;
 
 public class Transformer implements ClassFileTransformer {
+    private final String args;
+
+    public Transformer(String args) {
+        this.args = args;
+    }
+
     private static byte[] transform(byte[] classfileBuffer, Function<ClassVisitor, ClassVisitor> createClassVisitor) {
         var classReader = new ClassReader(classfileBuffer);
         var classWriter = new ClassWriter(classReader, 0);
@@ -24,12 +30,13 @@ public class Transformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         return switch (className) {
             case "net/minecraft/server/MinecraftServer" -> transform(classfileBuffer, ModNameTransformer::new);
-            case "com/mojang/brigadier/CommandDispatcher" -> transform(classfileBuffer, CommandInjector::new);
+            case "com/mojang/brigadier/CommandDispatcher" ->
+                    transform(classfileBuffer, v -> new CommandInjector(v, args));
             default -> null;
         };
     }
 
-    static class ModNameTransformer extends ClassVisitor {
+    private static class ModNameTransformer extends ClassVisitor {
         public ModNameTransformer(ClassVisitor classVisitor) {
             super(ASM9, classVisitor);
         }
@@ -50,9 +57,12 @@ public class Transformer implements ClassFileTransformer {
         }
     }
 
-    static class CommandInjector extends ClassVisitor {
-        public CommandInjector(ClassVisitor classVisitor) {
+    private static class CommandInjector extends ClassVisitor {
+        private final String benchmark;
+
+        public CommandInjector(ClassVisitor classVisitor, String benchmark) {
             super(ASM9, classVisitor);
+            this.benchmark = benchmark;
         }
 
         @Override
@@ -64,7 +74,8 @@ public class Transformer implements ClassFileTransformer {
                     public void visitInsn(int opcode) {
                         if (opcode == RETURN) {
                             visitVarInsn(ALOAD, 0);
-                            visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;)V", false);
+                            visitLdcInsn(benchmark);
+                            visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Ljava/lang/String;)V", false);
                         }
                         super.visitInsn(opcode);
                     }

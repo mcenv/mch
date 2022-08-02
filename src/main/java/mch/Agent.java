@@ -6,6 +6,6 @@ public class Agent {
     public static void premain(String args, Instrumentation instrumentation) {
         System.out.println("Starting mch.Agent");
 
-        instrumentation.addTransformer(new Transformer());
+        instrumentation.addTransformer(new Transformer(args));
     }
 }
