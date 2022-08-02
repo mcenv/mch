@@ -13,6 +13,6 @@ public class Fork {
         var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});
         var mainClass = Class.forName("net.minecraft.bundler.Main", true, classLoader);
         var mainHandle = MethodHandles.lookup().findStatic(mainClass, "main", MethodType.methodType(Void.TYPE, String[].class)).asFixedArity();
-        mainHandle.invoke(args);
+        mainHandle.invoke((Object) args);
     }
 }
