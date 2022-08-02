@@ -18,8 +18,8 @@ dependencies {
 tasks.jar {
     manifest {
         attributes(
+            "Premain-Class" to "mch.Agent",
             "Main-Class" to "mch.Main",
-            "Launcher-Agent-Class" to "mch.Agent",
         )
     }
 }

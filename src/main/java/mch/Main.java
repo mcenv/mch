@@ -1,18 +1,32 @@
 package mch;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws Throwable {
+    public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Starting mch.Main");
 
-        var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});
-        var mainClass = Class.forName("net.minecraft.bundler.Main", true, classLoader);
-        var mainHandle = MethodHandles.lookup().findStatic(mainClass, "main", MethodType.methodType(Void.TYPE, String[].class)).asFixedArity();
-        mainHandle.invoke(args);
+        var builder = new ProcessBuilder(getCommand(args));
+        var process = builder.start();
+        process.waitFor();
+    }
+
+    private static List<String> getCommand(String[] args) {
+        try {
+            var java = ProcessHandle.current().info().command().orElseThrow();
+            String jar = '"' + Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString() + '"';
+
+            var command = new ArrayList<String>();
+            command.addAll(List.of(java, "-javaagent:" + jar, "-cp", jar, "mch.Fork"));
+            command.addAll(Arrays.asList(args));
+            return command;
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
