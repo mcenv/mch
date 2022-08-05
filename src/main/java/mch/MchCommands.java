@@ -5,16 +5,20 @@ import com.mojang.brigadier.CommandDispatcher;
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 
 public class MchCommands {
-    public static void register(CommandDispatcher<Object> dispatcher, String name) {
+    public static void register(CommandDispatcher<Object> dispatcher, String target) {
         dispatcher.register(
                 literal("mch")
                         .executes(c -> {
                             var source = c.getSource();
-                            dispatcher.execute("say " + name, source);
-
+                            dispatcher.execute("say " + target, source);
                             Runtime.getRuntime().halt(0);
                             return 0;
                         })
         );
+    }
+
+    public enum Mode {
+        INIT,
+        RUN
     }
 }

@@ -19,23 +19,25 @@ public class Main {
         var benchmarks = options.valuesOf(benchmarksSpec);
         var minecraft = options.valueOf(minecraftSpec);
 
-        for (var benchmark : benchmarks) {
-            forkProcess(benchmark, minecraft);
+        for (var index = 0; index < benchmarks.size(); ++index) {
+            forkProcess(benchmarks, index, minecraft);
         }
     }
 
-    private static int forkProcess(String benchmark, String minecraft) throws IOException, InterruptedException {
-        var builder = new ProcessBuilder(getCommand(benchmark, minecraft));
+    private static int forkProcess(List<String> benchmarks, int index, String minecraft) throws IOException, InterruptedException {
+        var command = getCommand(benchmarks, index, minecraft);
+        var builder = new ProcessBuilder(command);
         var process = builder.start();
         process.getInputStream().transferTo(System.out);
         return process.waitFor();
     }
 
-    private static List<String> getCommand(String benchmark, String minecraft) {
+    private static List<String> getCommand(List<String> benchmarks, int index, String minecraft) {
         try {
             var java = ProcessHandle.current().info().command().orElseThrow();
             var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
-            return List.of(java, "-javaagent:" + jar + "=" + quote(benchmark), "-cp", jar, "mch.Fork", minecraft);
+            var options = quote("--mode;RUN;--benchmarks;" + String.join(",", benchmarks) + ";--index;" + index);
+            return List.of(java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", minecraft);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
