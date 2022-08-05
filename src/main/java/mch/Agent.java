@@ -21,10 +21,11 @@ public class Agent {
         var mode = options.valueOf(modeSpec);
         var benchmarks = options.valuesOf(benchmarksSpec);
         var index = options.valueOf(indexSpec);
+        var benchmark = benchmarks.get(index);
 
         instrumentation.addTransformer(new Transformer(Map.of(
                 "net/minecraft/server/MinecraftServer", ModNameTransformer::new,
-                "com/mojang/brigadier/CommandDispatcher", v -> new CommandInjector(v, benchmarks.get(index))
+                "com/mojang/brigadier/CommandDispatcher", v -> new CommandInjector(v, benchmark)
         )));
     }
 }
