@@ -1,6 +1,7 @@
 package mch;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.util.Collection;
@@ -12,17 +13,18 @@ public class MchCommands {
     private static long startTime;
     private static long iterationCount;
     private static long operationCount;
+    private static ParseResults<Object> run;
 
     public static void register(final CommandDispatcher<Object> dispatcher, final String target) {
         dispatcher.register(
                 literal("mch")
                         .then(
                                 literal("start")
-                                        .executes(c -> start())
+                                        .executes(c -> start(dispatcher, target, c.getSource()))
                         )
                         .then(
                                 literal("run")
-                                        .executes(c -> run(dispatcher, target, c.getSource()))
+                                        .executes(c -> run(dispatcher))
                         )
                         .then(
                                 literal("stop_or")
@@ -31,15 +33,16 @@ public class MchCommands {
         );
     }
 
-    private static int start() {
+    private static int start(final CommandDispatcher<Object> dispatcher, final String target, final Object source) {
         startTime = System.nanoTime();
         ++iterationCount;
         operationCount = 0;
+        run = dispatcher.parse("function mch:" + target /* TODO */, source);
         return 0;
     }
 
-    private static int run(final CommandDispatcher<Object> dispatcher, final String target, final Object source) throws CommandSyntaxException {
-        dispatcher.execute("function mch:" + target /* TODO */, source);
+    private static int run(final CommandDispatcher<Object> dispatcher) throws CommandSyntaxException {
+        dispatcher.execute(run);
         ++operationCount;
         return 0;
     }
