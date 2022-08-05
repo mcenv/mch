@@ -7,12 +7,12 @@ import java.net.URLClassLoader;
 import java.nio.file.Paths;
 
 public class Fork {
-    public static void main(String[] args) throws Throwable {
+    public static void main(final String[] args) throws Throwable {
         System.out.println("Starting mch.Fork");
 
-        var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});
-        var mainClass = Class.forName("net.minecraft.bundler.Main", true, classLoader);
-        var mainHandle = MethodHandles.lookup().findStatic(mainClass, "main", MethodType.methodType(Void.TYPE, String[].class)).asFixedArity();
+        final var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});
+        final var mainClass = Class.forName("net.minecraft.bundler.Main", true, classLoader);
+        final var mainHandle = MethodHandles.lookup().findStatic(mainClass, "main", MethodType.methodType(Void.TYPE, String[].class)).asFixedArity();
         mainHandle.invoke((Object) args);
     }
 }

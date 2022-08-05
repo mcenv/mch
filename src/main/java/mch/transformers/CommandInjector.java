@@ -8,18 +8,18 @@ import static org.objectweb.asm.Opcodes.*;
 public class CommandInjector extends ClassVisitor {
     private final String benchmark;
 
-    public CommandInjector(ClassVisitor classVisitor, String benchmark) {
+    public CommandInjector(final ClassVisitor classVisitor, final String benchmark) {
         super(ASM9, classVisitor);
         this.benchmark = benchmark;
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        var parent = super.visitMethod(access, name, descriptor, signature, exceptions);
+    public MethodVisitor visitMethod(final int access, final String name, final String descriptor, final String signature, final String[] exceptions) {
+        final var parent = super.visitMethod(access, name, descriptor, signature, exceptions);
         if (name.equals("<init>") && descriptor.equals("(Lcom/mojang/brigadier/tree/RootCommandNode;)V")) {
             return new MethodVisitor(ASM9, parent) {
                 @Override
-                public void visitInsn(int opcode) {
+                public void visitInsn(final int opcode) {
                     if (opcode == RETURN) {
                         visitVarInsn(ALOAD, 0);
                         visitLdcInsn(benchmark);

@@ -13,7 +13,7 @@ public class MchCommands {
     private static long iterationCount;
     private static long operationCount;
 
-    public static void register(CommandDispatcher<Object> dispatcher, String target) {
+    public static void register(final CommandDispatcher<Object> dispatcher, final String target) {
         dispatcher.register(
                 literal("mch")
                         .then(
@@ -38,20 +38,20 @@ public class MchCommands {
         return 0;
     }
 
-    private static int run(CommandDispatcher<Object> dispatcher, String target, Object source) throws CommandSyntaxException {
+    private static int run(final CommandDispatcher<Object> dispatcher, final String target, final Object source) throws CommandSyntaxException {
         dispatcher.execute("function mch:" + target /* TODO */, source);
         ++operationCount;
         return 0;
     }
 
-    private static Collection<Object> stopOr(Object source) {
-        var current = System.nanoTime();
+    private static Collection<Object> stopOr(final Object source) {
+        final var current = System.nanoTime();
         if (current - startTime < 1000000000L) {
             return Collections.singletonList(source);
         } else {
-            var stopTime = System.nanoTime();
-            var result = (double) (stopTime - startTime) / (double) operationCount + " ns/op";
-            var iterationName = iterationCount <= 5 ? "Warmup iteration" : "Iteration";
+            final var stopTime = System.nanoTime();
+            final var result = (double) (stopTime - startTime) / (double) operationCount + " ns/op";
+            final var iterationName = iterationCount <= 5 ? "Warmup iteration" : "Iteration";
             System.out.println(iterationName + ": " + result);
             return Collections.emptyList();
         }

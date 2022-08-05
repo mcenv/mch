@@ -12,20 +12,20 @@ import java.util.function.Function;
 public class Transformer implements ClassFileTransformer {
     private final Map<String, Function<ClassVisitor, ClassVisitor>> transformers;
 
-    public Transformer(Map<String, Function<ClassVisitor, ClassVisitor>> transformers) {
+    public Transformer(final Map<String, Function<ClassVisitor, ClassVisitor>> transformers) {
         this.transformers = transformers;
     }
 
-    private static byte[] transform(byte[] classfileBuffer, Function<ClassVisitor, ClassVisitor> createClassVisitor) {
-        var classReader = new ClassReader(classfileBuffer);
-        var classWriter = new ClassWriter(classReader, 0);
-        var classVisitor = createClassVisitor.apply(classWriter);
+    private static byte[] transform(final byte[] classfileBuffer, final Function<ClassVisitor, ClassVisitor> createClassVisitor) {
+        final var classReader = new ClassReader(classfileBuffer);
+        final var classWriter = new ClassWriter(classReader, 0);
+        final var classVisitor = createClassVisitor.apply(classWriter);
         classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES);
         return classWriter.toByteArray();
     }
 
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+    public byte[] transform(final ClassLoader loader, final String className, final Class<?> classBeingRedefined, final ProtectionDomain protectionDomain, final byte[] classfileBuffer) {
         return transform(classfileBuffer, transformers.get(className));
     }
 }
