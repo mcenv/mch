@@ -13,7 +13,12 @@ repositories {
 dependencies {
     implementation("net.sf.jopt-simple:jopt-simple:5.0.4")
     implementation("org.ow2.asm:asm:9.3")
+    implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("com.mojang:brigadier:1.0.18")
+}
+
+tasks.withType(JavaCompile::class) {
+    options.encoding = "UTF-8"
 }
 
 tasks.jar {
