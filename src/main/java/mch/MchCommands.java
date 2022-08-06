@@ -71,13 +71,16 @@ public final class MchCommands {
         } else {
             final var stopTime = System.nanoTime();
             final var result = (double) (stopTime - startTime) / (double) operationCount;
-            final var iterationType = iterationCount <= 5 ? "Warmup" : "Measurement";
 
-            System.out.println(iterationType + " iteration: " + result + " ns/op");
-            try {
-                socket.getOutputStream().write(doubleToBytes(result));
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
+            if (iterationCount <= 5) {
+                System.out.println("Warmup iteration: " + result + " ns/op");
+            } else {
+                System.out.println("Measurement iteration: " + result + " ns/op");
+                try {
+                    socket.getOutputStream().write(doubleToBytes(result));
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return 0;

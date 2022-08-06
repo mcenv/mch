@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static mch.Util.bytesToDouble;
@@ -23,21 +25,27 @@ public final class Main {
         final var benchmarks = options.valuesOf(benchmarksSpec);
         final var minecraft = options.valueOf(minecraftSpec);
 
+        final var results = new ArrayList<Result>();
         for (final var benchmark : benchmarks) {
-            forkProcess(benchmark, minecraft);
+            forkProcess(results, benchmark, minecraft);
+        }
+        for (final var result : results) {
+            System.out.println(result.benchmark() + " " + result.stat().mean() + " ± " + result.stat().error() + " ns/op");
         }
     }
 
-    private static void forkProcess(final String benchmark, final String minecraft) throws IOException, InterruptedException {
+    private static void forkProcess(Collection<Result> results, final String benchmark, final String minecraft) throws IOException, InterruptedException {
         try (final var server = new ServerSocket(0)) {
             final var thread = new Thread(() -> {
                 try {
                     final var client = server.accept();
                     try (final var in = client.getInputStream()) {
-                        final var buffer = new byte[8];
-                        while (in.readNBytes(buffer, 0, 8) == 8) {
-                            System.out.println(bytesToDouble(buffer));
+                        final var scores = new ArrayList<Double>();
+                        final var buffer = new byte[Double.BYTES];
+                        while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
+                            scores.add(bytesToDouble(buffer));
                         }
+                        results.add(new Result(benchmark, new Stat(scores)));
                     }
                 } catch (final IOException e) {
                     throw new RuntimeException(e);
