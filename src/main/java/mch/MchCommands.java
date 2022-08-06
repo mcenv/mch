@@ -15,12 +15,12 @@ public class MchCommands {
     private static long operationCount;
     private static ParseResults<Object> run;
 
-    public static void register(final CommandDispatcher<Object> dispatcher, final String target) {
+    public static void register(final CommandDispatcher<Object> dispatcher, final String benchmark) {
         dispatcher.register(
                 literal("mch")
                         .then(
                                 literal("start")
-                                        .executes(c -> start(dispatcher, target, c.getSource()))
+                                        .executes(c -> start(dispatcher, benchmark, c.getSource()))
                         )
                         .then(
                                 literal("run")
@@ -33,11 +33,11 @@ public class MchCommands {
         );
     }
 
-    private static int start(final CommandDispatcher<Object> dispatcher, final String target, final Object source) {
+    private static int start(final CommandDispatcher<Object> dispatcher, final String benchmark, final Object source) {
         startTime = System.nanoTime();
         ++iterationCount;
         operationCount = 0;
-        run = dispatcher.parse("function mch:" + target /* TODO */, source);
+        run = dispatcher.parse("function " + benchmark, source);
         return 0;
     }
 
@@ -54,14 +54,9 @@ public class MchCommands {
         } else {
             final var stopTime = System.nanoTime();
             final var result = (double) (stopTime - startTime) / (double) operationCount + " ns/op";
-            final var iterationName = iterationCount <= 5 ? "Warmup iteration" : "Iteration";
-            System.out.println(iterationName + ": " + result);
+            final var iterationType = iterationCount <= 5 ? "Warmup" : "Measurement";
+            System.out.println(iterationType + " iteration: " + result);
             return Collections.emptyList();
         }
-    }
-
-    public enum Mode {
-        INIT,
-        RUN
     }
 }

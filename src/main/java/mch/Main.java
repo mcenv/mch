@@ -19,24 +19,24 @@ public class Main {
         final var benchmarks = options.valuesOf(benchmarksSpec);
         final var minecraft = options.valueOf(minecraftSpec);
 
-        for (var index = 0; index < benchmarks.size(); ++index) {
-            forkProcess(benchmarks, index, minecraft);
+        for (var benchmark : benchmarks) {
+            forkProcess(benchmark, minecraft);
         }
     }
 
-    private static int forkProcess(final List<String> benchmarks, final int index, final String minecraft) throws IOException, InterruptedException {
-        final var command = getCommand(benchmarks, index, minecraft);
+    private static void forkProcess(final String benchmark, final String minecraft) throws IOException, InterruptedException {
+        final var command = getCommand(benchmark, minecraft);
         final var builder = new ProcessBuilder(command);
         final var process = builder.start();
         process.getInputStream().transferTo(System.out);
-        return process.waitFor();
+        process.waitFor();
     }
 
-    private static List<String> getCommand(final List<String> benchmarks, final int index, final String minecraft) {
+    private static List<String> getCommand(final String benchmark, final String minecraft) {
         try {
             final var java = ProcessHandle.current().info().command().orElseThrow();
             final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
-            final var options = quote("--mode;RUN;--benchmarks;" + String.join(",", benchmarks) + ";--index;" + index);
+            final var options = quote(benchmark);
             return List.of(java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", minecraft);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
