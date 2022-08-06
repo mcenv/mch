@@ -6,8 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Collection;
-import java.util.Collections;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static mch.Util.doubleToBytes;
@@ -17,6 +15,7 @@ public final class MchCommands {
     private static long iterationCount;
     private static long operationCount;
     private static ParseResults<Object> run;
+    private static ParseResults<Object> loop;
     private static Socket socket;
 
     public static void register(final CommandDispatcher<Object> dispatcher, final String benchmark, final int port) {
@@ -38,7 +37,7 @@ public final class MchCommands {
                         )
                         .then(
                                 literal("loop")
-                                        .fork(dispatcher.getRoot(), c -> loop(c.getSource()))
+                                        .executes(c -> loop(dispatcher))
                         )
                         .then(
                                 literal("stop")
@@ -47,11 +46,15 @@ public final class MchCommands {
         );
     }
 
-    private static int start(final CommandDispatcher<Object> dispatcher, final String benchmark, final Object source) {
+    private static int start(final CommandDispatcher<Object> dispatcher, final String benchmark, final Object source) throws CommandSyntaxException {
         startTime = System.nanoTime();
         ++iterationCount;
         operationCount = 0;
         run = dispatcher.parse("function " + benchmark, source);
+        if (loop == null) {
+            loop = dispatcher.parse("function mch:loop", source);
+        }
+        dispatcher.execute(loop);
         return 0;
     }
 
@@ -61,10 +64,10 @@ public final class MchCommands {
         return 0;
     }
 
-    private static Collection<Object> loop(final Object source) {
+    private static int loop(final CommandDispatcher<Object> dispatcher) throws CommandSyntaxException {
         final var current = System.nanoTime();
         if (current - startTime < 1000000000L) {
-            return Collections.singletonList(source);
+            dispatcher.execute(loop);
         } else {
             final var stopTime = System.nanoTime();
             final var result = (double) (stopTime - startTime) / (double) operationCount;
@@ -76,9 +79,8 @@ public final class MchCommands {
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
-
-            return Collections.emptyList();
         }
+        return 0;
     }
 
     private static int stop() {
