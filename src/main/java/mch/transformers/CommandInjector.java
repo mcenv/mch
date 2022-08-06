@@ -7,10 +7,12 @@ import static org.objectweb.asm.Opcodes.*;
 
 public final class CommandInjector extends ClassVisitor {
     private final String benchmark;
+    private final int port;
 
-    public CommandInjector(final ClassVisitor classVisitor, final String benchmark) {
+    public CommandInjector(final ClassVisitor classVisitor, final String benchmark, final int port) {
         super(ASM9, classVisitor);
         this.benchmark = benchmark;
+        this.port = port;
     }
 
     @Override
@@ -23,7 +25,8 @@ public final class CommandInjector extends ClassVisitor {
                     if (opcode == RETURN) {
                         visitVarInsn(ALOAD, 0);
                         visitLdcInsn(benchmark);
-                        visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Ljava/lang/String;)V", false);
+                        visitLdcInsn(port);
+                        visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Ljava/lang/String;I)V", false);
                     }
                     super.visitInsn(opcode);
                 }

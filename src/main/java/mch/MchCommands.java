@@ -19,10 +19,10 @@ public final class MchCommands {
     private static ParseResults<Object> run;
     private static Socket socket;
 
-    public static void register(final CommandDispatcher<Object> dispatcher, final String benchmark) {
+    public static void register(final CommandDispatcher<Object> dispatcher, final String benchmark, final int port) {
         try {
-            socket = new Socket("localhost", 25585);
-        } catch (IOException e) {
+            socket = new Socket((String) null, port);
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -73,7 +73,7 @@ public final class MchCommands {
             System.out.println(iterationType + " iteration: " + result + " ns/op");
             try {
                 socket.getOutputStream().write(doubleToBytes(result));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
 
@@ -84,7 +84,7 @@ public final class MchCommands {
     private static int stop() {
         try {
             socket.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         return 0;
