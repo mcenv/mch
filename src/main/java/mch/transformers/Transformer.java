@@ -9,7 +9,7 @@ import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.function.Function;
 
-public class Transformer implements ClassFileTransformer {
+public final class Transformer implements ClassFileTransformer {
     private final Map<String, Function<ClassVisitor, ClassVisitor>> transformers;
 
     public Transformer(final Map<String, Function<ClassVisitor, ClassVisitor>> transformers) {

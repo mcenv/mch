@@ -5,7 +5,7 @@ import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.ASM9;
 
-public class ModNameTransformer extends ClassVisitor {
+public final class ModNameTransformer extends ClassVisitor {
     public ModNameTransformer(final ClassVisitor classVisitor) {
         super(ASM9, classVisitor);
     }

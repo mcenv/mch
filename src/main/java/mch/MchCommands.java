@@ -9,7 +9,7 @@ import java.util.Collections;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 
-public class MchCommands {
+public final class MchCommands {
     private static long startTime;
     private static long iterationCount;
     private static long operationCount;

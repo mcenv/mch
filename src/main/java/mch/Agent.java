@@ -7,7 +7,7 @@ import mch.transformers.Transformer;
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
 
-public class Agent {
+public final class Agent {
     public static void premain(final String args, final Instrumentation instrumentation) {
         System.out.println("Starting mch.Agent");
 

@@ -6,7 +6,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
 
-public class Fork {
+public final class Fork {
     public static void main(final String[] args) throws Throwable {
         System.out.println("Starting mch.Fork");
 

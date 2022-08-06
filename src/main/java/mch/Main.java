@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class Main {
+public final class Main {
     public static void main(final String[] args) throws IOException, InterruptedException {
         System.out.println("Starting mch.Main");
 

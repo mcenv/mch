@@ -5,7 +5,7 @@ import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class CommandInjector extends ClassVisitor {
+public final class CommandInjector extends ClassVisitor {
     private final String benchmark;
 
     public CommandInjector(final ClassVisitor classVisitor, final String benchmark) {
