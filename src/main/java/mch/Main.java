@@ -3,9 +3,13 @@ package mch;
 import joptsimple.OptionParser;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.List;
+
+import static mch.Util.bytesToDouble;
+import static mch.Util.quote;
 
 public final class Main {
     public static void main(final String[] args) throws IOException, InterruptedException {
@@ -25,11 +29,28 @@ public final class Main {
     }
 
     private static void forkProcess(final String benchmark, final String minecraft) throws IOException, InterruptedException {
+        var thread = new Thread(() -> {
+            try (final var server = new ServerSocket(25585 /* TODO: use random port */)) {
+                final var client = server.accept();
+                try (final var in = client.getInputStream()) {
+                    final var buffer = new byte[8];
+                    while (in.readNBytes(buffer, 0, 8) == 8) {
+                        System.out.println(bytesToDouble(buffer));
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        thread.start();
+
         final var command = getCommand(benchmark, minecraft);
         final var builder = new ProcessBuilder(command);
         final var process = builder.start();
         process.getInputStream().transferTo(System.out);
         process.waitFor();
+
+        thread.join();
     }
 
     private static List<String> getCommand(final String benchmark, final String minecraft) {
@@ -41,9 +62,5 @@ public final class Main {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String quote(final String string) {
-        return '"' + string + '"';
     }
 }
