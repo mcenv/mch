@@ -10,6 +10,7 @@ import java.net.Socket;
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static mch.Util.doubleToBytes;
 
+@SuppressWarnings("unused")
 public final class MchCommands {
     private static long startTime;
     private static long iterationCount;
