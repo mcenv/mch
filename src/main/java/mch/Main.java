@@ -27,7 +27,7 @@ public final class Main {
                 forkProcess(results, benchmark, args);
             }
             for (final var result : results) {
-                System.out.println(result.benchmark() + " " + result.stat().mean() + " ± " + result.stat().error() + " ns/op");
+                System.out.println(result.benchmark() + " " + result.mean() + " ± " + result.error() + " ns/op");
             }
         } catch (final IOException e) {
             System.err.println("not found: 'benchmarks'");
@@ -50,7 +50,7 @@ public final class Main {
                         while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
                             scores.add(bytesToDouble(buffer));
                         }
-                        results.add(new Result(benchmark, new Stat(scores)));
+                        results.add(new Result(benchmark, scores));
                     }
                 } catch (final IOException e) {
                     throw new IllegalStateException(e);
