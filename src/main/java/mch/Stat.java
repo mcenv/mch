@@ -7,7 +7,9 @@ import java.util.Collection;
 public final class Stat {
     private final Collection<Double> values;
 
-    public Stat(final Collection<Double> values) {
+    public Stat(
+            final Collection<Double> values
+    ) {
         this.values = values;
     }
 

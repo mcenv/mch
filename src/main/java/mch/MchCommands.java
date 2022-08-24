@@ -18,7 +18,11 @@ public final class MchCommands {
     private static ParseResults<Object> loop;
     private static Socket socket;
 
-    public static void register(final CommandDispatcher<Object> dispatcher, final String benchmark, final int port) {
+    public static void register(
+            final CommandDispatcher<Object> dispatcher,
+            final String benchmark,
+            final int port
+    ) {
         try {
             socket = new Socket((String) null, port);
         } catch (final IOException e) {
@@ -46,7 +50,11 @@ public final class MchCommands {
         );
     }
 
-    private static int start(final CommandDispatcher<Object> dispatcher, final String benchmark, final Object source) throws CommandSyntaxException {
+    private static int start(
+            final CommandDispatcher<Object> dispatcher,
+            final String benchmark,
+            final Object source
+    ) throws CommandSyntaxException {
         startTime = System.nanoTime();
         ++iterationCount;
         operationCount = 0;
@@ -58,13 +66,17 @@ public final class MchCommands {
         return 0;
     }
 
-    private static int run(final CommandDispatcher<Object> dispatcher) throws CommandSyntaxException {
+    private static int run(
+            final CommandDispatcher<Object> dispatcher
+    ) throws CommandSyntaxException {
         dispatcher.execute(run);
         ++operationCount;
         return 0;
     }
 
-    private static int loop(final CommandDispatcher<Object> dispatcher) throws CommandSyntaxException {
+    private static int loop(
+            final CommandDispatcher<Object> dispatcher
+    ) throws CommandSyntaxException {
         final var current = System.nanoTime();
         if (current - startTime < 1000000000L) {
             dispatcher.execute(loop);

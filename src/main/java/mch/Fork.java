@@ -7,7 +7,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Paths;
 
 public final class Fork {
-    public static void main(final String[] args) throws Throwable {
+    public static void main(
+            final String[] args
+    ) throws Throwable {
         System.out.println("Starting mch.Fork");
 
         final var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});

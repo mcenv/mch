@@ -1,4 +1,7 @@
 package mch;
 
-public record Result(String benchmark, Stat stat) {
+public record Result(
+        String benchmark,
+        Stat stat
+) {
 }

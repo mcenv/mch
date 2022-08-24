@@ -1,11 +1,15 @@
 package mch;
 
 public final class Util {
-    public static String quote(final String string) {
+    public static String quote(
+            final String string
+    ) {
         return '"' + string + '"';
     }
 
-    public static byte[] doubleToBytes(final double d) {
+    public static byte[] doubleToBytes(
+            final double d
+    ) {
         final var l = Double.doubleToLongBits(d);
         return new byte[]{
                 (byte) (l >>> 56),
@@ -19,7 +23,9 @@ public final class Util {
         };
     }
 
-    public static double bytesToDouble(final byte[] bytes) {
+    public static double bytesToDouble(
+            final byte[] bytes
+    ) {
         return Double.longBitsToDouble(
                 ((long) bytes[0] << 56) +
                         ((long) (bytes[1] & 255) << 48) +

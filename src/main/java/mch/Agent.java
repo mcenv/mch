@@ -8,7 +8,10 @@ import java.lang.instrument.Instrumentation;
 import java.util.Map;
 
 public final class Agent {
-    public static void premain(final String args, final Instrumentation instrumentation) {
+    public static void premain(
+            final String args,
+            final Instrumentation instrumentation
+    ) {
         System.out.println("Starting mch.Agent");
 
         final var arguments = args.split(",");

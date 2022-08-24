@@ -14,7 +14,9 @@ import static mch.Util.bytesToDouble;
 import static mch.Util.quote;
 
 public final class Main {
-    public static void main(final String[] args) throws IOException, InterruptedException {
+    public static void main(
+            final String[] args
+    ) throws IOException, InterruptedException {
         System.out.println("Starting mch.Main");
 
         final var parser = new OptionParser();
@@ -34,7 +36,11 @@ public final class Main {
         }
     }
 
-    private static void forkProcess(final Collection<Result> results, final String benchmark, final String minecraft) throws IOException, InterruptedException {
+    private static void forkProcess(
+            final Collection<Result> results,
+            final String benchmark,
+            final String minecraft
+    ) throws IOException, InterruptedException {
         try (final var server = new ServerSocket(0)) {
             final var thread = new Thread(() -> {
                 try {
@@ -64,7 +70,11 @@ public final class Main {
         }
     }
 
-    private static List<String> getCommand(final String benchmark, final int port, final String minecraft) {
+    private static List<String> getCommand(
+            final String benchmark,
+            final int port,
+            final String minecraft
+    ) {
         try {
             final var java = ProcessHandle.current().info().command().orElseThrow();
             final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
