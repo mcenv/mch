@@ -21,7 +21,7 @@ public final class Stat {
 
     private double variance() {
         var result = 0.0;
-        var mean = mean();
+        final var mean = mean();
         for (final var value : values) {
             result += Math.pow(value - mean, 2.0);
         }

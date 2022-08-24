@@ -34,7 +34,7 @@ public final class Main {
         }
     }
 
-    private static void forkProcess(Collection<Result> results, final String benchmark, final String minecraft) throws IOException, InterruptedException {
+    private static void forkProcess(final Collection<Result> results, final String benchmark, final String minecraft) throws IOException, InterruptedException {
         try (final var server = new ServerSocket(0)) {
             final var thread = new Thread(() -> {
                 try {
