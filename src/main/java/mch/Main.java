@@ -78,7 +78,8 @@ public final class Main {
             final var java = ProcessHandle.current().info().command().orElseThrow();
             final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
             final var options = quote(benchmark + ',' + port);
-            final var result = new ArrayList<>(List.of(java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork"));
+            final var result = new ArrayList<String>();
+            Collections.addAll(result, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", "nogui");
             Collections.addAll(result, args);
             return result;
         } catch (final URISyntaxException e) {
