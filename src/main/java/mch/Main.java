@@ -1,5 +1,6 @@
 package mch;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 
 import java.io.IOException;
@@ -23,16 +24,20 @@ public final class Main {
         final var benchmarksSpec = parser.acceptsAll(List.of("b", "benchmarks")).withRequiredArg().ofType(String.class).withValuesSeparatedBy(',');
         final var minecraftSpec = parser.acceptsAll(List.of("m", "minecraft")).withOptionalArg().ofType(String.class).defaultsTo("nogui");
 
-        final var options = parser.parse(args);
-        final var benchmarks = options.valuesOf(benchmarksSpec);
-        final var minecraft = options.valueOf(minecraftSpec);
+        try {
+            final var options = parser.parse(args);
+            final var benchmarks = options.valuesOf(benchmarksSpec);
+            final var minecraft = options.valueOf(minecraftSpec);
 
-        final var results = new ArrayList<Result>();
-        for (final var benchmark : benchmarks) {
-            forkProcess(results, benchmark, minecraft);
-        }
-        for (final var result : results) {
-            System.out.println(result.benchmark() + " " + result.stat().mean() + " ± " + result.stat().error() + " ns/op");
+            final var results = new ArrayList<Result>();
+            for (final var benchmark : benchmarks) {
+                forkProcess(results, benchmark, minecraft);
+            }
+            for (final var result : results) {
+                System.out.println(result.benchmark() + " " + result.stat().mean() + " ± " + result.stat().error() + " ns/op");
+            }
+        } catch (final OptionException e) {
+            System.err.println(e.getMessage());
         }
     }
 
@@ -54,7 +59,7 @@ public final class Main {
                         results.add(new Result(benchmark, new Stat(scores)));
                     }
                 } catch (final IOException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(e);
                 }
             });
             thread.start();
@@ -81,7 +86,7 @@ public final class Main {
             final var options = quote(benchmark + ',' + port);
             return List.of(java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", minecraft);
         } catch (final URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 }
