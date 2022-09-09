@@ -79,7 +79,7 @@ public final class MchCommands {
             final CommandDispatcher<Object> dispatcher
     ) throws CommandSyntaxException {
         final var current = System.nanoTime();
-        if (current - startTime < 1000000000L) {
+        if (current - startTime < 10000000000L) {
             dispatcher.execute(loop);
         } else {
             final var stopTime = System.nanoTime();
