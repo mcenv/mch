@@ -12,6 +12,7 @@ import static mch.Util.doubleToBytes;
 
 @SuppressWarnings("unused")
 public final class MchCommands {
+    private static String benchmark;
     private static long startTime;
     private static long iterationCount;
     private static long operationCount;
@@ -24,6 +25,7 @@ public final class MchCommands {
             final String benchmark,
             final int port
     ) {
+        MchCommands.benchmark = benchmark;
         try {
             socket = new Socket((String) null, port);
         } catch (final IOException e) {
@@ -34,7 +36,7 @@ public final class MchCommands {
                 literal("mch")
                         .then(
                                 literal("start")
-                                        .executes(c -> start(dispatcher, benchmark, c.getSource()))
+                                        .executes(c -> start(dispatcher, c.getSource()))
                         )
                         .then(
                                 literal("run")
@@ -53,16 +55,16 @@ public final class MchCommands {
 
     private static int start(
             final CommandDispatcher<Object> dispatcher,
-            final String benchmark,
             final Object source
     ) throws CommandSyntaxException {
-        startTime = System.nanoTime();
         ++iterationCount;
         operationCount = 0;
         run = dispatcher.parse("function " + benchmark, source);
         if (loop == null) {
             loop = dispatcher.parse("function mch:loop", source);
         }
+        System.out.println(benchmark);
+        startTime = System.nanoTime();
         dispatcher.execute(loop);
         return 0;
     }
@@ -78,11 +80,10 @@ public final class MchCommands {
     private static int loop(
             final CommandDispatcher<Object> dispatcher
     ) throws CommandSyntaxException {
-        final var current = System.nanoTime();
-        if (current - startTime < 10000000000L) {
+        final var stopTime = System.nanoTime();
+        if (stopTime - startTime < 10000000000L) {
             dispatcher.execute(loop);
         } else {
-            final var stopTime = System.nanoTime();
             final var result = (double) (stopTime - startTime) / (double) operationCount;
 
             if (iterationCount <= 5) {
