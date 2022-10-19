@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static mch.Util.doubleToBytes;
@@ -13,8 +14,8 @@ import static mch.Util.doubleToBytes;
 @SuppressWarnings("unused")
 public final class MchCommands {
     private static long startTime;
-    private static long iterationCount;
-    private static long operationCount;
+    private static int iterationCount;
+    private static int operationCount;
     private static ParseResults<Object> run;
     private static ParseResults<Object> loop;
     private static Socket socket;
@@ -31,79 +32,58 @@ public final class MchCommands {
         }
 
         dispatcher.register(
-                literal("mch")
-                        .then(
-                                literal("start")
-                                        .executes(c -> start(dispatcher, benchmark, c.getSource()))
-                        )
-                        .then(
-                                literal("run")
-                                        .executes(c -> run(dispatcher))
-                        )
-                        .then(
-                                literal("loop")
-                                        .executes(c -> loop(dispatcher))
-                        )
-                        .then(
-                                literal("stop")
-                                        .executes(c -> stop())
-                        )
+                literal("mch:start").executes(c -> {
+                    System.out.println(benchmark);
+
+                    final var source = c.getSource();
+                    run = dispatcher.parse("function " + benchmark, source);
+                    loop = dispatcher.parse("function mch:loop", source);
+
+                    startTime = System.nanoTime();
+
+                    dispatcher.execute(run);
+                    dispatcher.execute(loop);
+                    ++operationCount;
+
+                    return 0;
+                })
         );
-    }
 
-    private static int start(
-            final CommandDispatcher<Object> dispatcher,
-            final String benchmark,
-            final Object source
-    ) throws CommandSyntaxException {
-        ++iterationCount;
-        operationCount = 0;
-        run = dispatcher.parse("function " + benchmark, source);
-        if (loop == null) {
-            loop = dispatcher.parse("function mch:loop", source);
-        }
-        startTime = System.nanoTime();
-        dispatcher.execute(loop);
-        return 0;
-    }
+        dispatcher.register(
+                literal("mch:loop").executes(c -> {
+                    final var stopTime = System.nanoTime();
+                    if (stopTime - startTime >= 10000000000L) {
+                        final var result = (double) (stopTime - startTime) / (double) operationCount;
 
-    private static int run(
-            final CommandDispatcher<Object> dispatcher
-    ) throws CommandSyntaxException {
-        dispatcher.execute(run);
-        ++operationCount;
-        return 0;
-    }
+                        if (iterationCount < 5) {
+                            System.out.println("Warmup iteration: " + result + " ns/op");
+                        } else if (iterationCount < 10) {
+                            System.out.println("Measurement iteration: " + result + " ns/op");
+                            try {
+                                socket.getOutputStream().write(doubleToBytes(result));
+                            } catch (final IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            try {
+                                socket.close();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return 0;
+                        }
 
-    private static int loop(
-            final CommandDispatcher<Object> dispatcher
-    ) throws CommandSyntaxException {
-        final var stopTime = System.nanoTime();
-        if (stopTime - startTime < 10000000000L) {
-            dispatcher.execute(loop);
-        } else {
-            final var result = (double) (stopTime - startTime) / (double) operationCount;
+                        ++iterationCount;
+                        operationCount = 0;
+                        startTime = System.nanoTime();
+                    }
 
-            if (iterationCount <= 5) {
-                System.out.println("Warmup iteration: " + result + " ns/op");
-            } else {
-                System.out.println("Measurement iteration: " + result + " ns/op");
-                try {
-                    socket.getOutputStream().write(doubleToBytes(result));
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return 0;
-    }
+                    dispatcher.execute(run);
+                    dispatcher.execute(loop);
+                    ++operationCount;
 
-    private static int stop() {
-        try {
-            socket.close();
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-        return 0;
+                    return 0;
+                })
+        );
     }
 }
