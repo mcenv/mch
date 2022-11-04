@@ -14,7 +14,6 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
-      - run: kotlin pack.main.kts
       - uses: gradle/wrapper-validation-action@v1
       - uses: gradle/gradle-build-action@v2
         with:
