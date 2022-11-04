@@ -31,7 +31,7 @@ tasks.jar {
 
 tasks.shadowJar {
     archiveClassifier.set("")
-    archiveVersion.set(project.version.toString())
+    archiveVersion.set("")
 }
 
 tasks.test {
