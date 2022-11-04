@@ -1,14 +1,14 @@
 package mch;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static mch.Util.bytesToDouble;
 import static mch.Util.quote;
@@ -16,22 +16,58 @@ import static mch.Util.quote;
 public final class Main {
     public static void main(
             final String[] args
-    ) throws InterruptedException {
+    ) throws InterruptedException, IOException {
         System.out.println("Starting mch.Main");
 
-        try {
-            final var benchmarks = Files.readAllLines(Paths.get("benchmarks"));
+        installDatapack();
 
-            final var results = new ArrayList<Result>();
-            for (final var benchmark : benchmarks) {
-                forkProcess(results, benchmark, args);
-            }
-            for (final var result : results) {
-                System.out.println(result.benchmark() + " " + result.mean() + " ± " + result.error() + " ns/op");
-            }
+        final List<String> benchmarks;
+        try {
+            benchmarks = Files.readAllLines(Paths.get("benchmarks"));
         } catch (final IOException e) {
             System.err.println("not found: 'benchmarks'");
             System.exit(1);
+            return;
+        }
+
+        final var results = new ArrayList<Result>();
+        for (final var benchmark : benchmarks) {
+            forkProcess(results, benchmark, args);
+        }
+
+        try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("results.json")))) {
+            output.write('[');
+            for (var i = 0; i < results.size(); ++i) {
+                if (i != 0) {
+                    output.write(',');
+                }
+                appendResult(output, results.get(i));
+            }
+            output.write('\n');
+            output.write(']');
+            output.write('\n');
+        }
+    }
+
+    private static void installDatapack() throws IOException {
+        final var serverProperties = Paths.get("server.properties");
+        var levelName = "world";
+        if (Files.exists(serverProperties)) {
+            final var properties = new Properties();
+            try (final var input = Files.newInputStream(serverProperties)) {
+                properties.load(input);
+            }
+            levelName = properties.getProperty("level-name");
+        }
+
+        final var datapack = Paths.get(levelName, "datapacks", "mch.zip");
+        if (Files.notExists(datapack)) {
+            Files.createDirectories(datapack.getParent());
+            try (final var output = new BufferedOutputStream(Files.newOutputStream(datapack))) {
+                try (final var input = Main.class.getResourceAsStream("/mch.zip")) {
+                    Objects.requireNonNull(input).transferTo(output);
+                }
+            }
         }
     }
 
@@ -85,5 +121,21 @@ public final class Main {
         } catch (final URISyntaxException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private static void appendResult(
+            final OutputStream output,
+            final Result result
+    ) throws IOException {
+        output.write(
+                String.format("""
+                                \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
+                        result.benchmark(),
+                        5,
+                        result.mean(),
+                        result.error(),
+                        "ns/op"
+                ).getBytes(StandardCharsets.UTF_8)
+        );
     }
 }

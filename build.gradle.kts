@@ -31,9 +31,21 @@ tasks.jar {
 
 tasks.shadowJar {
     archiveClassifier.set("")
-    archiveVersion.set("")
+    archiveVersion.set(project.version.toString())
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.register<Zip>("zipDatapack") {
+    from(layout.projectDirectory.dir("datapack"))
+    archiveFileName.set("mch.zip")
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
+tasks.getByName<ProcessResources>("processResources") {
+    dependsOn(tasks.getByName("zipDatapack"))
+    from(layout.buildDirectory.file("distributions/mch.zip"))
 }
