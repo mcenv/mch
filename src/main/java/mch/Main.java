@@ -135,7 +135,7 @@ public final class Main {
             final List<Result> results,
             final GlobalConfig config
     ) throws IOException {
-        try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("results.json")))) {
+        try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
             output.write('[');
             for (var i = 0; i < results.size(); ++i) {
                 if (i != 0) {
