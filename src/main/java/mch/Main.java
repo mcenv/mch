@@ -21,6 +21,7 @@ public final class Main {
         System.out.println("Starting mch.Main");
 
         installDatapack();
+        rewriteServerProperties();
 
         final var config = new GlobalConfig(getOrCreateProperties());
 
@@ -30,6 +31,21 @@ public final class Main {
         }
 
         dumpResults(results, config);
+    }
+
+    private static void rewriteServerProperties() throws IOException {
+        final var properties = new Properties();
+        final var path = Paths.get("server.properties");
+        if (Files.exists(path) && Files.isRegularFile(path)) {
+            try (final var input = Files.newInputStream(path)) {
+                properties.load(input);
+            }
+        }
+        properties.setProperty("function-permission-level", "4");
+        properties.setProperty("max-tick-time", "-1");
+        try (final var output = Files.newOutputStream(path)) {
+            properties.store(output, null);
+        }
     }
 
     private static Properties getOrCreateProperties() throws IOException {
