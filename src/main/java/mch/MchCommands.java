@@ -2,6 +2,7 @@ package mch;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -37,7 +38,17 @@ public final class MchCommands {
 
                     startTime = System.nanoTime();
 
-                    dispatcher.execute(run);
+                    try {
+                        dispatcher.execute(run);
+                    } catch (final CommandSyntaxException e1) {
+                        System.out.println(e1.getMessage());
+                        try {
+                            socket.close();
+                            dispatcher.execute("function mch:post", source);
+                        } catch (IOException e2) {
+                            throw new RuntimeException(e2);
+                        }
+                    }
                     dispatcher.execute(loop);
                     ++operationCount;
 

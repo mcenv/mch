@@ -1,5 +1,7 @@
 package mch;
 
+import org.apache.commons.math3.exception.NotStrictlyPositiveException;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -151,17 +153,20 @@ public final class Main {
                     if (i++ != 0) {
                         output.write(',');
                     }
-                    output.write(
-                            String.format(
-                                    """
-                                            \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
-                                    benchmark,
-                                    config.measurementIterations() * config.forks(),
-                                    Statistics.mean(values),
-                                    Statistics.error(values),
-                                    "ns/op"
-                            ).getBytes(StandardCharsets.UTF_8)
-                    );
+                    try {
+                        output.write(
+                                String.format(
+                                        """
+                                                \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
+                                        benchmark,
+                                        config.measurementIterations() * config.forks(),
+                                        Statistics.mean(values),
+                                        Statistics.error(values),
+                                        "ns/op"
+                                ).getBytes(StandardCharsets.UTF_8)
+                        );
+                    } catch (NotStrictlyPositiveException ignored) {
+                    }
                 }
             }
 
