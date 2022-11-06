@@ -2,10 +2,14 @@ package mch;
 
 import mch.transformers.CommandInjector;
 import mch.transformers.ModNameTransformer;
-import mch.transformers.Transformer;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
 
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.util.Map;
+import java.security.ProtectionDomain;
+import java.util.function.Function;
 
 public final class Agent {
     public static void premain(
@@ -14,9 +18,31 @@ public final class Agent {
     ) {
         System.out.println("Starting mch.Agent");
 
-        instrumentation.addTransformer(new Transformer(Map.of(
-                "net/minecraft/server/MinecraftServer", ModNameTransformer::new,
-                "com/mojang/brigadier/CommandDispatcher", v -> new CommandInjector(v, LocalConfig.parse(args))
-        )));
+        instrumentation.addTransformer(new ClassFileTransformer() {
+            private static byte[] transform(
+                    final byte[] classfileBuffer,
+                    final Function<ClassVisitor, ClassVisitor> createClassVisitor
+            ) {
+                final var classReader = new ClassReader(classfileBuffer);
+                final var classWriter = new ClassWriter(classReader, 0);
+                final var classVisitor = createClassVisitor.apply(classWriter);
+                classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES);
+                return classWriter.toByteArray();
+            }
+
+            @Override
+            public byte[] transform(
+                    final ClassLoader loader,
+                    final String className, Class<?> classBeingRedefined,
+                    final ProtectionDomain protectionDomain,
+                    final byte[] classfileBuffer
+            ) {
+                return switch (className) {
+                    case "net/minecraft/server/MinecraftServer" -> transform(classfileBuffer, ModNameTransformer::new);
+                    case "com/mojang/brigadier/CommandDispatcher" -> transform(classfileBuffer, v -> new CommandInjector(v, LocalConfig.parse(args)));
+                    default -> null;
+                };
+            }
+        });
     }
 }
