@@ -2,7 +2,6 @@ package mch;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -18,25 +17,22 @@ public final class MchCommands {
     private static int operationCount;
     private static ParseResults<Object> run;
     private static ParseResults<Object> loop;
-    private static Socket socket;
 
     public static void register(
             final CommandDispatcher<Object> dispatcher,
-            final String benchmark,
-            final int port
-    ) {
-        try {
-            socket = new Socket((String) null, port);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+            final LocalConfig config
+    ) throws IOException {
+        final var socket = new Socket((String) null, config.port());
+        final int warmupCount = config.warmupIterations();
+        final int measurementCount = config.warmupIterations() + config.measurementIterations();
+        final long time = TimeUnit.SECONDS.toNanos(config.time());
 
         dispatcher.register(
                 literal("mch:start").executes(c -> {
-                    System.out.println(benchmark);
+                    System.out.println(config.benchmark());
 
                     final var source = c.getSource();
-                    run = dispatcher.parse("function " + benchmark, source);
+                    run = dispatcher.parse("function " + config.benchmark(), source);
                     loop = dispatcher.parse("function mch:loop", source);
 
                     startTime = System.nanoTime();
@@ -51,38 +47,34 @@ public final class MchCommands {
 
         dispatcher.register(
                 literal("mch:loop").executes(c -> {
-                    final var stopTime = System.nanoTime();
-                    if (stopTime - startTime >= 10000000000L) {
-                        final var result = (double) (stopTime - startTime) / (double) operationCount;
+                    try {
+                        final var stopTime = System.nanoTime();
+                        if (stopTime - startTime >= time) {
+                            final var result = (double) (stopTime - startTime) / (double) operationCount;
 
-                        if (iterationCount < 5) {
-                            System.out.println("Warmup iteration: " + result + " ns/op");
-                        } else if (iterationCount < 10) {
-                            System.out.println("Measurement iteration: " + result + " ns/op");
-                            try {
+                            if (iterationCount < warmupCount) {
+                                System.out.println("Warmup iteration: " + result + " ns/op");
+                            } else if (iterationCount < measurementCount) {
+                                System.out.println("Measurement iteration: " + result + " ns/op");
                                 socket.getOutputStream().write(doubleToBytes(result));
-                            } catch (final IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            try {
+                            } else {
                                 socket.close();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
+                                return 0;
                             }
-                            return 0;
+
+                            ++iterationCount;
+                            operationCount = 0;
+                            startTime = System.nanoTime();
                         }
 
-                        ++iterationCount;
-                        operationCount = 0;
-                        startTime = System.nanoTime();
+                        dispatcher.execute(run);
+                        dispatcher.execute(loop);
+                        ++operationCount;
+
+                        return 0;
+                    } catch (final IOException e) {
+                        throw new RuntimeException(e);
                     }
-
-                    dispatcher.execute(run);
-                    dispatcher.execute(loop);
-                    ++operationCount;
-
-                    return 0;
                 })
         );
     }
