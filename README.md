@@ -12,9 +12,18 @@
 
 1. Download [`mch.jar`](https://github.com/mcenv/mch/releases/latest/download/mch.jar) and put it under the directory containing `server.jar`.
 2. Create `mch.properties` file under the same directory.
-3. Specify the comma-separated function names to be benchmarked in `benchmarks` property. For example:
+3. Specify the comma-separated list of function names to be benchmarked in `benchmarks` property. For example:
     ```properties
     benchmarks=a,b
     ```
 4. Run `java -jar mch.jar`.
 5. The benchmark results are dumped as `mch-results.json`.
+
+## Options
+
+| Name                     | Description                                               | Default |
+|:-------------------------|:----------------------------------------------------------|:--------|
+| `warmup-iterations`      | Number of warmup iterations.                              | `5`     |
+| `measurement-iterations` | Number of measurement iterations.                         | `5`     |
+| `time`                   | Duration of warmup and measurement iterations in seconds. | `10`    |
+| `benchmarks`             | Comma-separated list of function names to be benchmarked. | `,`     |
