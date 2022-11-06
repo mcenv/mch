@@ -182,6 +182,13 @@ public final class Main {
                                 ).getBytes(StandardCharsets.UTF_8)
                         );
                     } catch (NotStrictlyPositiveException ignored) {
+                        output.write(
+                                String.format(
+                                        """
+                                                \n  { "benchmark": "%s" }""",
+                                        benchmark
+                                ).getBytes(StandardCharsets.UTF_8)
+                        );
                     }
                 }
             }
