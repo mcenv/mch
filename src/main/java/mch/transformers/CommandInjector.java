@@ -1,22 +1,20 @@
 package mch.transformers;
 
+import mch.LocalConfig;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.*;
 
 public final class CommandInjector extends ClassVisitor {
-    private final String benchmark;
-    private final int port;
+    private final LocalConfig config;
 
     public CommandInjector(
             final ClassVisitor classVisitor,
-            final String benchmark,
-            final int port
+            final LocalConfig config
     ) {
         super(ASM9, classVisitor);
-        this.benchmark = benchmark;
-        this.port = port;
+        this.config = config;
     }
 
     @Override
@@ -31,12 +29,23 @@ public final class CommandInjector extends ClassVisitor {
         if (name.equals("<init>") && descriptor.equals("(Lcom/mojang/brigadier/tree/RootCommandNode;)V")) {
             return new MethodVisitor(ASM9, parent) {
                 @Override
+                public void visitMaxs(int maxStack, int maxLocals) {
+                    super.visitMaxs(8, 2);
+                }
+
+                @Override
                 public void visitInsn(final int opcode) {
                     if (opcode == RETURN) {
                         visitVarInsn(ALOAD, 0);
-                        visitLdcInsn(benchmark);
-                        visitLdcInsn(port);
-                        visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Ljava/lang/String;I)V", false);
+                        visitTypeInsn(NEW, "mch/LocalConfig");
+                        visitInsn(DUP);
+                        visitLdcInsn(config.warmupIterations());
+                        visitLdcInsn(config.measurementIterations());
+                        visitLdcInsn(config.time());
+                        visitLdcInsn(config.benchmark());
+                        visitLdcInsn(config.port());
+                        visitMethodInsn(INVOKESPECIAL, "mch/LocalConfig", "<init>", "(IIILjava/lang/String;I)V", false);
+                        visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Lmch/LocalConfig;)V", false);
                     }
                     super.visitInsn(opcode);
                 }

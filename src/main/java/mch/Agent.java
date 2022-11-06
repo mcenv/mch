@@ -14,13 +14,9 @@ public final class Agent {
     ) {
         System.out.println("Starting mch.Agent");
 
-        final var arguments = args.split(",");
-        final var benchmark = arguments[0];
-        final var port = Integer.parseInt(arguments[1]);
-
         instrumentation.addTransformer(new Transformer(Map.of(
                 "net/minecraft/server/MinecraftServer", ModNameTransformer::new,
-                "com/mojang/brigadier/CommandDispatcher", v -> new CommandInjector(v, benchmark, port)
+                "com/mojang/brigadier/CommandDispatcher", v -> new CommandInjector(v, LocalConfig.parse(args))
         )));
     }
 }

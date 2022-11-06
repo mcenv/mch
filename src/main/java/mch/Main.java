@@ -20,21 +20,32 @@ public final class Main {
 
         installDatapack();
 
-        final List<String> benchmarks;
-        try {
-            benchmarks = Files.readAllLines(Paths.get("benchmarks"));
-        } catch (final IOException e) {
-            System.err.println("not found: 'benchmarks'");
-            System.exit(1);
-            return;
-        }
+        final var config = new GlobalConfig(getOrCreateProperties());
 
         final var results = new ArrayList<Result>();
-        for (final var benchmark : benchmarks) {
-            forkProcess(results, benchmark, args);
+        for (final var benchmark : config.benchmarks()) {
+            forkProcess(results, config, benchmark, args);
         }
 
-        dumpResults(results);
+        dumpResults(results, config);
+    }
+
+    private static Properties getOrCreateProperties() throws IOException {
+        final var properties = new Properties();
+        final var path = Paths.get("mch.properties");
+        if (Files.exists(path) && Files.isRegularFile(path)) {
+            try (final var input = Files.newInputStream(path)) {
+                properties.load(input);
+            }
+        }
+        properties.putIfAbsent(GlobalConfig.WARMUP_ITERATIONS_KEY, String.valueOf(GlobalConfig.WARMUP_ITERATIONS_DEFAULT));
+        properties.putIfAbsent(GlobalConfig.MEASUREMENT_ITERATIONS_KEY, String.valueOf(GlobalConfig.MEASUREMENT_ITERATIONS_DEFAULT));
+        properties.putIfAbsent(GlobalConfig.TIME_KEY, String.valueOf(GlobalConfig.TIME_DEFAULT));
+        properties.putIfAbsent(GlobalConfig.BENCHMARKS, GlobalConfig.BENCHMARKS_DEFAULT);
+        try (final var output = Files.newOutputStream(path)) {
+            properties.store(output, null);
+        }
+        return properties;
     }
 
     private static void installDatapack() throws IOException {
@@ -61,6 +72,7 @@ public final class Main {
 
     private static void forkProcess(
             final Collection<Result> results,
+            final GlobalConfig config,
             final String benchmark,
             final String[] args
     ) throws IOException, InterruptedException {
@@ -83,7 +95,7 @@ public final class Main {
             thread.start();
 
             final var port = server.getLocalPort();
-            final var command = getCommand(benchmark, port, args);
+            final var command = getCommand(config, benchmark, port, args);
             final var builder = new ProcessBuilder(command);
             final var process = builder.start();
             process.getInputStream().transferTo(System.out);
@@ -94,6 +106,7 @@ public final class Main {
     }
 
     private static List<String> getCommand(
+            final GlobalConfig config,
             final String benchmark,
             final int port,
             final String[] args
@@ -101,18 +114,26 @@ public final class Main {
         try {
             final var java = ProcessHandle.current().info().command().orElseThrow();
             final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
-            final var options = quote(benchmark + ',' + port);
-            final var result = new ArrayList<String>();
-            Collections.addAll(result, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", "nogui");
-            Collections.addAll(result, args);
-            return result;
+            final var options = quote(String.format(
+                    "%d,%d,%d,%s,%d",
+                    config.warmupIterations(),
+                    config.measurementIterations(),
+                    config.time(),
+                    benchmark,
+                    port
+            ));
+            final var command = new ArrayList<String>();
+            Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", "nogui");
+            Collections.addAll(command, args);
+            return command;
         } catch (final URISyntaxException e) {
             throw new IllegalStateException(e);
         }
     }
 
     private static void dumpResults(
-            final List<Result> results
+            final List<Result> results,
+            final GlobalConfig config
     ) throws IOException {
         try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("results.json")))) {
             output.write('[');
@@ -122,10 +143,11 @@ public final class Main {
                 }
                 final var result = results.get(i);
                 output.write(
-                        String.format("""
+                        String.format(
+                                """
                                         \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
                                 result.benchmark(),
-                                5,
+                                config.measurementIterations(),
                                 result.mean(),
                                 result.error(),
                                 "ns/op"
