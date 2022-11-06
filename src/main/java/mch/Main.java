@@ -22,7 +22,7 @@ public final class Main {
 
         final var config = new GlobalConfig(getOrCreateProperties());
 
-        final var results = new ArrayList<Result>();
+        final var results = new LinkedHashMap<String, Collection<Double>>();
         for (final var benchmark : config.benchmarks()) {
             forkProcess(results, config, benchmark, args);
         }
@@ -41,6 +41,7 @@ public final class Main {
         properties.putIfAbsent(GlobalConfig.WARMUP_ITERATIONS_KEY, String.valueOf(GlobalConfig.WARMUP_ITERATIONS_DEFAULT));
         properties.putIfAbsent(GlobalConfig.MEASUREMENT_ITERATIONS_KEY, String.valueOf(GlobalConfig.MEASUREMENT_ITERATIONS_DEFAULT));
         properties.putIfAbsent(GlobalConfig.TIME_KEY, String.valueOf(GlobalConfig.TIME_DEFAULT));
+        properties.putIfAbsent(GlobalConfig.FORKS_KEY, String.valueOf(GlobalConfig.FORKS_DEFAULT));
         properties.putIfAbsent(GlobalConfig.BENCHMARKS, GlobalConfig.BENCHMARKS_DEFAULT);
         try (final var output = Files.newOutputStream(path)) {
             properties.store(output, null);
@@ -71,57 +72,61 @@ public final class Main {
     }
 
     private static void forkProcess(
-            final Collection<Result> results,
+            final Map<String, Collection<Double>> results,
             final GlobalConfig config,
             final String benchmark,
             final String[] args
     ) throws IOException, InterruptedException {
-        try (final var server = new ServerSocket(0)) {
-            final var thread = new Thread(() -> {
-                try {
-                    final var client = server.accept();
-                    try (final var in = client.getInputStream()) {
-                        final var scores = new ArrayList<Double>();
-                        final var buffer = new byte[Double.BYTES];
-                        while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
-                            scores.add(bytesToDouble(buffer));
+        for (var fork = 0; fork < config.forks(); ++fork) {
+            try (final var server = new ServerSocket(0)) {
+                final var thread = new Thread(() -> {
+                    try {
+                        final var client = server.accept();
+                        try (final var in = client.getInputStream()) {
+                            final var scores = new ArrayList<Double>();
+                            final var buffer = new byte[Double.BYTES];
+                            while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
+                                scores.add(bytesToDouble(buffer));
+                            }
+                            results.computeIfAbsent(benchmark, k -> new ArrayList<>()).addAll(scores);
                         }
-                        results.add(new Result(benchmark, scores));
+                    } catch (final IOException e) {
+                        throw new IllegalStateException(e);
                     }
-                } catch (final IOException e) {
-                    throw new IllegalStateException(e);
-                }
-            });
-            thread.start();
+                });
+                thread.start();
 
-            final var port = server.getLocalPort();
-            final var command = getCommand(config, benchmark, port, args);
-            final var builder = new ProcessBuilder(command);
-            final var process = builder.start();
-            process.getInputStream().transferTo(System.out);
-            process.waitFor();
+                final var port = server.getLocalPort();
+                final var command = getCommand(config, fork, port, benchmark, args);
+                final var builder = new ProcessBuilder(command);
+                final var process = builder.start();
+                process.getInputStream().transferTo(System.out);
+                process.waitFor();
 
-            thread.join();
+                thread.join();
+            }
         }
     }
 
     private static List<String> getCommand(
             final GlobalConfig config,
-            final String benchmark,
+            final int fork,
             final int port,
+            final String benchmark,
             final String[] args
     ) {
         try {
             final var java = ProcessHandle.current().info().command().orElseThrow();
             final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
-            final var options = quote(String.format(
-                    "%d,%d,%d,%s,%d",
+            final var options = quote(new LocalConfig(
                     config.warmupIterations(),
                     config.measurementIterations(),
                     config.time(),
-                    benchmark,
-                    port
-            ));
+                    config.forks(),
+                    fork,
+                    port,
+                    benchmark
+            ).toString());
             final var command = new ArrayList<String>();
             Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", "nogui");
             Collections.addAll(command, args);
@@ -132,28 +137,34 @@ public final class Main {
     }
 
     private static void dumpResults(
-            final List<Result> results,
+            final Map<String, Collection<Double>> results,
             final GlobalConfig config
     ) throws IOException {
         try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
             output.write('[');
-            for (var i = 0; i < results.size(); ++i) {
-                if (i != 0) {
-                    output.write(',');
+
+            {
+                var i = 0;
+                for (final var entry : results.entrySet()) {
+                    final var benchmark = entry.getKey();
+                    final var values = entry.getValue().stream().mapToDouble(x -> x).toArray();
+                    if (i++ != 0) {
+                        output.write(',');
+                    }
+                    output.write(
+                            String.format(
+                                    """
+                                            \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
+                                    benchmark,
+                                    config.measurementIterations() * config.forks(),
+                                    Statistics.mean(values),
+                                    Statistics.error(values),
+                                    "ns/op"
+                            ).getBytes(StandardCharsets.UTF_8)
+                    );
                 }
-                final var result = results.get(i);
-                output.write(
-                        String.format(
-                                """
-                                        \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
-                                result.benchmark(),
-                                config.measurementIterations(),
-                                result.mean(),
-                                result.error(),
-                                "ns/op"
-                        ).getBytes(StandardCharsets.UTF_8)
-                );
             }
+
             output.write('\n');
             output.write(']');
             output.write('\n');
