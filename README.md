@@ -25,5 +25,6 @@
 |:-------------------------|:----------------------------------------------------------|:--------|
 | `warmup-iterations`      | Number of warmup iterations.                              | `5`     |
 | `measurement-iterations` | Number of measurement iterations.                         | `5`     |
-| `time`                   | Duration of warmup and measurement iterations in seconds. | `10`    |
+| `time`                   | Duration of iterations in seconds.                        | `10`    |
+| `forks`                  | Number of forks.                                          | `5`     |
 | `benchmarks`             | Comma-separated list of function names to be benchmarked. | `,`     |

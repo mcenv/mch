@@ -29,7 +29,7 @@ public final class MchCommands {
 
         dispatcher.register(
                 literal("mch:start").executes(c -> {
-                    System.out.println(config.benchmark());
+                    System.out.println(config.benchmark() + " " + (config.fork() + 1) + "/" + config.forks());
 
                     final var source = c.getSource();
                     run = dispatcher.parse("function " + config.benchmark(), source);

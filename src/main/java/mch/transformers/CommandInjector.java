@@ -30,7 +30,7 @@ public final class CommandInjector extends ClassVisitor {
             return new MethodVisitor(ASM9, parent) {
                 @Override
                 public void visitMaxs(int maxStack, int maxLocals) {
-                    super.visitMaxs(8, 2);
+                    super.visitMaxs(10, 2);
                 }
 
                 @Override
@@ -42,9 +42,11 @@ public final class CommandInjector extends ClassVisitor {
                         visitLdcInsn(config.warmupIterations());
                         visitLdcInsn(config.measurementIterations());
                         visitLdcInsn(config.time());
-                        visitLdcInsn(config.benchmark());
+                        visitLdcInsn(config.forks());
+                        visitLdcInsn(config.fork());
                         visitLdcInsn(config.port());
-                        visitMethodInsn(INVOKESPECIAL, "mch/LocalConfig", "<init>", "(IIILjava/lang/String;I)V", false);
+                        visitLdcInsn(config.benchmark());
+                        visitMethodInsn(INVOKESPECIAL, "mch/LocalConfig", "<init>", "(IIIIIILjava/lang/String;)V", false);
                         visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Lmch/LocalConfig;)V", false);
                     }
                     super.visitInsn(opcode);
