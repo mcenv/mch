@@ -17,4 +17,4 @@
     benchmarks=a,b
     ```
 4. Run `java -jar mch.jar`.
-5. The benchmark results are dumped as `results.json`.
+5. The benchmark results are dumped as `mch-results.json`.
