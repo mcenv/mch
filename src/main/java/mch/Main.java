@@ -2,7 +2,6 @@ package mch;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -35,18 +34,7 @@ public final class Main {
             forkProcess(results, benchmark, args);
         }
 
-        try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("results.json")))) {
-            output.write('[');
-            for (var i = 0; i < results.size(); ++i) {
-                if (i != 0) {
-                    output.write(',');
-                }
-                appendResult(output, results.get(i));
-            }
-            output.write('\n');
-            output.write(']');
-            output.write('\n');
-        }
+        dumpResults(results);
     }
 
     private static void installDatapack() throws IOException {
@@ -123,19 +111,30 @@ public final class Main {
         }
     }
 
-    private static void appendResult(
-            final OutputStream output,
-            final Result result
+    private static void dumpResults(
+            final List<Result> results
     ) throws IOException {
-        output.write(
-                String.format("""
-                                \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
-                        result.benchmark(),
-                        5,
-                        result.mean(),
-                        result.error(),
-                        "ns/op"
-                ).getBytes(StandardCharsets.UTF_8)
-        );
+        try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("results.json")))) {
+            output.write('[');
+            for (var i = 0; i < results.size(); ++i) {
+                if (i != 0) {
+                    output.write(',');
+                }
+                final var result = results.get(i);
+                output.write(
+                        String.format("""
+                                        \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
+                                result.benchmark(),
+                                5,
+                                result.mean(),
+                                result.error(),
+                                "ns/op"
+                        ).getBytes(StandardCharsets.UTF_8)
+                );
+            }
+            output.write('\n');
+            output.write(']');
+            output.write('\n');
+        }
     }
 }
