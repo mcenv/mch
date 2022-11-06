@@ -5,6 +5,7 @@
 <samp>mch</samp> is a highly-compatible lightweight benchmark harness for Minecraft: Java Edition.
 
 > **Warning**
+> - Do not forget to backup your world. It is recommended to create a world for benchmarking.
 > - Make sure that the benchmarked functions are idempotent, i.e. do not have any side effects, otherwise the benchmark results will be inaccurate.
 > - Remember that the benchmark results may be affected by Minecraft/JVM/OS/HW.
 
