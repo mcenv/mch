@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static mch.ServerProperties.*;
 import static mch.Util.bytesToDouble;
 import static mch.Util.quote;
 
@@ -22,67 +23,48 @@ public final class Main {
   ) throws InterruptedException, IOException {
     System.out.println("Starting mch.Main");
 
-    installDatapack();
-    rewriteServerProperties();
+    {
+      final var serverProperties = ServerProperties.load();
+      validateServerProperties(serverProperties);
+      installDatapack(serverProperties);
+    }
 
-    final var config = new GlobalConfig(getOrCreateProperties());
+    final var mchProperties = MchProperties.load();
 
     dryRun(args);
 
     final var results = new LinkedHashMap<String, Collection<Double>>();
-    for (final var benchmark : config.benchmarks()) {
-      iterationRun(results, config, benchmark, args);
+    for (final var benchmark : mchProperties.benchmarks()) {
+      iterationRun(results, mchProperties, benchmark, args);
     }
 
-    dumpResults(results, config);
+    dumpResults(results, mchProperties);
   }
 
-  private static void rewriteServerProperties() throws IOException {
+  public static void validateServerProperties(
+    final ServerProperties serverProperties
+  ) throws IOException {
     final var properties = new Properties();
-    final var path = Paths.get("server.properties");
-    if (Files.exists(path) && Files.isRegularFile(path)) {
-      try (final var in = Files.newInputStream(path)) {
-        properties.load(in);
-      }
+
+    if (serverProperties.functionPermissionLevel() == null || serverProperties.functionPermissionLevel() != FUNCTION_PERMISSION_LEVEL_REQUIRED) {
+      properties.setProperty(FUNCTION_PERMISSION_LEVEL_KEY, String.valueOf(FUNCTION_PERMISSION_LEVEL_REQUIRED));
+      System.out.printf("Overwrote %s in server.properties to %d\n", FUNCTION_PERMISSION_LEVEL_KEY, FUNCTION_PERMISSION_LEVEL_REQUIRED);
     }
-    properties.setProperty("function-permission-level", "4");
-    properties.setProperty("max-tick-time", "-1");
-    try (final var out = Files.newOutputStream(path)) {
+
+    if (serverProperties.maxTickTime() == null || serverProperties.maxTickTime() != MAX_TICK_TIME_REQUIRED) {
+      properties.setProperty(MAX_TICK_TIME_KEY, String.valueOf(MAX_TICK_TIME_REQUIRED));
+      System.out.printf("Overwrote %s in server.properties to %d\n", MAX_TICK_TIME_KEY, MAX_TICK_TIME_REQUIRED);
+    }
+
+    try (final var out = Files.newOutputStream(Paths.get("server.properties"))) {
       properties.store(out, null);
     }
   }
 
-  private static Properties getOrCreateProperties() throws IOException {
-    final var properties = new Properties();
-    final var path = Paths.get("mch.properties");
-    if (Files.exists(path) && Files.isRegularFile(path)) {
-      try (final var in = Files.newInputStream(path)) {
-        properties.load(in);
-      }
-    }
-    properties.putIfAbsent(GlobalConfig.WARMUP_ITERATIONS_KEY, String.valueOf(GlobalConfig.WARMUP_ITERATIONS_DEFAULT));
-    properties.putIfAbsent(GlobalConfig.MEASUREMENT_ITERATIONS_KEY, String.valueOf(GlobalConfig.MEASUREMENT_ITERATIONS_DEFAULT));
-    properties.putIfAbsent(GlobalConfig.TIME_KEY, String.valueOf(GlobalConfig.TIME_DEFAULT));
-    properties.putIfAbsent(GlobalConfig.FORKS_KEY, String.valueOf(GlobalConfig.FORKS_DEFAULT));
-    properties.putIfAbsent(GlobalConfig.BENCHMARKS, GlobalConfig.BENCHMARKS_DEFAULT);
-    try (final var out = Files.newOutputStream(path)) {
-      properties.store(out, null);
-    }
-    return properties;
-  }
-
-  private static void installDatapack() throws IOException {
-    final var serverProperties = Paths.get("server.properties");
-    var levelName = "world";
-    if (Files.exists(serverProperties)) {
-      final var properties = new Properties();
-      try (final var in = Files.newInputStream(serverProperties)) {
-        properties.load(in);
-      }
-      levelName = properties.getProperty("level-name");
-    }
-
-    final var datapack = Paths.get(levelName, "datapacks", "mch.zip");
+  private static void installDatapack(
+    final ServerProperties serverProperties
+  ) throws IOException {
+    final var datapack = Paths.get(serverProperties.levelName(), "datapacks", "mch.zip");
     if (Files.notExists(datapack)) {
       Files.createDirectories(datapack.getParent());
       try (final var out = new BufferedOutputStream(Files.newOutputStream(datapack))) {
@@ -90,6 +72,7 @@ public final class Main {
           Objects.requireNonNull(in).transferTo(out);
         }
       }
+      System.out.printf("Installed datapack in %s\n", datapack);
     }
   }
 
@@ -106,7 +89,7 @@ public final class Main {
 
   private static void iterationRun(
     final Map<String, Collection<Double>> results,
-    final GlobalConfig config,
+    final MchProperties config,
     final String benchmark,
     final String[] args
   ) throws IOException, InterruptedException {
@@ -168,7 +151,7 @@ public final class Main {
 
   private static void dumpResults(
     final Map<String, Collection<Double>> results,
-    final GlobalConfig config
+    final MchProperties config
   ) throws IOException {
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
       out.write('[');

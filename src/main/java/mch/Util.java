@@ -7,6 +7,16 @@ public final class Util {
     return '"' + string + '"';
   }
 
+  public static Integer parseIntOrNull(
+    final String string
+  ) {
+    try {
+      return Integer.parseInt(string);
+    } catch (NumberFormatException ignored) {
+      return null;
+    }
+  }
+
   public static byte[] doubleToBytes(
     final double d
   ) {
