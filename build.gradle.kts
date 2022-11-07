@@ -13,7 +13,7 @@ repositories {
 dependencies {
     implementation("org.ow2.asm:asm:9.4")
     implementation("org.apache.commons:commons-math3:3.6.1")
-    implementation("com.mojang:brigadier:1.0.18")
+    compileOnly("com.mojang:brigadier:1.0.18")
 }
 
 tasks.withType(JavaCompile::class) {
