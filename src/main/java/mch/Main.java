@@ -23,6 +23,12 @@ public final class Main {
   ) throws InterruptedException, IOException {
     System.out.println("Starting mch.Main");
 
+    if (!validateEula()) {
+      System.out.println("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
+      System.exit(1);
+      return;
+    }
+
     {
       final var serverProperties = ServerProperties.load();
       validateServerProperties(serverProperties);
@@ -41,7 +47,20 @@ public final class Main {
     dumpResults(results, mchProperties);
   }
 
-  public static void validateServerProperties(
+  private static boolean validateEula() throws IOException {
+    final var path = Paths.get("eula.txt");
+    if (Files.exists(path) && Files.isRegularFile(path)) {
+      try (final var in = Files.newInputStream(path)) {
+        final var properties = new Properties();
+        properties.load(in);
+        return Boolean.parseBoolean(properties.getProperty("eula"));
+      }
+    } else {
+      return false;
+    }
+  }
+
+  private static void validateServerProperties(
     final ServerProperties serverProperties
   ) throws IOException {
     final var properties = new Properties();
