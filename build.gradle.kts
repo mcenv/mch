@@ -5,7 +5,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("com.guardsquare:proguard-gradle:7.1.0")
+    classpath("com.guardsquare:proguard-gradle:7.2.2")
   }
 }
 
@@ -29,7 +29,7 @@ dependencies {
 
 tasks.withType(JavaCompile::class) {
   options.encoding = "UTF-8"
-  options.release.set(16)
+  options.release.set(17)
 }
 
 tasks.jar {
