@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static mch.Util.doubleToBytes;
 
+@Keep
 @SuppressWarnings("unused")
 public final class MchCommands {
     private static long startTime;
@@ -19,6 +20,10 @@ public final class MchCommands {
     private static ParseResults<Object> run;
     private static ParseResults<Object> loop;
 
+    private MchCommands() {
+    }
+
+    @Keep
     public static void register(
             final CommandDispatcher<Object> dispatcher,
             final LocalConfig config

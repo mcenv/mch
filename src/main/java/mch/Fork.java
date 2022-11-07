@@ -6,7 +6,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
 
+@Keep
 public final class Fork {
+    @Keep
     public static void main(
             final String[] args
     ) throws Throwable {
