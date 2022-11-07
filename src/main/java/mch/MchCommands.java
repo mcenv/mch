@@ -26,11 +26,11 @@ public final class MchCommands {
   @Keep
   public static void register(
     final CommandDispatcher<Object> dispatcher,
-    final LocalConfig config
+    final Options options
   ) throws IOException {
-    if (config instanceof LocalConfig.Dry) {
+    if (options instanceof Options.Dry) {
       registerDry(dispatcher);
-    } else if (config instanceof LocalConfig.Iteration iteration) {
+    } else if (options instanceof Options.Iteration iteration) {
       registerIteration(dispatcher, iteration);
     }
   }
@@ -52,19 +52,19 @@ public final class MchCommands {
 
   private static void registerIteration(
     final CommandDispatcher<Object> dispatcher,
-    final LocalConfig.Iteration config
+    final Options.Iteration options
   ) throws IOException {
-    final var socket = new Socket((String) null, config.port());
-    final int warmupCount = config.warmupIterations();
-    final int measurementCount = config.warmupIterations() + config.measurementIterations();
-    final long time = TimeUnit.SECONDS.toNanos(config.time());
+    final var socket = new Socket((String) null, options.port());
+    final int warmupCount = options.warmupIterations();
+    final int measurementCount = options.warmupIterations() + options.measurementIterations();
+    final long time = TimeUnit.SECONDS.toNanos(options.time());
 
     dispatcher.register(
       literal("mch:start").executes(c -> {
-        System.out.println(config.benchmark() + " " + (config.fork() + 1) + "/" + config.forks());
+        System.out.println(options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
 
         final var source = c.getSource();
-        run = dispatcher.parse("function " + config.benchmark(), source);
+        run = dispatcher.parse("function " + options.benchmark(), source);
         loop = dispatcher.parse("function mch:loop", source);
 
         startTime = System.nanoTime();
