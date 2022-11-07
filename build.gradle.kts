@@ -82,5 +82,6 @@ tasks.register<ProGuardTask>("optimizeJar") {
   keepclassmembers("class * { @mch.Keep *; }")
 
   optimizationpasses(3)
+  repackageclasses("mch")
   dontwarn("java.lang.invoke.MethodHandle")
 }
