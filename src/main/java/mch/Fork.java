@@ -8,15 +8,15 @@ import java.nio.file.Paths;
 
 @Keep
 public final class Fork {
-    @Keep
-    public static void main(
-            final String[] args
-    ) throws Throwable {
-        System.out.println("Starting mch.Fork");
+  @Keep
+  public static void main(
+    final String[] args
+  ) throws Throwable {
+    System.out.println("Starting mch.Fork");
 
-        final var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});
-        final var mainClass = Class.forName("net.minecraft.bundler.Main", true, classLoader);
-        final var mainHandle = MethodHandles.lookup().findStatic(mainClass, "main", MethodType.methodType(Void.TYPE, String[].class)).asFixedArity();
-        mainHandle.invoke((Object) args);
-    }
+    final var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});
+    final var mainClass = Class.forName("net.minecraft.bundler.Main", true, classLoader);
+    final var mainHandle = MethodHandles.lookup().findStatic(mainClass, "main", MethodType.methodType(Void.TYPE, String[].class)).asFixedArity();
+    mainHandle.invoke((Object) args);
+  }
 }
