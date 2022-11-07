@@ -24,6 +24,14 @@ public record GlobalConfig(
   public static final String BENCHMARKS = "benchmarks";
   public static final String BENCHMARKS_DEFAULT = ",";
 
+  public static final GlobalConfig DEFAULT = new GlobalConfig(
+    WARMUP_ITERATIONS_DEFAULT,
+    MEASUREMENT_ITERATIONS_DEFAULT,
+    TIME_DEFAULT,
+    FORKS_DEFAULT,
+    new String[]{}
+  );
+
   public GlobalConfig(
     final Properties properties
   ) {
