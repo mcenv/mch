@@ -19,6 +19,10 @@
 3. Run `java -jar mch.jar`.
 4. The benchmark results are dumped to `mch-results.json`.
 
+## Requirements
+
+- Java 17+
+
 ## Options
 
 | Name                     | Description                                               | Default |
