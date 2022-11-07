@@ -31,7 +31,7 @@ public final class Main {
 
     final var results = new LinkedHashMap<String, Collection<Double>>();
     for (final var benchmark : config.benchmarks()) {
-      forkProcess(results, config, benchmark, args);
+      iterationRun(results, config, benchmark, args);
     }
 
     dumpResults(results, config);
@@ -96,14 +96,15 @@ public final class Main {
   private static void dryRun(
     final String[] args
   ) throws IOException, InterruptedException {
-    final var command = getCommand(GlobalConfig.DEFAULT, LocalConfig.DRY_RUN_FORK, -1, null, args);
+    final var options = LocalConfig.Dry.INSTANCE.toString();
+    final var command = getCommand(options, args);
     final var builder = new ProcessBuilder(command);
     final var process = builder.start();
     process.getInputStream().transferTo(System.out);
     process.waitFor();
   }
 
-  private static void forkProcess(
+  private static void iterationRun(
     final Map<String, Collection<Double>> results,
     final GlobalConfig config,
     final String benchmark,
@@ -129,7 +130,16 @@ public final class Main {
         thread.start();
 
         final var port = server.getLocalPort();
-        final var command = getCommand(config, fork, port, benchmark, args);
+        final var options = quote(new LocalConfig.Iteration(
+          config.warmupIterations(),
+          config.measurementIterations(),
+          config.time(),
+          config.forks(),
+          fork,
+          port,
+          benchmark
+        ).toString());
+        final var command = getCommand(options, args);
         final var builder = new ProcessBuilder(command);
         final var process = builder.start();
         process.getInputStream().transferTo(System.out);
@@ -141,24 +151,12 @@ public final class Main {
   }
 
   private static List<String> getCommand(
-    final GlobalConfig config,
-    final int fork,
-    final int port,
-    final String benchmark,
+    final String options,
     final String[] args
   ) {
     try {
       final var java = ProcessHandle.current().info().command().orElseThrow();
       final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
-      final var options = quote(new LocalConfig(
-        config.warmupIterations(),
-        config.measurementIterations(),
-        config.time(),
-        config.forks(),
-        fork,
-        port,
-        benchmark
-      ).toString());
       final var command = new ArrayList<String>();
       Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", "nogui");
       Collections.addAll(command, args);

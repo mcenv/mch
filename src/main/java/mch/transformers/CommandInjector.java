@@ -30,23 +30,27 @@ public final class CommandInjector extends ClassVisitor {
       return new MethodVisitor(ASM9, parent) {
         @Override
         public void visitMaxs(int maxStack, int maxLocals) {
-          super.visitMaxs(10, 2);
+          super.visitMaxs(config instanceof LocalConfig.Dry ? 4 : 10, 2);
         }
 
         @Override
         public void visitInsn(final int opcode) {
           if (opcode == RETURN) {
             visitVarInsn(ALOAD, 0);
-            visitTypeInsn(NEW, "mch/LocalConfig");
-            visitInsn(DUP);
-            visitLdcInsn(config.warmupIterations());
-            visitLdcInsn(config.measurementIterations());
-            visitLdcInsn(config.time());
-            visitLdcInsn(config.forks());
-            visitLdcInsn(config.fork());
-            visitLdcInsn(config.port());
-            visitLdcInsn(config.benchmark());
-            visitMethodInsn(INVOKESPECIAL, "mch/LocalConfig", "<init>", "(IIIIIILjava/lang/String;)V", false);
+            if (config instanceof LocalConfig.Dry) {
+              visitFieldInsn(GETSTATIC, "mch/LocalConfig$Dry", "INSTANCE", "Lmch/LocalConfig$Dry;");
+            } else if (config instanceof LocalConfig.Iteration iteration) {
+              visitTypeInsn(NEW, "mch/LocalConfig$Iteration");
+              visitInsn(DUP);
+              visitLdcInsn(iteration.warmupIterations());
+              visitLdcInsn(iteration.measurementIterations());
+              visitLdcInsn(iteration.time());
+              visitLdcInsn(iteration.forks());
+              visitLdcInsn(iteration.fork());
+              visitLdcInsn(iteration.port());
+              visitLdcInsn(iteration.benchmark());
+              visitMethodInsn(INVOKESPECIAL, "mch/LocalConfig$Iteration", "<init>", "(IIIIIILjava/lang/String;)V", false);
+            }
             visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Lmch/LocalConfig;)V", false);
           }
           super.visitInsn(opcode);
