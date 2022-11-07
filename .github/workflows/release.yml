@@ -17,7 +17,7 @@ jobs:
       - uses: gradle/wrapper-validation-action@v1
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: shadowJar
+          arguments: optimizeJar
       - uses: softprops/action-gh-release@v1
         with:
           files: ./build/libs/mch.jar
