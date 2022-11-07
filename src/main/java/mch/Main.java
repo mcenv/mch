@@ -41,14 +41,14 @@ public final class Main {
     final var properties = new Properties();
     final var path = Paths.get("server.properties");
     if (Files.exists(path) && Files.isRegularFile(path)) {
-      try (final var input = Files.newInputStream(path)) {
-        properties.load(input);
+      try (final var in = Files.newInputStream(path)) {
+        properties.load(in);
       }
     }
     properties.setProperty("function-permission-level", "4");
     properties.setProperty("max-tick-time", "-1");
-    try (final var output = Files.newOutputStream(path)) {
-      properties.store(output, null);
+    try (final var out = Files.newOutputStream(path)) {
+      properties.store(out, null);
     }
   }
 
@@ -56,8 +56,8 @@ public final class Main {
     final var properties = new Properties();
     final var path = Paths.get("mch.properties");
     if (Files.exists(path) && Files.isRegularFile(path)) {
-      try (final var input = Files.newInputStream(path)) {
-        properties.load(input);
+      try (final var in = Files.newInputStream(path)) {
+        properties.load(in);
       }
     }
     properties.putIfAbsent(GlobalConfig.WARMUP_ITERATIONS_KEY, String.valueOf(GlobalConfig.WARMUP_ITERATIONS_DEFAULT));
@@ -65,8 +65,8 @@ public final class Main {
     properties.putIfAbsent(GlobalConfig.TIME_KEY, String.valueOf(GlobalConfig.TIME_DEFAULT));
     properties.putIfAbsent(GlobalConfig.FORKS_KEY, String.valueOf(GlobalConfig.FORKS_DEFAULT));
     properties.putIfAbsent(GlobalConfig.BENCHMARKS, GlobalConfig.BENCHMARKS_DEFAULT);
-    try (final var output = Files.newOutputStream(path)) {
-      properties.store(output, null);
+    try (final var out = Files.newOutputStream(path)) {
+      properties.store(out, null);
     }
     return properties;
   }
@@ -76,8 +76,8 @@ public final class Main {
     var levelName = "world";
     if (Files.exists(serverProperties)) {
       final var properties = new Properties();
-      try (final var input = Files.newInputStream(serverProperties)) {
-        properties.load(input);
+      try (final var in = Files.newInputStream(serverProperties)) {
+        properties.load(in);
       }
       levelName = properties.getProperty("level-name");
     }
@@ -85,9 +85,9 @@ public final class Main {
     final var datapack = Paths.get(levelName, "datapacks", "mch.zip");
     if (Files.notExists(datapack)) {
       Files.createDirectories(datapack.getParent());
-      try (final var output = new BufferedOutputStream(Files.newOutputStream(datapack))) {
-        try (final var input = Main.class.getResourceAsStream("/mch.zip")) {
-          Objects.requireNonNull(input).transferTo(output);
+      try (final var out = new BufferedOutputStream(Files.newOutputStream(datapack))) {
+        try (final var in = Main.class.getResourceAsStream("/mch.zip")) {
+          Objects.requireNonNull(in).transferTo(out);
         }
       }
     }
@@ -172,8 +172,8 @@ public final class Main {
     final Map<String, Collection<Double>> results,
     final GlobalConfig config
   ) throws IOException {
-    try (final var output = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
-      output.write('[');
+    try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
+      out.write('[');
 
       {
         var i = 0;
@@ -181,10 +181,10 @@ public final class Main {
           final var benchmark = entry.getKey();
           final var values = entry.getValue().stream().mapToDouble(x -> x).toArray();
           if (i++ != 0) {
-            output.write(',');
+            out.write(',');
           }
           try {
-            output.write(
+            out.write(
               String.format(
                 """
                   \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
@@ -196,7 +196,7 @@ public final class Main {
               ).getBytes(StandardCharsets.UTF_8)
             );
           } catch (NotStrictlyPositiveException ignored) {
-            output.write(
+            out.write(
               String.format(
                 """
                   \n  { "benchmark": "%s" }""",
@@ -207,9 +207,9 @@ public final class Main {
         }
       }
 
-      output.write('\n');
-      output.write(']');
-      output.write('\n');
+      out.write('\n');
+      out.write(']');
+      out.write('\n');
     }
   }
 }
