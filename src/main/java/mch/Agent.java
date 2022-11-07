@@ -6,10 +6,16 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.jar.JarFile;
 
@@ -22,7 +28,7 @@ public final class Agent {
   ) throws IOException {
     System.out.println("Starting mch.Agent");
 
-    instrumentation.appendToSystemClassLoaderSearch(new JarFile("libraries/com/mojang/brigadier/1.0.18/brigadier-1.0.18.jar"));
+    instrumentation.appendToSystemClassLoaderSearch(getBrigadier());
     instrumentation.addTransformer(new ClassFileTransformer() {
       private static byte[] transform(
         final byte[] classfileBuffer,
@@ -49,5 +55,30 @@ public final class Agent {
         };
       }
     });
+  }
+
+  private static JarFile getBrigadier() throws IOException {
+    try (final var server = new JarFile("server.jar")) {
+      try (final var libraries = new BufferedInputStream(server.getInputStream(server.getEntry("META-INF/libraries.list")))) {
+        final var entries = new String(libraries.readAllBytes(), StandardCharsets.UTF_8).split("\n");
+        final var brigadierPath =
+          Arrays
+            .stream(entries)
+            .map(entry -> entry.split("\t")[2])
+            .filter(path -> path.startsWith("com/mojang/brigadier/"))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No brigadier was found"));
+
+        try (final var brigadier = new BufferedInputStream(server.getInputStream(server.getEntry("META-INF/libraries/" + brigadierPath)))) {
+          final var outPath = Paths.get("libraries", brigadierPath);
+          Files.createDirectories(outPath.getParent());
+          try (final var out = new BufferedOutputStream(Files.newOutputStream(outPath))) {
+            brigadier.transferTo(out);
+          }
+        }
+
+        return new JarFile("libraries/" + brigadierPath);
+      }
+    }
   }
 }
