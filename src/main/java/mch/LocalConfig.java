@@ -10,6 +10,8 @@ public record LocalConfig(
   int port,
   String benchmark
 ) {
+  public static final int DRY_RUN_FORK = -1;
+
   public static LocalConfig parse(
     final String string
   ) {

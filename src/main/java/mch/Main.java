@@ -27,6 +27,8 @@ public final class Main {
 
     final var config = new GlobalConfig(getOrCreateProperties());
 
+    dryRun(args);
+
     final var results = new LinkedHashMap<String, Collection<Double>>();
     for (final var benchmark : config.benchmarks()) {
       forkProcess(results, config, benchmark, args);
@@ -89,6 +91,16 @@ public final class Main {
         }
       }
     }
+  }
+
+  private static void dryRun(
+    final String[] args
+  ) throws IOException, InterruptedException {
+    final var command = getCommand(GlobalConfig.DEFAULT, LocalConfig.DRY_RUN_FORK, -1, null, args);
+    final var builder = new ProcessBuilder(command);
+    final var process = builder.start();
+    process.getInputStream().transferTo(System.out);
+    process.waitFor();
   }
 
   private static void forkProcess(
