@@ -8,8 +8,6 @@ import java.util.Properties;
 import static mch.Util.parseIntOrNull;
 
 public record ServerProperties(
-  Integer functionPermissionLevel,
-  Integer maxTickTime,
   String levelName
 ) {
   public static final String FUNCTION_PERMISSION_LEVEL_KEY = "function-permission-level";
@@ -25,28 +23,30 @@ public record ServerProperties(
     final var properties = new Properties();
     final var path = Paths.get("server.properties");
 
-    final Integer functionPermissionLevel;
-    final Integer maxTickTime;
-    final String levelName;
-
     if (Files.exists(path) && Files.isRegularFile(path)) {
       try (final var in = Files.newInputStream(path)) {
         properties.load(in);
       }
 
-      functionPermissionLevel = parseIntOrNull(properties.getProperty(FUNCTION_PERMISSION_LEVEL_KEY));
-      maxTickTime = parseIntOrNull(properties.getProperty(MAX_TICK_TIME_KEY));
-      levelName = properties.getProperty(LEVEL_NAME_KEY, LEVEL_NAME_DEFAULT);
-    } else {
-      functionPermissionLevel = null;
-      maxTickTime = null;
-      levelName = LEVEL_NAME_DEFAULT;
+      final var functionPermissionLevel = parseIntOrNull(properties.getProperty(FUNCTION_PERMISSION_LEVEL_KEY));
+      if (functionPermissionLevel == null || functionPermissionLevel != FUNCTION_PERMISSION_LEVEL_REQUIRED) {
+        properties.setProperty(FUNCTION_PERMISSION_LEVEL_KEY, String.valueOf(FUNCTION_PERMISSION_LEVEL_REQUIRED));
+        System.out.printf("Overwrote %s in server.properties to %d\n", FUNCTION_PERMISSION_LEVEL_KEY, FUNCTION_PERMISSION_LEVEL_REQUIRED);
+      }
+
+      final var maxTickTime = parseIntOrNull(properties.getProperty(MAX_TICK_TIME_KEY));
+      if (maxTickTime == null || maxTickTime != MAX_TICK_TIME_REQUIRED) {
+        properties.setProperty(MAX_TICK_TIME_KEY, String.valueOf(MAX_TICK_TIME_REQUIRED));
+        System.out.printf("Overwrote %s in server.properties to %d\n", MAX_TICK_TIME_KEY, MAX_TICK_TIME_REQUIRED);
+      }
+    }
+
+    try (final var out = Files.newOutputStream(path)) {
+      properties.store(out, "Minecraft server properties");
     }
 
     return new ServerProperties(
-      functionPermissionLevel,
-      maxTickTime,
-      levelName
+      properties.getProperty(LEVEL_NAME_KEY, LEVEL_NAME_DEFAULT)
     );
   }
 }
