@@ -6,18 +6,21 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.function.Function;
+import java.util.jar.JarFile;
 
 public final class Agent {
     public static void premain(
             final String args,
             final Instrumentation instrumentation
-    ) {
+    ) throws IOException {
         System.out.println("Starting mch.Agent");
 
+        instrumentation.appendToSystemClassLoaderSearch(new JarFile("libraries/com/mojang/brigadier/1.0.18/brigadier-1.0.18.jar"));
         instrumentation.addTransformer(new ClassFileTransformer() {
             private static byte[] transform(
                     final byte[] classfileBuffer,
