@@ -1,5 +1,6 @@
 package mch;
 
+@Keep
 public record LocalConfig(
         int warmupIterations,
         int measurementIterations,

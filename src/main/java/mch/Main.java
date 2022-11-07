@@ -14,7 +14,9 @@ import java.util.*;
 import static mch.Util.bytesToDouble;
 import static mch.Util.quote;
 
+@Keep
 public final class Main {
+    @Keep
     public static void main(
             final String[] args
     ) throws InterruptedException, IOException {

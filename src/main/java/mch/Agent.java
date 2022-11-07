@@ -13,7 +13,9 @@ import java.security.ProtectionDomain;
 import java.util.function.Function;
 import java.util.jar.JarFile;
 
+@Keep
 public final class Agent {
+    @Keep
     public static void premain(
             final String args,
             final Instrumentation instrumentation
