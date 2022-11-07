@@ -50,7 +50,7 @@ public final class Agent {
       ) {
         return switch (className) {
           case "net/minecraft/server/MinecraftServer" -> transform(classfileBuffer, ModNameTransformer::new);
-          case "com/mojang/brigadier/CommandDispatcher" -> transform(classfileBuffer, v -> new CommandInjector(v, LocalConfig.parse(args)));
+          case "com/mojang/brigadier/CommandDispatcher" -> transform(classfileBuffer, v -> new CommandInjector(v, Options.parse(args)));
           default -> null;
         };
       }

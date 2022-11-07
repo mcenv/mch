@@ -1,8 +1,8 @@
 package mch;
 
 @Keep
-public sealed interface LocalConfig permits LocalConfig.Dry, LocalConfig.Iteration {
-  static LocalConfig parse(
+public sealed interface Options permits Options.Dry, Options.Iteration {
+  static Options parse(
     final String string
   ) {
     final var args = string.split(",");
@@ -23,7 +23,7 @@ public sealed interface LocalConfig permits LocalConfig.Dry, LocalConfig.Iterati
   }
 
   @Keep
-  final class Dry implements LocalConfig {
+  final class Dry implements Options {
     @Keep
     public static final Dry INSTANCE = new Dry();
 
@@ -45,7 +45,7 @@ public sealed interface LocalConfig permits LocalConfig.Dry, LocalConfig.Iterati
     int fork,
     int port,
     String benchmark
-  ) implements LocalConfig {
+  ) implements Options {
     @Override
     public String toString() {
       return String.format(

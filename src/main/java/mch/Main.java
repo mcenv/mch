@@ -30,16 +30,16 @@ public final class Main {
 
     installDatapack(ServerProperties.load());
 
-    final var mchProperties = MchProperties.load();
+    final var properties = MchProperties.load();
 
     dryRun(args);
 
     final var results = new LinkedHashMap<String, Collection<Double>>();
-    for (final var benchmark : mchProperties.benchmarks()) {
-      iterationRun(results, mchProperties, benchmark, args);
+    for (final var benchmark : properties.benchmarks()) {
+      iterationRun(results, properties, benchmark, args);
     }
 
-    dumpResults(results, mchProperties);
+    dumpResults(results, properties);
   }
 
   private static boolean validateEula() throws IOException {
@@ -73,7 +73,7 @@ public final class Main {
   private static void dryRun(
     final String[] args
   ) throws IOException, InterruptedException {
-    final var options = LocalConfig.Dry.INSTANCE.toString();
+    final var options = Options.Dry.INSTANCE.toString();
     final var command = getCommand(options, args);
     final var builder = new ProcessBuilder(command);
     final var process = builder.start();
@@ -83,11 +83,11 @@ public final class Main {
 
   private static void iterationRun(
     final Map<String, Collection<Double>> results,
-    final MchProperties config,
+    final MchProperties properties,
     final String benchmark,
     final String[] args
   ) throws IOException, InterruptedException {
-    for (var fork = 0; fork < config.forks(); ++fork) {
+    for (var fork = 0; fork < properties.forks(); ++fork) {
       try (final var server = new ServerSocket(0)) {
         final var thread = new Thread(() -> {
           try {
@@ -107,11 +107,11 @@ public final class Main {
         thread.start();
 
         final var port = server.getLocalPort();
-        final var options = quote(new LocalConfig.Iteration(
-          config.warmupIterations(),
-          config.measurementIterations(),
-          config.time(),
-          config.forks(),
+        final var options = quote(new Options.Iteration(
+          properties.warmupIterations(),
+          properties.measurementIterations(),
+          properties.time(),
+          properties.forks(),
           fork,
           port,
           benchmark
@@ -145,7 +145,7 @@ public final class Main {
 
   private static void dumpResults(
     final Map<String, Collection<Double>> results,
-    final MchProperties config
+    final MchProperties properties
   ) throws IOException {
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
       out.write('[');
@@ -164,7 +164,7 @@ public final class Main {
                 """
                   \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
                 benchmark,
-                config.measurementIterations() * config.forks(),
+                properties.measurementIterations() * properties.forks(),
                 Statistics.mean(values),
                 Statistics.error(values),
                 "ns/op"
