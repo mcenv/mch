@@ -19,6 +19,7 @@ public final class MchCommands {
   private static long startTime;
   private static int iterationCount;
   private static int operationCount;
+  private static double[] results;
   private static ParseResults<Object> run;
   private static ParseResults<Object> loop;
   private static ParseResults<Object> post;
@@ -65,6 +66,10 @@ public final class MchCommands {
     dispatcher.register(
       literal("mch:loop").executes(c -> 0)
     );
+
+    dispatcher.register(
+      literal("mch:post").executes(c -> 0)
+    );
   }
 
   private static void registerIteration(
@@ -75,6 +80,7 @@ public final class MchCommands {
     final int warmupCount = options.warmupIterations();
     final int measurementCount = options.warmupIterations() + options.measurementIterations();
     final long time = TimeUnit.SECONDS.toNanos(options.time());
+    results = new double[options.measurementIterations()];
 
     dispatcher.register(
       literal("mch:start").executes(c -> {
@@ -105,41 +111,50 @@ public final class MchCommands {
 
     dispatcher.register(
       literal("mch:loop").executes(c -> {
-        try {
-          final var stopTime = System.nanoTime();
-          if (stopTime - startTime >= time) {
-            if (iterationCount < measurementCount) {
-              dispatcher.execute(teardownIteration);
+        final var stopTime = System.nanoTime();
+        if (stopTime - startTime >= time) {
+          if (iterationCount < measurementCount) {
+            dispatcher.execute(teardownIteration);
 
-              final var result = (double) (stopTime - startTime) / (double) operationCount;
-              if (iterationCount < warmupCount) {
-                System.out.println("Warmup iteration: " + result + " ns/op");
-              } else {
-                System.out.println("Measurement iteration: " + result + " ns/op");
-                socket.getOutputStream().write(doubleToBytes(result));
-              }
-
-              if (iterationCount < measurementCount - 1) {
-                dispatcher.execute(setupIteration);
-              }
+            final var result = (double) (stopTime - startTime) / (double) operationCount;
+            if (iterationCount < warmupCount) {
+              System.out.println("Warmup iteration: " + result + " ns/op");
             } else {
-              socket.close();
-              return 0;
+              System.out.println("Measurement iteration: " + result + " ns/op");
+              results[iterationCount - warmupCount] = result;
             }
 
-            ++iterationCount;
-            operationCount = 0;
-            startTime = System.nanoTime();
+            if (iterationCount < measurementCount - 1) {
+              dispatcher.execute(setupIteration);
+            }
+          } else {
+            return 0;
           }
 
-          dispatcher.execute(run);
-          dispatcher.execute(loop);
-          ++operationCount;
+          ++iterationCount;
+          operationCount = 0;
+          startTime = System.nanoTime();
+        }
 
-          return 0;
-        } catch (final IOException e) {
+        dispatcher.execute(run);
+        dispatcher.execute(loop);
+        ++operationCount;
+
+        return 0;
+      })
+    );
+
+    dispatcher.register(
+      literal("mch:post").executes(c -> {
+        try {
+          for (final var result : results) {
+            socket.getOutputStream().write(doubleToBytes(result));
+          }
+          socket.close();
+        } catch (IOException e) {
           throw new RuntimeException(e);
         }
+        return 0;
       })
     );
   }
