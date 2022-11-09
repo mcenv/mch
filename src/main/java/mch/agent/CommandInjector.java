@@ -1,4 +1,4 @@
-package mch.transformers;
+package mch.agent;
 
 import mch.Options;
 import org.objectweb.asm.ClassVisitor;
@@ -51,7 +51,7 @@ public final class CommandInjector extends ClassVisitor {
               visitLdcInsn(iteration.benchmark());
               visitMethodInsn(INVOKESPECIAL, "mch/Options$Iteration", "<init>", "(IIIIIILjava/lang/String;)V", false);
             }
-            visitMethodInsn(INVOKESTATIC, "mch/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Lmch/Options;)V", false);
+            visitMethodInsn(INVOKESTATIC, "mch/agent/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Lmch/Options;)V", false);
           }
           super.visitInsn(opcode);
         }

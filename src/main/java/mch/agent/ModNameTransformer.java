@@ -1,4 +1,4 @@
-package mch.transformers;
+package mch.agent;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;

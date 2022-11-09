@@ -1,7 +1,7 @@
-package mch;
+package mch.agent;
 
-import mch.transformers.CommandInjector;
-import mch.transformers.ModNameTransformer;
+import mch.Keep;
+import mch.Options;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -26,7 +26,7 @@ public final class Agent {
     final String args,
     final Instrumentation instrumentation
   ) throws IOException {
-    System.out.println("Starting mch.Agent");
+    System.out.println("Starting mch.agent.Agent");
 
     instrumentation.appendToSystemClassLoaderSearch(getBrigadier());
     instrumentation.addTransformer(new ClassFileTransformer() {

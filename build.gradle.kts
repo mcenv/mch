@@ -35,8 +35,8 @@ tasks.withType(JavaCompile::class) {
 tasks.jar {
   manifest {
     attributes(
-      "Premain-Class" to "mch.Agent",
-      "Main-Class" to "mch.Main",
+      "Premain-Class" to "mch.agent.Agent",
+      "Main-Class" to "mch.main.Main",
     )
   }
 }
