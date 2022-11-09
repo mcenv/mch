@@ -19,8 +19,23 @@ public final class MchCommands {
   private static int operationCount;
   private static ParseResults<Object> run;
   private static ParseResults<Object> loop;
+  private static ParseResults<Object> post;
+  private static ParseResults<Object> setupIteration;
+  private static ParseResults<Object> teardownIteration;
 
   private MchCommands() {
+  }
+
+  private static void parseFunctions(
+    final CommandDispatcher<Object> dispatcher,
+    final Object source,
+    final String benchmark
+  ) {
+    run = dispatcher.parse("function " + benchmark, source);
+    loop = dispatcher.parse("function mch:loop", source);
+    post = dispatcher.parse("function mch:post", source);
+    setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
+    teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
   }
 
   @Keep
@@ -63,9 +78,8 @@ public final class MchCommands {
       literal("mch:start").executes(c -> {
         System.out.println(options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
 
-        final var source = c.getSource();
-        run = dispatcher.parse("function " + options.benchmark(), source);
-        loop = dispatcher.parse("function mch:loop", source);
+        parseFunctions(dispatcher, c.getSource(), options.benchmark());
+        dispatcher.execute(setupIteration);
 
         startTime = System.nanoTime();
 
@@ -75,7 +89,7 @@ public final class MchCommands {
           System.out.println(e1.getMessage());
           try {
             socket.close();
-            dispatcher.execute("function mch:post", source);
+            dispatcher.execute(post);
           } catch (IOException e2) {
             throw new RuntimeException(e2);
           }
@@ -92,13 +106,20 @@ public final class MchCommands {
         try {
           final var stopTime = System.nanoTime();
           if (stopTime - startTime >= time) {
-            final var result = (double) (stopTime - startTime) / (double) operationCount;
+            if (iterationCount < measurementCount) {
+              dispatcher.execute(teardownIteration);
 
-            if (iterationCount < warmupCount) {
-              System.out.println("Warmup iteration: " + result + " ns/op");
-            } else if (iterationCount < measurementCount) {
-              System.out.println("Measurement iteration: " + result + " ns/op");
-              socket.getOutputStream().write(doubleToBytes(result));
+              final var result = (double) (stopTime - startTime) / (double) operationCount;
+              if (iterationCount < warmupCount) {
+                System.out.println("Warmup iteration: " + result + " ns/op");
+              } else {
+                System.out.println("Measurement iteration: " + result + " ns/op");
+                socket.getOutputStream().write(doubleToBytes(result));
+              }
+
+              if (iterationCount < measurementCount - 1) {
+                dispatcher.execute(setupIteration);
+              }
             } else {
               socket.close();
               return 0;
