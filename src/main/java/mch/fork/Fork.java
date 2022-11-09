@@ -1,4 +1,6 @@
-package mch;
+package mch.fork;
+
+import mch.Keep;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -12,7 +14,7 @@ public final class Fork {
   public static void main(
     final String[] args
   ) throws Throwable {
-    System.out.println("Starting mch.Fork");
+    System.out.println("Starting mch.fork.Fork");
 
     final var classLoader = new URLClassLoader(new URL[]{Paths.get("server.jar").toUri().toURL()});
     final var mainClass = Class.forName("net.minecraft.bundler.Main", true, classLoader);

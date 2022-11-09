@@ -1,5 +1,7 @@
-package mch;
+package mch.main;
 
+import mch.Keep;
+import mch.Options;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 
 import java.io.BufferedOutputStream;
@@ -20,7 +22,7 @@ public final class Main {
   public static void main(
     final String[] args
   ) throws InterruptedException, IOException {
-    System.out.println("Starting mch.Main");
+    System.out.println("Starting mch.main.Main");
 
     if (!validateEula()) {
       System.out.println("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
@@ -135,7 +137,7 @@ public final class Main {
       final var java = ProcessHandle.current().info().command().orElseThrow();
       final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
       final var command = new ArrayList<String>();
-      Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.Fork", "nogui");
+      Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.fork.Fork", "nogui");
       Collections.addAll(command, args);
       return command;
     } catch (final URISyntaxException e) {

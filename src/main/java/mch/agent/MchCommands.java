@@ -1,8 +1,10 @@
-package mch;
+package mch.agent;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import mch.Keep;
+import mch.Options;
 
 import java.io.IOException;
 import java.net.Socket;
