@@ -32,3 +32,12 @@
 | `time`                   | Duration of iterations in seconds.                        | `10`    |
 | `forks`                  | Number of forks.                                          | `5`     |
 | `benchmarks`             | Comma-separated list of function names to be benchmarked. | `,`     |
+
+## Fixtures
+
+| Function tag              | Description                                      |
+|:--------------------------|:-------------------------------------------------|
+| `#mch.setup.trial`        | To be run before each run of the benchmark       |
+| `#mch.setup.iteration`    | To be run before each iteration of the benchmark |
+| `#mch.teardown.trial`     | To be run after each run of the benchmark        |
+| `#mch.teardown.iteration` | To be run after each iteration of the benchmark  |
