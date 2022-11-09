@@ -37,7 +37,7 @@
 
 | Function tag              | Description                                      |
 |:--------------------------|:-------------------------------------------------|
-| `#mch.setup.trial`        | To be run before each run of the benchmark       |
-| `#mch.setup.iteration`    | To be run before each iteration of the benchmark |
-| `#mch.teardown.trial`     | To be run after each run of the benchmark        |
-| `#mch.teardown.iteration` | To be run after each iteration of the benchmark  |
+| `#mch:setup.trial`        | To be run before each run of the benchmark       |
+| `#mch:setup.iteration`    | To be run before each iteration of the benchmark |
+| `#mch:teardown.trial`     | To be run after each run of the benchmark        |
+| `#mch:teardown.iteration` | To be run after each iteration of the benchmark  |
