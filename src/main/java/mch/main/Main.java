@@ -61,15 +61,13 @@ public final class Main {
     final ServerProperties serverProperties
   ) throws IOException {
     final var datapack = Paths.get(serverProperties.levelName(), "datapacks", "mch.zip");
-    if (Files.notExists(datapack)) {
-      Files.createDirectories(datapack.getParent());
-      try (final var out = new BufferedOutputStream(Files.newOutputStream(datapack))) {
-        try (final var in = Main.class.getResourceAsStream("/mch.zip")) {
-          Objects.requireNonNull(in).transferTo(out);
-        }
+    Files.createDirectories(datapack.getParent());
+    try (final var out = new BufferedOutputStream(Files.newOutputStream(datapack))) {
+      try (final var in = Main.class.getResourceAsStream("/mch.zip")) {
+        Objects.requireNonNull(in).transferTo(out);
       }
-      System.out.printf("Installed datapack in %s\n", datapack);
     }
+    System.out.printf("Installed datapack in %s\n", datapack);
   }
 
   private static void dryRun(
