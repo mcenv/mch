@@ -30,16 +30,19 @@ public record ServerProperties(
 
       final var functionPermissionLevel = parseIntOrNull(properties.getProperty(FUNCTION_PERMISSION_LEVEL_KEY));
       if (functionPermissionLevel == null || functionPermissionLevel != FUNCTION_PERMISSION_LEVEL_REQUIRED) {
-        properties.setProperty(FUNCTION_PERMISSION_LEVEL_KEY, String.valueOf(FUNCTION_PERMISSION_LEVEL_REQUIRED));
         System.out.printf("Overwrote %s in server.properties to %d\n", FUNCTION_PERMISSION_LEVEL_KEY, FUNCTION_PERMISSION_LEVEL_REQUIRED);
       }
 
       final var maxTickTime = parseIntOrNull(properties.getProperty(MAX_TICK_TIME_KEY));
       if (maxTickTime == null || maxTickTime != MAX_TICK_TIME_REQUIRED) {
-        properties.setProperty(MAX_TICK_TIME_KEY, String.valueOf(MAX_TICK_TIME_REQUIRED));
         System.out.printf("Overwrote %s in server.properties to %d\n", MAX_TICK_TIME_KEY, MAX_TICK_TIME_REQUIRED);
       }
+    } else {
+      System.out.println("Created server.properties");
     }
+
+    properties.setProperty(FUNCTION_PERMISSION_LEVEL_KEY, String.valueOf(FUNCTION_PERMISSION_LEVEL_REQUIRED));
+    properties.setProperty(MAX_TICK_TIME_KEY, String.valueOf(MAX_TICK_TIME_REQUIRED));
 
     try (final var out = Files.newOutputStream(path)) {
       properties.store(out, "Minecraft server properties");
