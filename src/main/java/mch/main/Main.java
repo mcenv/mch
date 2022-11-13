@@ -37,8 +37,13 @@ public final class Main {
     dryRun(args);
 
     final var results = new LinkedHashMap<String, Collection<Double>>();
+
+    for (final var benchmark : properties.parsingBenchmarks()) {
+      iterationRun(results, properties, Options.Iteration.Mode.PARSING, benchmark, args);
+    }
+
     for (final var benchmark : properties.benchmarks()) {
-      iterationRun(results, properties, benchmark, args);
+      iterationRun(results, properties, Options.Iteration.Mode.EXECUTE, benchmark, args);
     }
 
     dumpResults(results, properties);
@@ -84,6 +89,7 @@ public final class Main {
   private static void iterationRun(
     final Map<String, Collection<Double>> results,
     final MchProperties properties,
+    final Options.Iteration.Mode mode,
     final String benchmark,
     final String[] args
   ) throws IOException, InterruptedException {
@@ -114,6 +120,7 @@ public final class Main {
           properties.forks(),
           fork,
           port,
+          mode,
           benchmark
         ).toString());
         final var command = getCommand(options, args);
