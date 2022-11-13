@@ -22,6 +22,10 @@ import static mch.Util.doubleToBytes;
 @SuppressWarnings("unused")
 @Keep
 public final class MchCommands {
+  private static final String START = "mch:start";
+  private static final String LOOP = "mch:loop";
+  private static final String POST = "mch:post";
+
   private static long startTime;
   private static int iterationCount;
   private static int operationCount;
@@ -53,20 +57,9 @@ public final class MchCommands {
   private static void registerDry(
     final CommandDispatcher<Object> dispatcher
   ) {
-    dispatcher.register(
-      literal("mch:start").executes(c -> {
-        System.out.println("Dry run");
-        return 0;
-      })
-    );
-
-    dispatcher.register(
-      literal("mch:loop").executes(c -> 0)
-    );
-
-    dispatcher.register(
-      literal("mch:post").executes(c -> 0)
-    );
+    registerConst(dispatcher, START);
+    registerConst(dispatcher, LOOP);
+    registerConst(dispatcher, POST);
   }
 
   private static void registerParsingIteration(
@@ -82,7 +75,7 @@ public final class MchCommands {
     final var commands = prepareCommands(dispatcher, options.benchmark());
 
     dispatcher.register(
-      literal("mch:start").executes(c -> {
+      literal(START).executes(c -> {
         System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
 
         if (commands == null) {
@@ -127,12 +120,10 @@ public final class MchCommands {
       })
     );
 
-    dispatcher.register(
-      literal("mch:loop").executes(c -> 0)
-    );
+    registerConst(dispatcher, LOOP);
 
     dispatcher.register(
-      literal("mch:post").executes(c -> {
+      literal(POST).executes(c -> {
         try {
           for (final var result : results) {
             socket.getOutputStream().write(doubleToBytes(result));
@@ -182,7 +173,7 @@ public final class MchCommands {
     results = new double[options.measurementIterations()];
 
     dispatcher.register(
-      literal("mch:start").executes(c -> {
+      literal(START).executes(c -> {
         System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
 
         parseFunctions(dispatcher, c.getSource(), options.benchmark());
@@ -209,7 +200,7 @@ public final class MchCommands {
     );
 
     dispatcher.register(
-      literal("mch:loop").executes(c -> {
+      literal(LOOP).executes(c -> {
         final var stopTime = System.nanoTime();
         if (stopTime - startTime >= time) {
           if (iterationCount < measurementCount) {
@@ -244,7 +235,7 @@ public final class MchCommands {
     );
 
     dispatcher.register(
-      literal("mch:post").executes(c -> {
+      literal(POST).executes(c -> {
         try {
           for (final var result : results) {
             socket.getOutputStream().write(doubleToBytes(result));
@@ -268,5 +259,12 @@ public final class MchCommands {
     post = dispatcher.parse("function mch:post", source);
     setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
     teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
+  }
+
+  private static void registerConst(
+    final CommandDispatcher<Object> dispatcher,
+    final String name
+  ) {
+    dispatcher.register(literal(name).executes(c -> 0));
   }
 }
