@@ -12,9 +12,9 @@
 ## Usage
 
 1. Download [`mch.jar`](https://github.com/mcenv/mch/releases/latest/download/mch.jar) and put it under the directory containing `server.jar`.
-2. Create `mch.properties` file under the same directory and specify the comma-separated list of function names to be benchmarked in `benchmarks` property. For example:
+2. Create `mch.properties` file under the same directory and specify the comma-separated list of function names to be benchmarked in `execute-benchmarks` property. For example:
     ```properties
-    benchmarks=a,b
+    execute-benchmarks=a,b
     ```
 3. Run `java -jar mch.jar`.
 4. The benchmark results are dumped to `mch-results.json`.
@@ -25,19 +25,20 @@
 
 ## Options
 
-| Name                     | Description                                               | Default |
-|:-------------------------|:----------------------------------------------------------|:--------|
-| `warmup-iterations`      | Number of warmup iterations.                              | `5`     |
-| `measurement-iterations` | Number of measurement iterations.                         | `5`     |
-| `time`                   | Duration of iterations in seconds.                        | `10`    |
-| `forks`                  | Number of forks.                                          | `5`     |
-| `benchmarks`             | Comma-separated list of function names to be benchmarked. | `,`     |
+| Name                     | Description                                                       | Default |
+|:-------------------------|:------------------------------------------------------------------|:--------|
+| `warmup-iterations`      | Number of warmup iterations.                                      | `5`     |
+| `measurement-iterations` | Number of measurement iterations.                                 | `5`     |
+| `time`                   | Duration of iterations in seconds.                                | `10`    |
+| `forks`                  | Number of forks.                                                  | `5`     |
+| `parsing-benchmarks`     | Comma-separated list of function **paths** for parsing benchmark. | `,`     |
+| `execute-benchmarks`     | Comma-separated list of function **names** for execute benchmark. | `,`     |
 
 ## Fixtures
 
-| Function tag              | Description                                      |
-|:--------------------------|:-------------------------------------------------|
-| `#mch:setup.trial`        | To be run before each run of the benchmark       |
-| `#mch:setup.iteration`    | To be run before each iteration of the benchmark |
-| `#mch:teardown.trial`     | To be run after each run of the benchmark        |
-| `#mch:teardown.iteration` | To be run after each iteration of the benchmark  |
+| Function tag              | Description                                              |
+|:--------------------------|:---------------------------------------------------------|
+| `#mch:setup.trial`        | To be run before each run of the execute benchmark       |
+| `#mch:setup.iteration`    | To be run before each iteration of the execute benchmark |
+| `#mch:teardown.trial`     | To be run after each run of the execute benchmark        |
+| `#mch:teardown.iteration` | To be run after each iteration of the execute benchmark  |
