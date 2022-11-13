@@ -6,9 +6,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mch.Keep;
 import mch.Options;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static mch.Util.doubleToBytes;
@@ -29,18 +35,6 @@ public final class MchCommands {
   private MchCommands() {
   }
 
-  private static void parseFunctions(
-    final CommandDispatcher<Object> dispatcher,
-    final Object source,
-    final String benchmark
-  ) {
-    run = dispatcher.parse("function " + benchmark, source);
-    loop = dispatcher.parse("function mch:loop", source);
-    post = dispatcher.parse("function mch:post", source);
-    setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
-    teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
-  }
-
   @Keep
   public static void register(
     final CommandDispatcher<Object> dispatcher,
@@ -49,7 +43,10 @@ public final class MchCommands {
     if (options instanceof Options.Dry) {
       registerDry(dispatcher);
     } else if (options instanceof Options.Iteration iteration) {
-      registerIteration(dispatcher, iteration);
+      switch (iteration.mode()) {
+        case PARSING -> registerParsingIteration(dispatcher, iteration);
+        case EXECUTE -> registerIteration(dispatcher, iteration);
+      }
     }
   }
 
@@ -72,14 +69,116 @@ public final class MchCommands {
     );
   }
 
+  private static void registerParsingIteration(
+    final CommandDispatcher<Object> dispatcher,
+    final Options.Iteration options
+  ) throws IOException {
+    final var socket = new Socket((String) null, options.port());
+    final var warmupCount = options.warmupIterations();
+    final var measurementCount = options.warmupIterations() + options.measurementIterations();
+    final var time = TimeUnit.SECONDS.toNanos(options.time());
+    results = new double[options.measurementIterations()];
+
+    final var commands = prepareCommands(dispatcher, options.benchmark());
+
+    dispatcher.register(
+      literal("mch:start").executes(c -> {
+        System.out.println(options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
+
+        if (commands == null) {
+          try {
+            System.out.println("No file " + options.benchmark() + "was found");
+            socket.close();
+            dispatcher.execute(post);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+          return 0;
+        }
+
+        var startTime = System.nanoTime();
+        final var source = c.getSource();
+
+        while (true) {
+          for (final var command : commands) {
+            dispatcher.parse(command, source);
+          }
+          final var stopTime = System.nanoTime();
+          ++operationCount;
+
+          if (stopTime - startTime >= time) {
+            if (iterationCount < measurementCount) {
+              final var result = (double) (stopTime - startTime) / (double) operationCount;
+              if (iterationCount < warmupCount) {
+                System.out.println("Warmup iteration: " + result + " ns/op");
+              } else {
+                System.out.println("Measurement iteration: " + result + " ns/op");
+                results[iterationCount - warmupCount] = result;
+              }
+            } else {
+              return 0;
+            }
+
+            ++iterationCount;
+            operationCount = 0;
+            startTime = System.nanoTime();
+          }
+        }
+      })
+    );
+
+    dispatcher.register(
+      literal("mch:loop").executes(c -> 0)
+    );
+
+    dispatcher.register(
+      literal("mch:post").executes(c -> {
+        try {
+          for (final var result : results) {
+            socket.getOutputStream().write(doubleToBytes(result));
+          }
+          socket.close();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        return 0;
+      })
+    );
+  }
+
+  private static String[] prepareCommands(
+    final CommandDispatcher<Object> dispatcher,
+    final String benchmark
+  ) throws IOException {
+    final var path = Paths.get(benchmark);
+    if (Files.exists(path) && Files.isRegularFile(path)) {
+      try (final var in = new BufferedReader(new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8))) {
+        return in
+          .lines()
+          .flatMap(line -> {
+            final var normalized = line.trim();
+            if (normalized.isEmpty() || normalized.startsWith("#")) {
+              return Stream.empty();
+            } else {
+              return Stream.of(normalized);
+            }
+          })
+          .toList()
+          .toArray(new String[]{});
+      }
+    } else {
+      return null;
+    }
+  }
+
   private static void registerIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {
     final var socket = new Socket((String) null, options.port());
-    final int warmupCount = options.warmupIterations();
-    final int measurementCount = options.warmupIterations() + options.measurementIterations();
-    final long time = TimeUnit.SECONDS.toNanos(options.time());
+    final var warmupCount = options.warmupIterations();
+    final var measurementCount = options.warmupIterations() + options.measurementIterations();
+    final var time = TimeUnit.SECONDS.toNanos(options.time());
     results = new double[options.measurementIterations()];
 
     dispatcher.register(
@@ -157,5 +256,17 @@ public final class MchCommands {
         return 0;
       })
     );
+  }
+
+  private static void parseFunctions(
+    final CommandDispatcher<Object> dispatcher,
+    final Object source,
+    final String benchmark
+  ) {
+    run = dispatcher.parse("function " + benchmark, source);
+    loop = dispatcher.parse("function mch:loop", source);
+    post = dispatcher.parse("function mch:post", source);
+    setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
+    teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
   }
 }

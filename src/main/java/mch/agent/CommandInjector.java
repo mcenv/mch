@@ -30,7 +30,7 @@ public final class CommandInjector extends ClassVisitor {
       return new MethodVisitor(ASM9, parent) {
         @Override
         public void visitMaxs(int maxStack, int maxLocals) {
-          super.visitMaxs(options instanceof Options.Dry ? 4 : 10, 2);
+          super.visitMaxs(options instanceof Options.Dry ? 4 : 11, 2);
         }
 
         @Override
@@ -48,8 +48,12 @@ public final class CommandInjector extends ClassVisitor {
               visitLdcInsn(iteration.forks());
               visitLdcInsn(iteration.fork());
               visitLdcInsn(iteration.port());
+              switch (iteration.mode()) {
+                case PARSING -> visitFieldInsn(GETSTATIC, "mch/Options$Iteration$Mode", "PARSING", "Lmch/Options$Iteration$Mode;");
+                case EXECUTE -> visitFieldInsn(GETSTATIC, "mch/Options$Iteration$Mode", "EXECUTE", "Lmch/Options$Iteration$Mode;");
+              }
               visitLdcInsn(iteration.benchmark());
-              visitMethodInsn(INVOKESPECIAL, "mch/Options$Iteration", "<init>", "(IIIIIILjava/lang/String;)V", false);
+              visitMethodInsn(INVOKESPECIAL, "mch/Options$Iteration", "<init>", "(IIIIIILmch/Options$Iteration$Mode;Ljava/lang/String;)V", false);
             }
             visitMethodInsn(INVOKESTATIC, "mch/agent/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Lmch/Options;)V", false);
           }
