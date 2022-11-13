@@ -45,7 +45,7 @@ public final class MchCommands {
     } else if (options instanceof Options.Iteration iteration) {
       switch (iteration.mode()) {
         case PARSING -> registerParsingIteration(dispatcher, iteration);
-        case EXECUTE -> registerIteration(dispatcher, iteration);
+        case EXECUTE -> registerExecuteIteration(dispatcher, iteration);
       }
     }
   }
@@ -171,7 +171,7 @@ public final class MchCommands {
     }
   }
 
-  private static void registerIteration(
+  private static void registerExecuteIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {

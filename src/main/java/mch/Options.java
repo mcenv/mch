@@ -65,17 +65,30 @@ public sealed interface Options permits Options.Dry, Options.Iteration {
 
     @Keep
     public enum Mode {
-      @Keep PARSING,
-      @Keep EXECUTE;
+      @Keep PARSING("parsing"),
+      @Keep EXECUTE("execute");
+
+      private final String name;
+
+      Mode(
+        final String name
+      ) {
+        this.name = name;
+      }
 
       public static Mode parse(
         final String string
       ) {
         return switch (string) {
-          case "PARSING" -> PARSING;
-          case "EXECUTE" -> EXECUTE;
+          case "parsing" -> PARSING;
+          case "execute" -> EXECUTE;
           default -> throw new IllegalArgumentException("Unknown mode: " + string);
         };
+      }
+
+      @Override
+      public String toString() {
+        return name;
       }
     }
   }

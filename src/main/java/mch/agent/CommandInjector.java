@@ -48,10 +48,7 @@ public final class CommandInjector extends ClassVisitor {
               visitLdcInsn(iteration.forks());
               visitLdcInsn(iteration.fork());
               visitLdcInsn(iteration.port());
-              switch (iteration.mode()) {
-                case PARSING -> visitFieldInsn(GETSTATIC, "mch/Options$Iteration$Mode", "PARSING", "Lmch/Options$Iteration$Mode;");
-                case EXECUTE -> visitFieldInsn(GETSTATIC, "mch/Options$Iteration$Mode", "EXECUTE", "Lmch/Options$Iteration$Mode;");
-              }
+              visitFieldInsn(GETSTATIC, "mch/Options$Iteration$Mode", iteration.mode().name(), "Lmch/Options$Iteration$Mode;");
               visitLdcInsn(iteration.benchmark());
               visitMethodInsn(INVOKESPECIAL, "mch/Options$Iteration", "<init>", "(IIIIIILmch/Options$Iteration$Mode;Ljava/lang/String;)V", false);
             }

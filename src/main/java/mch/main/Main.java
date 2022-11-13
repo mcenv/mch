@@ -29,23 +29,19 @@ public final class Main {
       System.exit(1);
       return;
     }
-
     installDatapack(ServerProperties.load());
 
     final var properties = MchProperties.load();
 
     dryRun(args);
 
-    final var results = new LinkedHashMap<String, Collection<Double>>();
-
+    final var results = new LinkedHashMap<String, Result>();
     for (final var benchmark : properties.parsingBenchmarks()) {
       iterationRun(results, properties, Options.Iteration.Mode.PARSING, benchmark, args);
     }
-
-    for (final var benchmark : properties.benchmarks()) {
+    for (final var benchmark : properties.executeBenchmarks()) {
       iterationRun(results, properties, Options.Iteration.Mode.EXECUTE, benchmark, args);
     }
-
     dumpResults(results, properties);
   }
 
@@ -87,7 +83,7 @@ public final class Main {
   }
 
   private static void iterationRun(
-    final Map<String, Collection<Double>> results,
+    final Map<String, Result> results,
     final MchProperties properties,
     final Options.Iteration.Mode mode,
     final String benchmark,
@@ -104,7 +100,7 @@ public final class Main {
               while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
                 scores.add(bytesToDouble(buffer));
               }
-              results.computeIfAbsent(benchmark, k -> new ArrayList<>()).addAll(scores);
+              results.computeIfAbsent(benchmark, k -> new Result(new ArrayList<>(), mode)).scores().addAll(scores);
             }
           } catch (final IOException e) {
             throw new IllegalStateException(e);
@@ -151,7 +147,7 @@ public final class Main {
   }
 
   private static void dumpResults(
-    final Map<String, Collection<Double>> results,
+    final Map<String, Result> results,
     final MchProperties properties
   ) throws IOException {
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
@@ -161,7 +157,8 @@ public final class Main {
         var i = 0;
         for (final var entry : results.entrySet()) {
           final var benchmark = entry.getKey();
-          final var values = entry.getValue().stream().mapToDouble(x -> x).toArray();
+          final var result = entry.getValue();
+          final var values = result.scores().stream().mapToDouble(x -> x).toArray();
           if (i++ != 0) {
             out.write(',');
           }
@@ -169,8 +166,9 @@ public final class Main {
             out.write(
               String.format(
                 """
-                  \n  { "benchmark": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
+                  \n  { "benchmark": "%s", "mode": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
                 benchmark,
+                result.mode(),
                 properties.measurementIterations() * properties.forks(),
                 Statistics.mean(values),
                 Statistics.error(values),

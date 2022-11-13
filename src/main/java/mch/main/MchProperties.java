@@ -11,7 +11,7 @@ public record MchProperties(
   int time,
   int forks,
   String[] parsingBenchmarks,
-  String[] benchmarks
+  String[] executeBenchmarks
 ) {
   public static final String WARMUP_ITERATIONS_KEY = "warmup-iterations";
   public static final int WARMUP_ITERATIONS_DEFAULT = 5;
@@ -28,8 +28,8 @@ public record MchProperties(
   public static final String PARSING_BENCHMARKS = "parsing-benchmarks";
   public static final String PARSING_BENCHMARKS_DEFAULT = ",";
 
-  public static final String BENCHMARKS = "benchmarks";
-  public static final String BENCHMARKS_DEFAULT = ",";
+  public static final String EXECUTE_BENCHMARKS = "execute-benchmarks";
+  public static final String EXECUTE_BENCHMARKS_DEFAULT = ",";
 
   public static MchProperties load() throws IOException {
     final var properties = new Properties();
@@ -46,7 +46,7 @@ public record MchProperties(
     properties.putIfAbsent(TIME_KEY, String.valueOf(TIME_DEFAULT));
     properties.putIfAbsent(FORKS_KEY, String.valueOf(FORKS_DEFAULT));
     properties.putIfAbsent(PARSING_BENCHMARKS, PARSING_BENCHMARKS_DEFAULT);
-    properties.putIfAbsent(BENCHMARKS, BENCHMARKS_DEFAULT);
+    properties.putIfAbsent(EXECUTE_BENCHMARKS, EXECUTE_BENCHMARKS_DEFAULT);
 
     try (final var out = Files.newOutputStream(path)) {
       properties.store(out, null);
@@ -58,7 +58,7 @@ public record MchProperties(
       Integer.parseInt(properties.getProperty(TIME_KEY)),
       Integer.parseInt(properties.getProperty(FORKS_KEY)),
       properties.getProperty(PARSING_BENCHMARKS).split(","),
-      properties.getProperty(BENCHMARKS).split(",")
+      properties.getProperty(EXECUTE_BENCHMARKS).split(",")
     );
   }
 }
