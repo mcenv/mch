@@ -83,11 +83,11 @@ public final class MchCommands {
 
     dispatcher.register(
       literal("mch:start").executes(c -> {
-        System.out.println(options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
+        System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
 
         if (commands == null) {
           try {
-            System.out.println("No file " + options.benchmark() + "was found");
+            System.out.println("No file " + options.benchmark() + " was found");
             socket.close();
             dispatcher.execute(post);
           } catch (IOException e) {
@@ -183,7 +183,7 @@ public final class MchCommands {
 
     dispatcher.register(
       literal("mch:start").executes(c -> {
-        System.out.println(options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
+        System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
 
         parseFunctions(dispatcher, c.getSource(), options.benchmark());
         dispatcher.execute(setupIteration);
