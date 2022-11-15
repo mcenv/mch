@@ -2,7 +2,7 @@
 
 [![test](https://github.com/mcenv/mch/actions/workflows/test.yml/badge.svg)](https://github.com/mcenv/mch/actions/workflows/test.yml)
 
-<samp>mch</samp> is a highly-compatible lightweight benchmark harness for Minecraft: Java Edition.
+<samp>mch</samp> is a highly-compatible lightweight benchmark harness for Minecraft: Java Edition[^1].
 
 > **Warning**
 > - Do not forget to back up your world. It is recommended to create a world for benchmarking.
@@ -42,3 +42,5 @@
 | `#mch:setup.iteration`    | To be run before each iteration of the execute benchmark |
 | `#mch:teardown.trial`     | To be run after each run of the execute benchmark        |
 | `#mch:teardown.iteration` | To be run after each iteration of the execute benchmark  |
+
+[^1]: NOT OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG.
