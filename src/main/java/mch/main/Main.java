@@ -29,7 +29,7 @@ public final class Main {
       System.exit(1);
       return;
     }
-    installDatapack(ServerProperties.load());
+    Datapack.install(ServerProperties.load());
 
     final var properties = MchProperties.load();
 
@@ -56,19 +56,6 @@ public final class Main {
     } else {
       return false;
     }
-  }
-
-  private static void installDatapack(
-    final ServerProperties serverProperties
-  ) throws IOException {
-    final var datapack = Paths.get(serverProperties.levelName(), "datapacks", "mch.zip");
-    Files.createDirectories(datapack.getParent());
-    try (final var out = new BufferedOutputStream(Files.newOutputStream(datapack))) {
-      try (final var in = Main.class.getResourceAsStream("/mch.zip")) {
-        Objects.requireNonNull(in).transferTo(out);
-      }
-    }
-    System.out.printf("Installed datapack in %s\n", datapack);
   }
 
   private static void dryRun(

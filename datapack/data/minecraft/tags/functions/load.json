@@ -1,9 +1,0 @@
-{
-  "values": [
-    "mch:pre",
-    "#mch:setup.trial",
-    "mch:start",
-    "#mch:teardown.trial",
-    "mch:post"
-  ]
-}
