@@ -1,5 +1,9 @@
 package mch.main;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.GsonBuilder;
+import mch.Keep;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,26 +22,26 @@ public final class Datapack {
     Files.createDirectories(datapack.getParent());
 
     try (final var out = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(datapack)))) {
-      writeEntry(out, "pack.mcmeta", String.format("""
-        {"pack":{"description":"","pack_format":%d}}""", PACK_FORMAT));
+      final var gson = new GsonBuilder()
+        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        .create();
 
-      writeEntry(out, "data/minecraft/tags/functions/load.json", """
-        {"values": ["mch:pre","#mch:setup.trial","mch:start","#mch:teardown.trial","mch:post"]}""");
+      writeEntry(out, "pack.mcmeta", gson.toJson(new PackMetadata(new PackMetadataSection("", PACK_FORMAT))));
 
-      writeEntry(out, "data/mch/tags/functions/setup.json", """
-        {"values":[]}""");
+      writeEntry(out, "data/minecraft/tags/functions/load.json", gson.toJson(new Tag(
+        "mch:pre",
+        "#mch:setup.trial",
+        "mch:start",
+        "#mch:teardown.trial",
+        "mch:post"
+      )));
 
-      writeEntry(out, "data/mch/tags/functions/setup.trial.json", """
-        {"values":[]}""");
-
-      writeEntry(out, "data/mch/tags/functions/setup.iteration.json", """
-        {"values":[]}""");
-
-      writeEntry(out, "data/mch/tags/functions/teardown.trial.json", """
-        {"values":[]}""");
-
-      writeEntry(out, "data/mch/tags/functions/teardown.iteration.json", """
-        {"values":[]}""");
+      final var emptyTag = gson.toJson(new Tag());
+      writeEntry(out, "data/mch/tags/functions/setup.json", emptyTag);
+      writeEntry(out, "data/mch/tags/functions/setup.trial.json", emptyTag);
+      writeEntry(out, "data/mch/tags/functions/setup.iteration.json", emptyTag);
+      writeEntry(out, "data/mch/tags/functions/teardown.trial.json", emptyTag);
+      writeEntry(out, "data/mch/tags/functions/teardown.iteration.json", emptyTag);
 
       writeEntry(out, "data/mch/functions/pre.mcfunction", """
         gamerule maxCommandChainLength 2147483647""");
@@ -63,5 +67,24 @@ public final class Datapack {
   ) throws IOException {
     out.putNextEntry(new ZipEntry(name));
     out.write(content.getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Keep
+  private record PackMetadata(
+    @Keep PackMetadataSection pack
+  ) {
+  }
+
+  @Keep
+  private record PackMetadataSection(
+    @Keep String description,
+    @Keep int packFormat
+  ) {
+  }
+
+  @Keep
+  private record Tag(
+    @Keep String... values
+  ) {
   }
 }

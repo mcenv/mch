@@ -22,6 +22,7 @@ repositories {
 }
 
 dependencies {
+  implementation("com.google.code.gson:gson:2.10.1")
   implementation("org.ow2.asm:asm:9.4")
   implementation("org.apache.commons:commons-math3:3.6.1")
   compileOnly("com.mojang:brigadier:1.0.18")
@@ -62,6 +63,7 @@ tasks.register<ProGuardTask>("optimizeJar") {
       libraryjars("$javaHome/jmods/java.base.jmod")
       libraryjars("$javaHome/jmods/java.desktop.jmod")
       libraryjars("$javaHome/jmods/java.instrument.jmod")
+      libraryjars("$javaHome/jmods/java.sql.jmod")
     }
   libraryjars(configurations.compileClasspath.get().asFileTree.find { it.endsWith("brigadier-1.0.18.jar") })
 
