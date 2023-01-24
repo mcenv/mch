@@ -57,7 +57,10 @@ public final class MchCommands {
   private static void registerDry(
     final CommandDispatcher<Object> dispatcher
   ) {
-    registerConst(dispatcher, START);
+    dispatcher.register(
+      literal(START).executes(c -> dispatcher.execute("function #mch:setup", c.getSource()))
+    );
+
     registerConst(dispatcher, LOOP);
     registerConst(dispatcher, POST);
   }

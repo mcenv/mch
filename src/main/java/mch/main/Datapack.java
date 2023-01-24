@@ -24,6 +24,9 @@ public final class Datapack {
       writeEntry(out, "data/minecraft/tags/functions/load.json", """
         {"values": ["mch:pre","#mch:setup.trial","mch:start","#mch:teardown.trial","mch:post"]}""");
 
+      writeEntry(out, "data/mch/tags/functions/setup.json", """
+        {"values":[]}""");
+
       writeEntry(out, "data/mch/tags/functions/setup.trial.json", """
         {"values":[]}""");
 
