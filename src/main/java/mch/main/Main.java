@@ -1,5 +1,6 @@
 package mch.main;
 
+import com.google.gson.GsonBuilder;
 import mch.Keep;
 import mch.Options;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
@@ -138,45 +139,30 @@ public final class Main {
     final MchProperties properties
   ) throws IOException {
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
-      out.write('[');
-
-      {
-        var i = 0;
-        for (final var entry : results.entrySet()) {
+      final var entries = results
+        .entrySet()
+        .stream()
+        .map(entry -> {
           final var benchmark = entry.getKey();
           final var result = entry.getValue();
           final var values = result.scores().stream().mapToDouble(x -> x).toArray();
-          if (i++ != 0) {
-            out.write(',');
-          }
           try {
-            out.write(
-              String.format(
-                """
-                  \n  { "benchmark": "%s", "mode": "%s", "count": %d, "score": %f, "error": %f, "unit": "%s" }""",
-                benchmark,
-                result.mode(),
-                properties.measurementIterations() * properties.forks(),
-                Statistics.mean(values),
-                Statistics.error(values),
-                "ns/op"
-              ).getBytes(StandardCharsets.UTF_8)
+            return new Result.Entry(
+              benchmark,
+              result.mode().toString(),
+              properties.measurementIterations() * properties.forks(),
+              Statistics.mean(values),
+              Statistics.error(values),
+              "ns/op"
             );
           } catch (NotStrictlyPositiveException ignored) {
-            out.write(
-              String.format(
-                """
-                  \n  { "benchmark": "%s" }""",
-                benchmark
-              ).getBytes(StandardCharsets.UTF_8)
-            );
+            return null;
           }
-        }
-      }
+        })
+        .toArray();
 
-      out.write('\n');
-      out.write(']');
-      out.write('\n');
+      final var gson = new GsonBuilder().setPrettyPrinting().create();
+      out.write(gson.toJson(entries).getBytes(StandardCharsets.UTF_8));
     }
   }
 }
