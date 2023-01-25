@@ -60,7 +60,7 @@ public final class Datapack {
         stop""");
     }
 
-    System.out.printf("Installed datapack in %s\n", datapack);
+    System.out.printf("Installing datapack in %s\n", datapack);
   }
 
   private static void writeEntry(
