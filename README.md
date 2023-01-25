@@ -5,7 +5,7 @@
 <samp>mch</samp> is a highly-compatible lightweight benchmark harness for Minecraft: Java Edition[^1].
 
 > **Warning**
-> - Do not forget to back up your world. It is recommended to create a world for benchmarking.
+> - Back up your world. It is recommended to create a world for benchmarking.
 > - Make sure that the benchmarked functions are [idempotent](https://en.wikipedia.org/wiki/Idempotence) otherwise the benchmark results will be inaccurate.
 > - Remember that the benchmark results may be affected by Minecraft/JVM/OS/HW.
 
@@ -38,6 +38,7 @@
 
 | Function tag              | Description                                              |
 |:--------------------------|:---------------------------------------------------------|
+| `#mch:setup`              | To be run once before the benchmarks                     |
 | `#mch:setup.trial`        | To be run before each run of the execute benchmark       |
 | `#mch:setup.iteration`    | To be run before each iteration of the execute benchmark |
 | `#mch:teardown.trial`     | To be run after each run of the execute benchmark        |
