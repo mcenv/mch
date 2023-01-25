@@ -9,11 +9,16 @@ import org.objectweb.asm.ClassWriter;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.function.Function;
@@ -28,7 +33,7 @@ public final class Agent {
   ) throws IOException {
     System.out.println("Starting mch.agent.Agent");
 
-    instrumentation.appendToSystemClassLoaderSearch(getBrigadier());
+    instrumentation.appendToSystemClassLoaderSearch(getOrExtractBrigadier());
     instrumentation.addTransformer(new ClassFileTransformer() {
       private static byte[] transform(
         final byte[] classfileBuffer,
@@ -57,27 +62,78 @@ public final class Agent {
     });
   }
 
-  private static JarFile getBrigadier() throws IOException {
+  private static JarFile getOrExtractBrigadier() throws IOException {
     try (final var server = new JarFile("server.jar")) {
       try (final var libraries = new BufferedInputStream(server.getInputStream(server.getEntry("META-INF/libraries.list")))) {
         final var entries = new String(libraries.readAllBytes(), StandardCharsets.UTF_8).split("\n");
-        final var brigadierPath =
-          Arrays
-            .stream(entries)
-            .map(entry -> entry.split("\t")[2])
-            .filter(path -> path.startsWith("com/mojang/brigadier/"))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No brigadier was found"));
+        final var brigadierEntry = Arrays
+          .stream(entries)
+          .map(FileEntry::parse)
+          .filter(entry -> entry.path.startsWith("com/mojang/brigadier/"))
+          .findFirst()
+          .orElseThrow(() -> new IllegalStateException("No brigadier was found"));
+        final var brigadierOutPath = Paths.get("libraries", brigadierEntry.path);
 
-        try (final var brigadier = new BufferedInputStream(server.getInputStream(server.getEntry("META-INF/libraries/" + brigadierPath)))) {
-          final var outPath = Paths.get("libraries", brigadierPath);
-          Files.createDirectories(outPath.getParent());
-          try (final var out = new BufferedOutputStream(Files.newOutputStream(outPath))) {
-            brigadier.transferTo(out);
+        if (!Files.exists(brigadierOutPath) || !checkIntegrity(brigadierOutPath, brigadierEntry.hash)) {
+          try (final var brigadier = new BufferedInputStream(server.getInputStream(server.getEntry("META-INF/libraries/" + brigadierEntry.path)))) {
+            Files.createDirectories(brigadierOutPath.getParent());
+            try (final var out = new BufferedOutputStream(Files.newOutputStream(brigadierOutPath))) {
+              brigadier.transferTo(out);
+            }
           }
+          System.out.printf("Unpacking %s (libraries:%s) to %s\n", brigadierEntry.path, brigadierEntry.id, brigadierOutPath);
         }
 
-        return new JarFile("libraries/" + brigadierPath);
+        return new JarFile("libraries/" + brigadierEntry.path);
+      }
+    }
+  }
+
+  private static boolean checkIntegrity(
+    final Path file,
+    final String expectedHash
+  ) throws IOException {
+    final MessageDigest digest;
+    try {
+      digest = MessageDigest.getInstance("SHA-256");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+
+    try (final var output = Files.newInputStream(file)) {
+      output.transferTo(new DigestOutputStream(OutputStream.nullOutputStream(), digest));
+      final var actualHash = byteToHex(digest.digest());
+      if (actualHash.equalsIgnoreCase(expectedHash)) {
+        return true;
+      } else {
+        System.out.printf("Expected file %s to have hash %s, but got %s\n", file, expectedHash, actualHash);
+        return false;
+      }
+    }
+  }
+
+  private static String byteToHex(
+    final byte[] bytes
+  ) {
+    final var result = new StringBuilder(bytes.length * 2);
+    for (final var b : bytes) {
+      result.append(Character.forDigit(b >> 4 & 0xf, 16));
+      result.append(Character.forDigit(b & 0xf, 16));
+    }
+    return result.toString();
+  }
+
+  private record FileEntry(
+    String hash,
+    String id,
+    String path
+  ) {
+    public static FileEntry parse(String string) {
+      final var fields = string.split("\t");
+      if (fields.length != 3) {
+        throw new IllegalStateException("Malformed library entry: " + string);
+      } else {
+        return new FileEntry(fields[0], fields[1], fields[2]);
       }
     }
   }
