@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public final class Datapack {
-  private static final int PACK_FORMAT = 11; // TODO
-
   public static void install(
     final ServerProperties serverProperties
   ) throws IOException {
@@ -26,7 +26,10 @@ public final class Datapack {
         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         .create();
 
-      writeEntry(out, "pack.mcmeta", gson.toJson(new PackMetadata(new PackMetadataSection("", PACK_FORMAT))));
+      try (final var server = new JarFile("server.jar")) {
+        final var version = gson.fromJson(new String(server.getInputStream(new JarEntry("version.json")).readAllBytes(), StandardCharsets.UTF_8), Version.class);
+        writeEntry(out, "pack.mcmeta", gson.toJson(new PackMetadata(new PackMetadataSection("", version.packVersion.data))));
+      }
 
       writeEntry(out, "data/minecraft/tags/functions/load.json", gson.toJson(new Tag(
         "mch:pre",
@@ -67,6 +70,18 @@ public final class Datapack {
   ) throws IOException {
     out.putNextEntry(new ZipEntry(name));
     out.write(content.getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Keep
+  private record Version(
+    @Keep PackVersion packVersion
+  ) {
+  }
+
+  @Keep
+  private record PackVersion(
+    @Keep int data
+  ) {
   }
 
   @Keep
