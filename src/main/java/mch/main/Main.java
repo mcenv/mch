@@ -124,9 +124,9 @@ public final class Main {
   ) {
     try {
       final var java = ProcessHandle.current().info().command().orElseThrow();
-      final var jar = quote(Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString());
+      final var jar = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString();
       final var command = new ArrayList<String>();
-      Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", jar, "mch.fork.Fork", "nogui");
+      Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", quote(jar), "mch.fork.Fork", "nogui");
       Collections.addAll(command, args);
       return command;
     } catch (final URISyntaxException e) {
