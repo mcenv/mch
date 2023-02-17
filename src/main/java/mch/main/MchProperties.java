@@ -4,12 +4,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import static mch.Util.abbreviate;
+import static mch.Util.parseTimeUnit;
 
 public record MchProperties(
   int warmupIterations,
   int measurementIterations,
   int time,
   int forks,
+  TimeUnit timeUnit,
   String[] parsingBenchmarks,
   String[] executeBenchmarks
 ) {
@@ -24,6 +29,9 @@ public record MchProperties(
 
   public static final String FORKS_KEY = "forks";
   public static final int FORKS_DEFAULT = 5;
+
+  public static final String TIME_UNIT_KEY = "time-unit";
+  public static final TimeUnit TIME_UNIT_DEFAULT = TimeUnit.SECONDS;
 
   public static final String PARSING_BENCHMARKS = "parsing-benchmarks";
   public static final String PARSING_BENCHMARKS_DEFAULT = ",";
@@ -45,6 +53,7 @@ public record MchProperties(
     properties.putIfAbsent(MEASUREMENT_ITERATIONS_KEY, String.valueOf(MEASUREMENT_ITERATIONS_DEFAULT));
     properties.putIfAbsent(TIME_KEY, String.valueOf(TIME_DEFAULT));
     properties.putIfAbsent(FORKS_KEY, String.valueOf(FORKS_DEFAULT));
+    properties.putIfAbsent(TIME_UNIT_KEY, abbreviate(TIME_UNIT_DEFAULT));
     properties.putIfAbsent(PARSING_BENCHMARKS, PARSING_BENCHMARKS_DEFAULT);
     properties.putIfAbsent(EXECUTE_BENCHMARKS, EXECUTE_BENCHMARKS_DEFAULT);
 
@@ -57,6 +66,7 @@ public record MchProperties(
       Integer.parseInt(properties.getProperty(MEASUREMENT_ITERATIONS_KEY)),
       Integer.parseInt(properties.getProperty(TIME_KEY)),
       Integer.parseInt(properties.getProperty(FORKS_KEY)),
+      parseTimeUnit(properties.getProperty(TIME_UNIT_KEY)),
       properties.getProperty(PARSING_BENCHMARKS).split(","),
       properties.getProperty(EXECUTE_BENCHMARKS).split(",")
     );

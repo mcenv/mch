@@ -13,9 +13,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
-import static mch.Util.bytesToDouble;
-import static mch.Util.quote;
+import static mch.Util.*;
 
 @Keep
 public final class Main {
@@ -138,6 +138,7 @@ public final class Main {
     final Map<String, RunResult> runResults,
     final MchProperties properties
   ) throws IOException {
+    final var unit = String.format("%s/op", abbreviate(properties.timeUnit()));
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
       final String mchVersion;
       try (final var version = Main.class.getClassLoader().getResourceAsStream("version")) {
@@ -155,9 +156,9 @@ public final class Main {
               benchmark,
               runResult.mode().toString(),
               properties.measurementIterations() * properties.forks(),
-              Statistics.mean(values),
-              Statistics.error(values),
-              "ns/op"
+              convert(Statistics.mean(values), TimeUnit.NANOSECONDS, properties.timeUnit()),
+              convert(Statistics.error(values), TimeUnit.NANOSECONDS, properties.timeUnit()),
+              unit
             );
           } catch (NotStrictlyPositiveException e) {
             throw new RuntimeException(e);
