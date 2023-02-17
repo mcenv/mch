@@ -6,6 +6,7 @@ import java.util.Collection;
 
 @Keep
 public record Results(
+  @Keep String mchVersion,
   @Keep Collection<Result> results
 ) {
   @Keep

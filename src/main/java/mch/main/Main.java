@@ -139,17 +139,21 @@ public final class Main {
     final MchProperties properties
   ) throws IOException {
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
+      final String mchVersion;
+      try (final var version = Main.class.getClassLoader().getResourceAsStream("version")) {
+        mchVersion = new String(version.readAllBytes(), StandardCharsets.UTF_8).trim();
+      }
       final var entries = runResults
         .entrySet()
         .stream()
         .map(entry -> {
           final var benchmark = entry.getKey();
-          final var result = entry.getValue();
-          final var values = result.scores().stream().mapToDouble(x -> x).toArray();
+          final var runResult = entry.getValue();
+          final var values = runResult.scores().stream().mapToDouble(x -> x).toArray();
           try {
             return new Results.Result(
               benchmark,
-              result.mode().toString(),
+              runResult.mode().toString(),
               properties.measurementIterations() * properties.forks(),
               Statistics.mean(values),
               Statistics.error(values),
@@ -160,9 +164,14 @@ public final class Main {
           }
         })
         .toList();
-      final var results = new Results(entries);
       final var gson = new GsonBuilder().setPrettyPrinting().create();
-      out.write(gson.toJson(results).getBytes(StandardCharsets.UTF_8));
+      out.write(gson
+        .toJson(new Results(
+          mchVersion,
+          entries
+        ))
+        .getBytes(StandardCharsets.UTF_8)
+      );
     }
   }
 }

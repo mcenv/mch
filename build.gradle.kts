@@ -51,6 +51,13 @@ tasks.test {
   useJUnitPlatform()
 }
 
+@Suppress("UnstableApiUsage")
+tasks.withType<ProcessResources> {
+  filesMatching("version") {
+    expand("version" to version)
+  }
+}
+
 tasks.register<ProGuardTask>("optimizeJar") {
   dependsOn(tasks.getByName("shadowJar"))
 
