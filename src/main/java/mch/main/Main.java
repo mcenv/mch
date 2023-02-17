@@ -36,14 +36,14 @@ public final class Main {
 
     dryRun(args);
 
-    final var results = new LinkedHashMap<String, Result>();
+    final var runResults = new LinkedHashMap<String, RunResult>();
     for (final var benchmark : properties.parsingBenchmarks()) {
-      iterationRun(results, properties, Options.Iteration.Mode.PARSING, benchmark, args);
+      iterationRun(runResults, properties, Options.Iteration.Mode.PARSING, benchmark, args);
     }
     for (final var benchmark : properties.executeBenchmarks()) {
-      iterationRun(results, properties, Options.Iteration.Mode.EXECUTE, benchmark, args);
+      iterationRun(runResults, properties, Options.Iteration.Mode.EXECUTE, benchmark, args);
     }
-    dumpResults(results, properties);
+    writeResults(runResults, properties);
   }
 
   private static boolean validateEula() throws IOException {
@@ -71,7 +71,7 @@ public final class Main {
   }
 
   private static void iterationRun(
-    final Map<String, Result> results,
+    final Map<String, RunResult> results,
     final MchProperties properties,
     final Options.Iteration.Mode mode,
     final String benchmark,
@@ -88,7 +88,7 @@ public final class Main {
               while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
                 scores.add(bytesToDouble(buffer));
               }
-              results.computeIfAbsent(benchmark, k -> new Result(new ArrayList<>(), mode)).scores().addAll(scores);
+              results.computeIfAbsent(benchmark, k -> new RunResult(new ArrayList<>(), mode)).scores().addAll(scores);
             }
           } catch (final IOException e) {
             throw new IllegalStateException(e);
@@ -134,12 +134,12 @@ public final class Main {
     }
   }
 
-  private static void dumpResults(
-    final Map<String, Result> results,
+  private static void writeResults(
+    final Map<String, RunResult> runResults,
     final MchProperties properties
   ) throws IOException {
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
-      final var entries = results
+      final var entries = runResults
         .entrySet()
         .stream()
         .map(entry -> {
@@ -147,7 +147,7 @@ public final class Main {
           final var result = entry.getValue();
           final var values = result.scores().stream().mapToDouble(x -> x).toArray();
           try {
-            return new Result.Entry(
+            return new Results.Result(
               benchmark,
               result.mode().toString(),
               properties.measurementIterations() * properties.forks(),
@@ -155,14 +155,14 @@ public final class Main {
               Statistics.error(values),
               "ns/op"
             );
-          } catch (NotStrictlyPositiveException ignored) {
-            return null;
+          } catch (NotStrictlyPositiveException e) {
+            throw new RuntimeException(e);
           }
         })
-        .toArray();
-
+        .toList();
+      final var results = new Results(entries);
       final var gson = new GsonBuilder().setPrettyPrinting().create();
-      out.write(gson.toJson(entries).getBytes(StandardCharsets.UTF_8));
+      out.write(gson.toJson(results).getBytes(StandardCharsets.UTF_8));
     }
   }
 }
