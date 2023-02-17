@@ -31,6 +31,7 @@
 | `measurement-iterations` | Number of measurement iterations.                                 | `5`     |
 | `time`                   | Duration of iterations in seconds.                                | `10`    |
 | `forks`                  | Number of forks.                                                  | `5`     |
+| `time-unit`              | Output time unit. (`ns`, `us`, `ms`, `s`, `m`)                    | `s`     |
 | `parsing-benchmarks`     | Comma-separated list of function **paths** for parsing benchmark. | `,`     |
 | `execute-benchmarks`     | Comma-separated list of function **names** for execute benchmark. | `,`     |
 
