@@ -1,17 +1,15 @@
 package mch.main;
 
 import mch.Keep;
-import mch.Options;
 
 import java.util.Collection;
 
-public record Result(
-  Collection<Double> scores,
-  Options.Iteration.Mode mode
+@Keep
+public record Results(
+  @Keep Collection<Result> results
 ) {
-
   @Keep
-  public record Entry(
+  public record Result(
     @Keep String benchmark,
     @Keep String mode,
     @Keep int count,
