@@ -123,7 +123,7 @@ public final class Main {
     final String[] args
   ) {
     try {
-      final var java = ProcessHandle.current().info().command().orElseThrow();
+      final var java = getCurrentJvm();
       final var jar = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString();
       final var command = new ArrayList<String>();
       Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", quote(jar), "mch.fork.Fork", "nogui");
@@ -144,6 +144,10 @@ public final class Main {
       try (final var version = Main.class.getClassLoader().getResourceAsStream("version")) {
         mchVersion = new String(version.readAllBytes(), StandardCharsets.UTF_8).trim();
       }
+      final var jvm = getCurrentJvm();
+      final var jdkVersion = System.getProperty("java.version");
+      final var vmVersion = System.getProperty("java.vm.version");
+      final var vmName = System.getProperty("java.vm.name");
       final var entries = runResults
         .entrySet()
         .stream()
@@ -165,10 +169,15 @@ public final class Main {
           }
         })
         .toList();
+
       final var gson = new GsonBuilder().setPrettyPrinting().create();
       out.write(gson
         .toJson(new Results(
           mchVersion,
+          jvm,
+          jdkVersion,
+          vmName,
+          vmVersion,
           entries
         ))
         .getBytes(StandardCharsets.UTF_8)

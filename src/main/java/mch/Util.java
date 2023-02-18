@@ -83,4 +83,8 @@ public final class Util {
       return sourceDuration * targetUnit.convert(1, sourceUnit);
     }
   }
+
+  public static String getCurrentJvm() {
+    return ProcessHandle.current().info().command().orElseThrow();
+  }
 }
