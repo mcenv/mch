@@ -127,7 +127,8 @@ public final class Main {
       final var command = new ArrayList<String>();
       command.add(java);
       Collections.addAll(command, mchProperties.jvmArgs());
-      Collections.addAll(command, "-javaagent:" + jar + "=" + options, "-cp", quote(jar), "mch.fork.Fork", "nogui");
+      Collections.addAll(command, "-javaagent:" + jar + "=" + options, "-cp", quote(jar), "mch.fork.Fork");
+      Collections.addAll(command, mchProperties.mcArgs());
       return command;
     } catch (final URISyntaxException e) {
       throw new IllegalStateException(e);
