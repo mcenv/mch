@@ -32,6 +32,8 @@
 | `time`                   | Duration of iterations in seconds.                                | `10`    |
 | `forks`                  | Number of forks.                                                  | `5`     |
 | `time-unit`              | Output time unit. (`ns`, `us`, `ms`, `s`, `m`)                    | `s`     |
+| `jvm-args`               | JVM arguments to use with forks.                                  | `,`     |
+| `mc-args`                | Minecraft arguments to use with forks.                            | `nogui` |
 | `parsing-benchmarks`     | Comma-separated list of function **paths** for parsing benchmark. | `,`     |
 | `execute-benchmarks`     | Comma-separated list of function **names** for execute benchmark. | `,`     |
 
