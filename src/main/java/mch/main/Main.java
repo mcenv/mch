@@ -147,9 +147,11 @@ public final class Main {
       }
       final var forks = mchProperties.forks();
       final var jvm = getCurrentJvm();
+      final var jvmArgs = mchProperties.jvmArgs();
       final var jdkVersion = System.getProperty("java.version");
       final var vmName = System.getProperty("java.vm.name");
       final var vmVersion = System.getProperty("java.vm.version");
+      final var mcArgs = mchProperties.mcArgs();
       final var warmupIterations = mchProperties.warmupIterations();
       final var warmupTime = String.format("%d %s", mchProperties.time(), abbreviate(TimeUnit.SECONDS));
       final var measurementIterations = mchProperties.measurementIterations();
@@ -182,9 +184,11 @@ public final class Main {
           mchVersion,
           forks,
           jvm,
+          jvmArgs,
           jdkVersion,
           vmName,
           vmVersion,
+          mcArgs,
           warmupIterations,
           warmupTime,
           measurementIterations,
