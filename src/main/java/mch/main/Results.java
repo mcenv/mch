@@ -7,6 +7,10 @@ import java.util.Collection;
 @Keep
 public record Results(
   @Keep String mchVersion,
+  @Keep String jvm,
+  @Keep String jdkVersion,
+  @Keep String vmName,
+  @Keep String vmVersion,
   @Keep Collection<Result> results
 ) {
   @Keep
