@@ -5,19 +5,19 @@
 <samp>mch</samp> is a highly-compatible lightweight benchmark harness for Minecraft: Java Edition[^1].
 
 > **Warning**
-> - Back up your world. It is recommended to create a world for benchmarking.
-> - Make sure that the benchmarked functions are [idempotent](https://en.wikipedia.org/wiki/Idempotence) otherwise the benchmark results will be inaccurate.
+> - Back up your world. It is recommended to create a world specifically for benchmarking.
+> - Ensure that the benchmarked functions are [idempotent](https://en.wikipedia.org/wiki/Idempotence); otherwise, the benchmark results will be inaccurate.
 > - Remember that the benchmark results may be affected by Minecraft/JVM/OS/HW.
 
 ## Usage
 
-1. Download [`mch.jar`](https://github.com/mcenv/mch/releases/latest/download/mch.jar) and put it under the directory containing `server.jar`.
-2. Create `mch.properties` file under the same directory and specify the comma-separated list of function names to be benchmarked in `execute-benchmarks` property. For example:
+1. Download [`mch.jar`](https://github.com/mcenv/mch/releases/latest/download/mch.jar) and place it in the same directory as `server.jar`.
+2. Create `mch.properties` file in the same directory and specify a comma-separated list of function names to be benchmarked in `execute-benchmarks` property. For example:
     ```properties
     execute-benchmarks=a,b
     ```
 3. Run `java -jar mch.jar`.
-4. The benchmark results are dumped to `mch-results.json`.
+4. The benchmark results will be dumped to `mch-results.json`.
 
 ## Requirements
 
