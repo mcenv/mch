@@ -136,18 +136,23 @@ public final class Main {
 
   private static void writeResults(
     final Map<String, RunResult> runResults,
-    final MchProperties properties
+    final MchProperties mchProperties
   ) throws IOException {
-    final var unit = String.format("%s/op", abbreviate(properties.timeUnit()));
+    final var unit = String.format("%s/op", abbreviate(mchProperties.timeUnit()));
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
       final String mchVersion;
       try (final var version = Main.class.getClassLoader().getResourceAsStream("version")) {
         mchVersion = new String(version.readAllBytes(), StandardCharsets.UTF_8).trim();
       }
+      final var forks = mchProperties.forks();
       final var jvm = getCurrentJvm();
       final var jdkVersion = System.getProperty("java.version");
-      final var vmVersion = System.getProperty("java.vm.version");
       final var vmName = System.getProperty("java.vm.name");
+      final var vmVersion = System.getProperty("java.vm.version");
+      final var warmupIterations = mchProperties.warmupIterations();
+      final var warmupTime = String.format("%d %s", mchProperties.time(), abbreviate(TimeUnit.SECONDS));
+      final var measurementIterations = mchProperties.measurementIterations();
+      final var measurementTime = String.format("%d %s", mchProperties.time(), abbreviate(TimeUnit.SECONDS));
       final var entries = runResults
         .entrySet()
         .stream()
@@ -159,9 +164,9 @@ public final class Main {
             return new Results.Result(
               benchmark,
               runResult.mode().toString(),
-              properties.measurementIterations() * properties.forks(),
-              convert(Statistics.mean(values), TimeUnit.NANOSECONDS, properties.timeUnit()),
-              convert(Statistics.error(values), TimeUnit.NANOSECONDS, properties.timeUnit()),
+              mchProperties.measurementIterations() * mchProperties.forks(),
+              convert(Statistics.mean(values), TimeUnit.NANOSECONDS, mchProperties.timeUnit()),
+              convert(Statistics.error(values), TimeUnit.NANOSECONDS, mchProperties.timeUnit()),
               unit
             );
           } catch (NotStrictlyPositiveException e) {
@@ -174,10 +179,15 @@ public final class Main {
       out.write(gson
         .toJson(new Results(
           mchVersion,
+          forks,
           jvm,
           jdkVersion,
           vmName,
           vmVersion,
+          warmupIterations,
+          warmupTime,
+          measurementIterations,
+          measurementTime,
           entries
         ))
         .getBytes(StandardCharsets.UTF_8)
