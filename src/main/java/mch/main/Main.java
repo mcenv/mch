@@ -32,18 +32,18 @@ public final class Main {
     }
     Datapack.install(ServerProperties.load());
 
-    final var properties = MchProperties.load();
+    final var mchProperties = MchProperties.load();
 
-    dryRun(args);
+    dryRun(mchProperties);
 
     final var runResults = new LinkedHashMap<String, RunResult>();
-    for (final var benchmark : properties.parsingBenchmarks()) {
-      iterationRun(runResults, properties, Options.Iteration.Mode.PARSING, benchmark, args);
+    for (final var benchmark : mchProperties.parsingBenchmarks()) {
+      iterationRun(runResults, mchProperties, Options.Iteration.Mode.PARSING, benchmark);
     }
-    for (final var benchmark : properties.executeBenchmarks()) {
-      iterationRun(runResults, properties, Options.Iteration.Mode.EXECUTE, benchmark, args);
+    for (final var benchmark : mchProperties.executeBenchmarks()) {
+      iterationRun(runResults, mchProperties, Options.Iteration.Mode.EXECUTE, benchmark);
     }
-    writeResults(runResults, properties);
+    writeResults(runResults, mchProperties);
   }
 
   private static boolean validateEula() throws IOException {
@@ -60,10 +60,10 @@ public final class Main {
   }
 
   private static void dryRun(
-    final String[] args
+    final MchProperties mchProperties
   ) throws IOException, InterruptedException {
     final var options = Options.Dry.INSTANCE.toString();
-    final var command = getCommand(options, args);
+    final var command = getCommand(options, mchProperties);
     final var builder = new ProcessBuilder(command);
     final var process = builder.start();
     process.getInputStream().transferTo(System.out);
@@ -71,13 +71,12 @@ public final class Main {
   }
 
   private static void iterationRun(
-    final Map<String, RunResult> results,
-    final MchProperties properties,
+    final Map<String, RunResult> runResults,
+    final MchProperties mchProperties,
     final Options.Iteration.Mode mode,
-    final String benchmark,
-    final String[] args
+    final String benchmark
   ) throws IOException, InterruptedException {
-    for (var fork = 0; fork < properties.forks(); ++fork) {
+    for (var fork = 0; fork < mchProperties.forks(); ++fork) {
       try (final var server = new ServerSocket(0)) {
         final var thread = new Thread(() -> {
           try {
@@ -88,7 +87,7 @@ public final class Main {
               while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
                 scores.add(bytesToDouble(buffer));
               }
-              results.computeIfAbsent(benchmark, k -> new RunResult(new ArrayList<>(), mode)).scores().addAll(scores);
+              runResults.computeIfAbsent(benchmark, k -> new RunResult(new ArrayList<>(), mode)).scores().addAll(scores);
             }
           } catch (final IOException e) {
             throw new IllegalStateException(e);
@@ -98,16 +97,16 @@ public final class Main {
 
         final var port = server.getLocalPort();
         final var options = quote(new Options.Iteration(
-          properties.warmupIterations(),
-          properties.measurementIterations(),
-          properties.time(),
-          properties.forks(),
+          mchProperties.warmupIterations(),
+          mchProperties.measurementIterations(),
+          mchProperties.time(),
+          mchProperties.forks(),
           fork,
           port,
           mode,
           benchmark
         ).toString());
-        final var command = getCommand(options, args);
+        final var command = getCommand(options, mchProperties);
         final var builder = new ProcessBuilder(command);
         final var process = builder.start();
         process.getInputStream().transferTo(System.out);
@@ -120,14 +119,15 @@ public final class Main {
 
   private static List<String> getCommand(
     final String options,
-    final String[] args
+    final MchProperties mchProperties
   ) {
     try {
       final var java = getCurrentJvm();
       final var jar = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString();
       final var command = new ArrayList<String>();
-      Collections.addAll(command, java, "-javaagent:" + jar + "=" + options, "-cp", quote(jar), "mch.fork.Fork", "nogui");
-      Collections.addAll(command, args);
+      command.add(java);
+      Collections.addAll(command, mchProperties.jvmArgs());
+      Collections.addAll(command, "-javaagent:" + jar + "=" + options, "-cp", quote(jar), "mch.fork.Fork", "nogui");
       return command;
     } catch (final URISyntaxException e) {
       throw new IllegalStateException(e);
