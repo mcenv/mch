@@ -96,7 +96,7 @@ public final class Main {
         thread.start();
 
         final var port = server.getLocalPort();
-        final var options = quote(new Options.Iteration(
+        final var options = new Options.Iteration(
           mchProperties.warmupIterations(),
           mchProperties.measurementIterations(),
           mchProperties.time(),
@@ -105,7 +105,7 @@ public final class Main {
           port,
           mode,
           benchmark
-        ).toString());
+        ).toString();
         final var command = getCommand(options, mchProperties);
         final var builder = new ProcessBuilder(command);
         final var process = builder.start();
