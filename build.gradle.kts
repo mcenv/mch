@@ -59,7 +59,7 @@ tasks.withType<ProcessResources> {
   }
 }
 
-tasks.register<ProGuardTask>("optimizeJar") {
+fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
   dependsOn(tasks.getByName("shadowJar"))
 
   injars(layout.buildDirectory.file("libs/mch-shadow.jar"))
@@ -79,7 +79,15 @@ tasks.register<ProGuardTask>("optimizeJar") {
   keep("@mch.Keep class *")
   keepclassmembers("class * { @mch.Keep *; }")
 
-  optimizationpasses(10)
+  optimizationpasses(optimizationPasses)
   repackageclasses("mch")
   dontwarn("java.lang.invoke.MethodHandle")
+}
+
+tasks.register<ProGuardTask>("optimizeJar") {
+  optimizeJar(10)
+}
+
+tasks.register<ProGuardTask>("developmentOptimizeJar") {
+  optimizeJar(0)
 }
