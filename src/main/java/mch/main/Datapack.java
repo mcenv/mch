@@ -18,6 +18,11 @@ public final class Datapack {
   public static void install(
     final ServerProperties serverProperties
   ) throws IOException {
+    final var serverPath = Paths.get("server.jar");
+    if (!Files.exists(serverPath) || !Files.isRegularFile(serverPath)) {
+      throw new IllegalStateException("No server.jar was found");
+    }
+
     final var datapack = Paths.get(serverProperties.levelName(), "datapacks", "mch.zip");
     Files.createDirectories(datapack.getParent());
 

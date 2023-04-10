@@ -25,37 +25,42 @@ public final class Main {
   ) throws InterruptedException, IOException {
     System.out.println("Starting mch.main.Main");
 
-    if (!validateEula()) {
-      System.out.println("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
+    try {
+      validateEula();
+      Datapack.install(ServerProperties.load());
+      final var mchProperties = MchProperties.load();
+
+      dryRun(mchProperties);
+
+      final var runResults = new LinkedHashMap<String, RunResult>();
+
+      for (final var benchmark : mchProperties.parsingBenchmarks()) {
+        iterationRun(runResults, mchProperties, Options.Iteration.Mode.PARSING, benchmark);
+      }
+
+      for (final var benchmark : mchProperties.executeBenchmarks()) {
+        iterationRun(runResults, mchProperties, Options.Iteration.Mode.EXECUTE, benchmark);
+      }
+
+      writeResults(runResults, mchProperties);
+    } catch (final IllegalStateException e) {
+      System.err.println("Error: " + e.getMessage());
       System.exit(1);
-      return;
     }
-    Datapack.install(ServerProperties.load());
-
-    final var mchProperties = MchProperties.load();
-
-    dryRun(mchProperties);
-
-    final var runResults = new LinkedHashMap<String, RunResult>();
-    for (final var benchmark : mchProperties.parsingBenchmarks()) {
-      iterationRun(runResults, mchProperties, Options.Iteration.Mode.PARSING, benchmark);
-    }
-    for (final var benchmark : mchProperties.executeBenchmarks()) {
-      iterationRun(runResults, mchProperties, Options.Iteration.Mode.EXECUTE, benchmark);
-    }
-    writeResults(runResults, mchProperties);
   }
 
-  private static boolean validateEula() throws IOException {
+  private static void validateEula() throws IOException {
     final var path = Paths.get("eula.txt");
     if (Files.exists(path) && Files.isRegularFile(path)) {
       try (final var in = Files.newInputStream(path)) {
         final var properties = new Properties();
         properties.load(in);
-        return Boolean.parseBoolean(properties.getProperty("eula"));
+        if (!Boolean.parseBoolean(properties.getProperty("eula"))) {
+          throw new IllegalStateException("You need to agree to the EULA in order to run the server");
+        }
       }
     } else {
-      return false;
+      throw new IllegalStateException("No eula.txt was found");
     }
   }
 
