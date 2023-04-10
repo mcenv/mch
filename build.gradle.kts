@@ -15,6 +15,7 @@ plugins {
 }
 
 version = "0.8.1"
+val brigadierVersion = "1.1.8"
 
 repositories {
   mavenCentral()
@@ -25,7 +26,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("org.ow2.asm:asm:9.5")
   implementation("org.apache.commons:commons-math3:3.6.1")
-  compileOnly("com.mojang:brigadier:1.0.18")
+  compileOnly("com.mojang", "brigadier", brigadierVersion)
 }
 
 tasks.withType(JavaCompile::class) {
@@ -72,7 +73,7 @@ tasks.register<ProGuardTask>("optimizeJar") {
       libraryjars("$javaHome/jmods/java.instrument.jmod")
       libraryjars("$javaHome/jmods/java.sql.jmod")
     }
-  libraryjars(configurations.compileClasspath.get().asFileTree.find { it.endsWith("brigadier-1.0.18.jar") })
+  libraryjars(configurations.compileClasspath.get().asFileTree.find { it.endsWith("brigadier-$brigadierVersion.jar") })
 
   keep("@interface mch.Keep")
   keep("@mch.Keep class *")
