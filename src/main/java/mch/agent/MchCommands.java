@@ -25,6 +25,7 @@ public final class MchCommands {
   private static final String START = "mch:start";
   private static final String LOOP = "mch:loop";
   private static final String POST = "mch:post";
+  private static final String NOOP = "mch:noop";
 
   private static long startTime;
   private static int iterationCount;
@@ -63,6 +64,7 @@ public final class MchCommands {
 
     registerConst(dispatcher, LOOP);
     registerConst(dispatcher, POST);
+    registerConst(dispatcher, NOOP);
   }
 
   private static void registerParsingIteration(
@@ -138,6 +140,8 @@ public final class MchCommands {
         return 0;
       })
     );
+
+    registerConst(dispatcher, NOOP);
   }
 
   private static String[] prepareCommands(
@@ -250,6 +254,8 @@ public final class MchCommands {
         return 0;
       })
     );
+
+    registerConst(dispatcher, NOOP);
   }
 
   private static void parseFunctions(
