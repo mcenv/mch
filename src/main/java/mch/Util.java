@@ -4,12 +4,6 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public final class Util {
-  public static String quote(
-    final String string
-  ) {
-    return '"' + string + '"';
-  }
-
   public static Integer parseIntOrNull(
     final String string
   ) {

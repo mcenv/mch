@@ -13,6 +13,7 @@ public record Results(
   @Keep String jdkVersion,
   @Keep String vmName,
   @Keep String vmVersion,
+  @Keep String mc,
   @Keep String[] mcArgs,
   @Keep int warmupIterations,
   @Keep String warmupTime,
