@@ -33,7 +33,6 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("org.ow2.asm:asm:9.5")
   implementation("org.apache.commons:commons-math3:3.6.1")
-  implementation("dev.mcenv:spy:0.3.0")
 }
 
 tasks.withType(JavaCompile::class) {
