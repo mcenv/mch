@@ -132,7 +132,13 @@ public final class Main {
       final var command = new ArrayList<String>();
       command.add(java);
       Collections.addAll(command, mchProperties.jvmArgs());
-      Collections.addAll(command, "-javaagent:" + jar + "=" + options, "-cp", quote(jar), "mch.fork.Fork");
+      Collections.addAll(command,
+        "-javaagent:" + jar + "=" + options,
+        "-Dmch.server=" + mchProperties.mc(),
+        "-cp",
+        jar,
+        "mch.fork.Fork"
+      );
       Collections.addAll(command, mchProperties.mcArgs());
       return command;
     } catch (final URISyntaxException e) {
@@ -156,6 +162,7 @@ public final class Main {
       final var jdkVersion = System.getProperty("java.version");
       final var vmName = System.getProperty("java.vm.name");
       final var vmVersion = System.getProperty("java.vm.version");
+      final var mc = mchProperties.mc();
       final var mcArgs = mchProperties.mcArgs();
       final var warmupIterations = mchProperties.warmupIterations();
       final var warmupTime = String.format("%d %s", mchProperties.time(), abbreviate(TimeUnit.SECONDS));
@@ -193,6 +200,7 @@ public final class Main {
           jdkVersion,
           vmName,
           vmVersion,
+          mc,
           mcArgs,
           warmupIterations,
           warmupTime,

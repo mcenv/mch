@@ -15,6 +15,7 @@ public record MchProperties(
   int time,
   int forks,
   TimeUnit timeUnit,
+  String mc,
   String[] jvmArgs,
   String[] mcArgs,
   String[] parsingBenchmarks,
@@ -34,6 +35,9 @@ public record MchProperties(
 
   public static final String TIME_UNIT_KEY = "time-unit";
   public static final TimeUnit TIME_UNIT_DEFAULT = TimeUnit.SECONDS;
+
+  public static final String MC_KEY = "mc";
+  public static final String MC_DEFAULT = "server.jar";
 
   public static final String JVM_ARGS_KEY = "jvm-args";
   public static final String JVM_ARGS_DEFAULT = ",";
@@ -62,6 +66,7 @@ public record MchProperties(
     properties.putIfAbsent(TIME_KEY, String.valueOf(TIME_DEFAULT));
     properties.putIfAbsent(FORKS_KEY, String.valueOf(FORKS_DEFAULT));
     properties.putIfAbsent(TIME_UNIT_KEY, abbreviate(TIME_UNIT_DEFAULT));
+    properties.putIfAbsent(MC_KEY, MC_DEFAULT);
     properties.putIfAbsent(JVM_ARGS_KEY, JVM_ARGS_DEFAULT);
     properties.putIfAbsent(MC_ARGS_KEY, MC_ARGS_DEFAULT);
     properties.putIfAbsent(PARSING_BENCHMARKS, PARSING_BENCHMARKS_DEFAULT);
@@ -77,6 +82,7 @@ public record MchProperties(
       Integer.parseInt(properties.getProperty(TIME_KEY)),
       Integer.parseInt(properties.getProperty(FORKS_KEY)),
       parseTimeUnit(properties.getProperty(TIME_UNIT_KEY)),
+      properties.getProperty(MC_KEY),
       properties.getProperty(JVM_ARGS_KEY).split(","),
       properties.getProperty(MC_ARGS_KEY).split(","),
       properties.getProperty(PARSING_BENCHMARKS).split(","),
