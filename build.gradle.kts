@@ -19,13 +19,6 @@ val brigadierVersion = "1.1.8"
 
 repositories {
   mavenCentral()
-  maven {
-    url = uri("https://maven.pkg.github.com/mcenv/spy")
-    credentials {
-      username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
-      password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
-    }
-  }
   maven("https://libraries.minecraft.net")
 }
 
@@ -33,6 +26,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("org.ow2.asm:asm:9.5")
   implementation("org.apache.commons:commons-math3:3.6.1")
+  compileOnly("com.mojang:brigadier:$brigadierVersion")
 }
 
 tasks.withType(JavaCompile::class) {
