@@ -65,7 +65,7 @@
     },
     "parsing_benchmarks": {
       "title": "Parsing Benchmarks",
-      "description": "Comma-separated list of function **paths** for parsing benchmark",
+      "description": "Comma-separated list of function paths for parsing benchmark",
       "type": "array",
       "items": {
         "type": "string"
@@ -74,7 +74,7 @@
     },
     "execute_benchmarks": {
       "title": "Execute Benchmarks",
-      "description": "Comma-separated list of function **names** for execute benchmark",
+      "description": "Comma-separated list of function names for execute benchmark",
       "type": "array",
       "items": {
         "type": "string"
