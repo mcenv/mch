@@ -30,7 +30,7 @@ public final class Main {
       validateEula();
       Datapack.install(ServerProperties.load());
 
-      final var mchConfig = loadConfig();
+      final var mchConfig = loadConfig(args);
 
       dryRun(mchConfig);
 
@@ -66,9 +66,11 @@ public final class Main {
     }
   }
 
-  private static MchConfig loadConfig() throws IOException {
+  private static MchConfig loadConfig(
+    final String[] args
+  ) throws IOException {
     return new GsonBuilder()
-      .registerTypeAdapter(MchConfig.class, new MchConfig.Deserializer())
+      .registerTypeAdapter(MchConfig.class, new MchConfig.Deserializer(args))
       .create()
       .fromJson(Files.newBufferedReader(Paths.get("mch-config.json")), MchConfig.class);
   }
