@@ -9,15 +9,11 @@
 > - Ensure that the benchmarked functions are [idempotent](https://en.wikipedia.org/wiki/Idempotence); otherwise, the benchmark results will be inaccurate.
 > - Remember that the benchmark results may be affected by Minecraft/JVM/OS/HW.
 
-## Usage
+## Example usage
 
 1. Download [`mch.jar`](https://github.com/mcenv/mch/releases/latest/download/mch.jar) and place it in the same directory as `server.jar`.
-2. Create `mch.properties` file in the same directory and specify a comma-separated list of function names to be benchmarked in `execute-benchmarks` property. For example:
-    ```properties
-    execute-benchmarks=a,b
-    ```
-3. Run `java -jar mch.jar`.
-4. The benchmark results will be dumped to `mch-results.json`.
+2. Run `java -jar mch.jar --execute-benchmarks=a,b`. This will start the benchmarks for functions `a` and `b`.
+3. The benchmark results will be dumped to `mch-results.json`.
 
 ## Requirements
 
