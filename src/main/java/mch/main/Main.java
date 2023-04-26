@@ -1,5 +1,6 @@
 package mch.main;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 import mch.Keep;
 import mch.Options;
@@ -190,7 +191,7 @@ public final class Main {
         })
         .toList();
 
-      final var gson = new GsonBuilder().setPrettyPrinting().create();
+      final var gson = new GsonBuilder().setPrettyPrinting().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
       out.write(gson
         .toJson(new Results(
           mchVersion,
