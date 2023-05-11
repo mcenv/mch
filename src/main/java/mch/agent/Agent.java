@@ -63,7 +63,7 @@ public final class Agent {
   }
 
   private static JarFile getOrExtractBrigadier() throws IOException {
-    try (final var server = new JarFile("server.jar")) {
+    try (final var server = new JarFile(System.getProperty("mch.server"))) {
       try (final var libraries = new BufferedInputStream(server.getInputStream(server.getEntry("META-INF/libraries.list")))) {
         final var entries = new String(libraries.readAllBytes(), StandardCharsets.UTF_8).split("\n");
         final var brigadierEntry = Arrays

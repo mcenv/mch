@@ -28,9 +28,8 @@ public final class Main {
 
     try {
       validateEula();
-      Datapack.install(ServerProperties.load());
-
       final var mchConfig = loadConfig(args);
+      Datapack.install(mchConfig, ServerProperties.load());
 
       dryRun(mchConfig);
 

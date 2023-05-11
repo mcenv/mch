@@ -16,9 +16,10 @@ import java.util.zip.ZipOutputStream;
 
 public final class Datapack {
   public static void install(
+    final MchConfig mchConfig,
     final ServerProperties serverProperties
   ) throws IOException {
-    final var serverPath = Paths.get("server.jar");
+    final var serverPath = Paths.get(mchConfig.mc());
     if (!Files.exists(serverPath) || !Files.isRegularFile(serverPath)) {
       throw new IllegalStateException("No server.jar was found");
     }
@@ -31,7 +32,7 @@ public final class Datapack {
         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         .create();
 
-      try (final var server = new JarFile("server.jar")) {
+      try (final var server = new JarFile(mchConfig.mc())) {
         final var version = gson.fromJson(new String(server.getInputStream(new JarEntry("version.json")).readAllBytes(), StandardCharsets.UTF_8), Version.class);
         writeEntry(out, "pack.mcmeta", gson.toJson(new PackMetadata(new PackMetadataSection("", version.packVersion.data))));
       }
