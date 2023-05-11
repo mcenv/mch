@@ -68,10 +68,15 @@ public final class Main {
   private static MchConfig loadConfig(
     final String[] args
   ) throws IOException {
-    return new GsonBuilder()
-      .registerTypeAdapter(MchConfig.class, new MchConfig.Deserializer(args))
-      .create()
-      .fromJson(Files.newBufferedReader(Paths.get("mch-config.json")), MchConfig.class);
+    final var mchConfigPath = Paths.get("mch-config.json");
+    if (Files.exists(mchConfigPath) && Files.isRegularFile(mchConfigPath)) {
+      return new GsonBuilder()
+        .registerTypeAdapter(MchConfig.class, new MchConfig.Deserializer(args))
+        .create()
+        .fromJson(Files.newBufferedReader(mchConfigPath), MchConfig.class);
+    } else {
+      return new MchConfig.Builder(args).build();
+    }
   }
 
   private static void dryRun(

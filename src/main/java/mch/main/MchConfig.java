@@ -33,21 +33,24 @@ public record MchConfig(
   public static final String MC_DEFAULT = "server.jar";
   public static final String MC_ARGS_DEFAULT = "nogui";
 
-  public static final class Deserializer implements JsonDeserializer<MchConfig> {
+  public static class Builder {
     private final String[] args;
+    private int warmupIterations = WARMUP_ITERATIONS_DEFAULT;
+    private int measurementIterations = MEASUREMENT_ITERATIONS_DEFAULT;
+    private int time = TIME_DEFAULT;
+    private int forks = FORKS_DEFAULT;
+    private TimeUnit timeUnit = TIME_UNIT_DEFAULT;
+    private String mc = MC_DEFAULT;
+    private Collection<String> jvmArgs = List.of();
+    private Collection<String> mcArgs = List.of(MC_ARGS_DEFAULT);
+    private Collection<String> parsingBenchmarks = List.of();
+    private Collection<String> executeBenchmarks = List.of();
 
-    public Deserializer(
-      final String[] args
-    ) {
+    public Builder(final String[] args) {
       this.args = args;
     }
 
-    @Override
-    public MchConfig deserialize(
-      final JsonElement json,
-      final Type typeOfT,
-      final JsonDeserializationContext context
-    ) throws JsonParseException {
+    public MchConfig build() {
       final var parser = new OptionParser();
       final var warmupIterationsSpec = parser.accepts("warmup-iterations").withOptionalArg().ofType(Integer.class);
       final var measurementIterationsSpec = parser.accepts("measurement-iterations").withOptionalArg().ofType(Integer.class);
@@ -61,17 +64,36 @@ public record MchConfig(
       final var executeBenchmarkSpec = parser.accepts("execute-benchmarks").withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var options = parser.parse(args);
 
-      final var object = json.getAsJsonObject();
-      final var warmupIterations = options.has(warmupIterationsSpec) ? options.valueOf(warmupIterationsSpec) : object.get("warmup_iterations") != null ? object.get("warmup_iterations").getAsInt() : WARMUP_ITERATIONS_DEFAULT;
-      final var measurementIterations = options.has(measurementIterationsSpec) ? options.valueOf(measurementIterationsSpec) : object.get("measurement_iterations") != null ? object.get("measurement_iterations").getAsInt() : MEASUREMENT_ITERATIONS_DEFAULT;
-      final var time = options.has(timeSpec) ? options.valueOf(timeSpec) : object.get("time") != null ? object.get("time").getAsInt() : TIME_DEFAULT;
-      final var forks = options.has(forksSpec) ? options.valueOf(forksSpec) : object.get("forks") != null ? object.get("forks").getAsInt() : FORKS_DEFAULT;
-      final var timeUnit = options.has(timeUnitSpec) ? parseTimeUnit(options.valueOf(timeUnitSpec)) : object.get("time_unit") != null ? parseTimeUnit(object.get("time_unit").getAsString()) : TIME_UNIT_DEFAULT;
-      final var mc = options.has(mcSpec) ? options.valueOf(mcSpec) : object.get("mc") != null ? object.get("mc").getAsString() : MC_DEFAULT;
-      final var jvmArgs = options.has(jvmArgsSpec) ? options.valuesOf(jvmArgsSpec) : object.get("jvm_args") != null ? object.get("jvm_args").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList() : List.<String>of();
-      final var mcArgs = options.has(mcArgsSpec) ? options.valuesOf(mcArgsSpec) : object.get("mc_args") != null ? object.get("mc_args").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList() : List.of(MC_ARGS_DEFAULT);
-      final var parsingBenchmarks = options.has(parsingBenchmarksSpec) ? options.valuesOf(parsingBenchmarksSpec) : object.get("parsing_benchmarks") != null ? object.get("parsing_benchmarks").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList() : List.<String>of();
-      final var executeBenchmark = options.has(executeBenchmarkSpec) ? options.valuesOf(executeBenchmarkSpec) : object.get("execute_benchmarks") != null ? object.get("execute_benchmarks").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList() : List.<String>of();
+      if (options.has(warmupIterationsSpec)) {
+        warmupIterations = options.valueOf(warmupIterationsSpec);
+      }
+      if (options.has(measurementIterationsSpec)) {
+        measurementIterations = options.valueOf(measurementIterationsSpec);
+      }
+      if (options.has(timeSpec)) {
+        time = options.valueOf(timeSpec);
+      }
+      if (options.has(forksSpec)) {
+        forks = options.valueOf(forksSpec);
+      }
+      if (options.has(timeUnitSpec)) {
+        timeUnit = parseTimeUnit(options.valueOf(timeUnitSpec));
+      }
+      if (options.has(mcSpec)) {
+        mc = options.valueOf(mcSpec);
+      }
+      if (options.has(jvmArgsSpec)) {
+        jvmArgs = options.valuesOf(jvmArgsSpec);
+      }
+      if (options.has(mcArgsSpec)) {
+        mcArgs = options.valuesOf(mcArgsSpec);
+      }
+      if (options.has(parsingBenchmarksSpec)) {
+        parsingBenchmarks = options.valuesOf(parsingBenchmarksSpec);
+      }
+      if (options.has(executeBenchmarkSpec)) {
+        executeBenchmarks = options.valuesOf(executeBenchmarkSpec);
+      }
 
       return new MchConfig(
         warmupIterations,
@@ -83,8 +105,56 @@ public record MchConfig(
         jvmArgs,
         mcArgs,
         parsingBenchmarks,
-        executeBenchmark
+        executeBenchmarks
       );
+    }
+  }
+
+  public static final class Deserializer extends Builder implements JsonDeserializer<MchConfig> {
+    public Deserializer(final String[] args) {
+      super(args);
+    }
+
+    @Override
+    public MchConfig deserialize(
+      final JsonElement json,
+      final Type typeOfT,
+      final JsonDeserializationContext context
+    ) throws JsonParseException {
+      final var object = json.getAsJsonObject();
+
+      if (object.get("warmup_iterations") != null) {
+        super.warmupIterations = object.get("warmup_iterations").getAsInt();
+      }
+      if (object.get("measurement_iterations") != null) {
+        super.measurementIterations = object.get("measurement_iterations").getAsInt();
+      }
+      if (object.get("time") != null) {
+        super.time = object.get("time").getAsInt();
+      }
+      if (object.get("forks") != null) {
+        super.forks = object.get("forks").getAsInt();
+      }
+      if (object.get("time_unit") != null) {
+        super.timeUnit = parseTimeUnit(object.get("time_unit").getAsString());
+      }
+      if (object.get("mc") != null) {
+        super.mc = object.get("mc").getAsString();
+      }
+      if (object.get("jvm_args") != null) {
+        super.jvmArgs = object.get("jvm_args").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      }
+      if (object.get("mc_args") != null) {
+        super.mcArgs = object.get("mc_args").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      }
+      if (object.get("parsing_benchmarks") != null) {
+        super.parsingBenchmarks = object.get("parsing_benchmarks").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      }
+      if (object.get("execute_benchmarks") != null) {
+        super.executeBenchmarks = object.get("execute_benchmarks").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      }
+
+      return build();
     }
   }
 }
