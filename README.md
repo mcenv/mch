@@ -26,7 +26,7 @@
      "$schema": "https://raw.githubusercontent.com/mcenv/mch/main/mch-config-schema.json"
    }
    ```
-3. Run `java -Dmch.server=server.jar -jar mch.jar`. This will start the benchmarks with the options in `mch-config.json` on `server.jar`.
+3. Run `java -jar mch.jar`. This will start the benchmarks with the options in `mch-config.json`.
 4. The benchmark results will be dumped to `mch-results.json`.
 
 ## Requirements
