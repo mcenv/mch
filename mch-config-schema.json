@@ -43,6 +43,12 @@
         "m"
       ]
     },
+    "mc": {
+      "title": "Minecraft",
+      "description": "Path to Minecraft server",
+      "type": "string",
+      "default": "server.jar"
+    },
     "jvm_args": {
       "title": "JVM Arguments",
       "description": "JVM arguments to use with forks",
