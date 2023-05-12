@@ -49,7 +49,7 @@ jobs:
         with:
           script: |
             const versions = require("./versions.json");
-            return versions[${{ matrix.version }}]?.supported === true;
+            return versions["${{ matrix.version }}"]?.supported === true;
       - if: steps.check.outputs.result == true
         run: echo "{}" > mch-results.json
       - if: steps.check.outputs.result == false
