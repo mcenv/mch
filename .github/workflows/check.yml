@@ -1,0 +1,107 @@
+name: Check
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.fetch.outputs.result }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: versions
+      - uses: actions/github-script@v6
+        id: fetch
+        env:
+          MINIMUM_SUPPORTED_VERSION: "22w46a"
+        with:
+          retries: 3
+          script: |
+            const { MINIMUM_SUPPORTED_VERSION } = process.env;
+            const response = await fetch("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json");
+            const manifest = await response.json();
+            const versions = [];
+            for (const version of manifest.versions) {
+              const id = version.id;
+              versions.push(id);
+              if (id === MINIMUM_SUPPORTED_VERSION) {
+                break;
+              }
+            }
+            return versions;
+  check:
+    needs: fetch
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(needs.fetch.outputs.versions) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: versions
+      - uses: actions/github-script@v6
+        id: check
+        with:
+          script: |
+            const versions = require("./versions.json");
+            return versions[${{ matrix.version }}]?.supported === true;
+      - if: steps.check.outputs.result == true
+        run: echo "{}" > mch-results.json
+      - if: steps.check.outputs.result == false
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+      - if: steps.check.outputs.result == false
+        uses: mcenv/setup-minecraft@v3
+        with:
+          version: ${{ matrix.version }}
+      - if: steps.check.outputs.result == false
+        run: |
+          curl -L -o mch.jar https://github.com/mcenv/mch/releases/latest/download/mch.jar
+          echo "eula=true" > eula.txt
+          java -jar mch.jar --mc=$MINECRAFT
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.version }}
+          path: mch-results.json
+          retention-days: 1
+  update:
+    needs: [fetch, check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: versions
+      - uses: actions/download-artifact@v3
+        with:
+          path: versions
+      - uses: actions/github-script@v6
+        id: update
+        with:
+          script: |
+            const results = {};
+            for (const version of ${{ needs.fetch.outputs.versions }}) {
+              results[version] = { supported: false };
+            }
+            const globber = await glob.create("versions/*/mch-results.json");
+            const versions = await globber.glob();
+            for (const version of versions) {
+              const id = version.slice(0, -"/mch-results.json".length).split("/").pop();
+              results[id].supported = true;
+            }
+            const fs = require("fs");
+            fs.writeFileSync("versions.json", JSON.stringify(results, null, 2));
+            fs.writeFileSync("versions.csv", "version,supported\n" + Object.entries(results).map(([version, { supported }]) => `${version},${supported ? "✅" : "❌"}`).join("\n"));
+            return;
+      - run: |
+          git config --global user.name "mcenv"
+          git config --global user.email "mcenv@users.noreply.github.com"
+          git add versions.json versions.csv
+          git commit -m "Update versions"
+          git push
