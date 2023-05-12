@@ -50,18 +50,18 @@ jobs:
           script: |
             const versions = require("./versions.json");
             return versions["${{ matrix.version }}"]?.supported === true;
-      - if: steps.check.outputs.result == true
+      - if: steps.check.outputs.result == 'true'
         run: echo "{}" > mch-results.json
-      - if: steps.check.outputs.result == false
+      - if: steps.check.outputs.result == 'false'
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: "17"
-      - if: steps.check.outputs.result == false
+      - if: steps.check.outputs.result == 'false'
         uses: mcenv/setup-minecraft@v3
         with:
           version: ${{ matrix.version }}
-      - if: steps.check.outputs.result == false
+      - if: steps.check.outputs.result == 'false'
         run: |
           curl -L -o mch.jar https://github.com/mcenv/mch/releases/latest/download/mch.jar
           echo "eula=true" > eula.txt
