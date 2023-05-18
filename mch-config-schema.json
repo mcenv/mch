@@ -71,7 +71,7 @@
     },
     "parsing_benchmarks": {
       "title": "Parsing Benchmarks",
-      "description": "Comma-separated list of function paths for parsing benchmark",
+      "description": "Comma-separated list of commands for parsing benchmark",
       "type": "array",
       "items": {
         "type": "string"

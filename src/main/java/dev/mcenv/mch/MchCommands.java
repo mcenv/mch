@@ -77,30 +77,17 @@ public final class MchCommands implements Commands {
     final var time = TimeUnit.SECONDS.toNanos(options.time());
     results = new double[options.measurementIterations()];
 
-    final var commands = prepareCommands(dispatcher, options.benchmark());
+    final var command = options.benchmark();
 
     dispatcher.register(
       literal(START).executes(c -> {
         System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
 
-        if (commands == null) {
-          try {
-            System.out.println("No file " + options.benchmark() + " was found");
-            socket.close();
-            dispatcher.execute(post);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-          return 0;
-        }
-
         var startTime = System.nanoTime();
         final var source = c.getSource();
 
         while (true) {
-          for (final var command : commands) {
-            dispatcher.parse(command, source);
-          }
+          dispatcher.parse(command, source);
           final var stopTime = System.nanoTime();
           ++operationCount;
 
@@ -142,31 +129,6 @@ public final class MchCommands implements Commands {
     );
 
     registerConst(dispatcher, NOOP);
-  }
-
-  private String[] prepareCommands(
-    final CommandDispatcher<Object> dispatcher,
-    final String benchmark
-  ) throws IOException {
-    final var path = Paths.get(benchmark);
-    if (Files.exists(path) && Files.isRegularFile(path)) {
-      try (final var in = new BufferedReader(new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8))) {
-        return in
-          .lines()
-          .flatMap(line -> {
-            final var normalized = line.trim();
-            if (normalized.isEmpty() || normalized.startsWith("#")) {
-              return Stream.empty();
-            } else {
-              return Stream.of(normalized);
-            }
-          })
-          .toList()
-          .toArray(new String[]{});
-      }
-    } else {
-      return null;
-    }
   }
 
   private void registerExecuteIteration(
