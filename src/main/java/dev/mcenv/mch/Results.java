@@ -12,6 +12,7 @@ public record Results(
   String vmVersion,
   String mc,
   Collection<String> mcArgs,
+  String mcVersion,
   int warmupIterations,
   String warmupTime,
   int measurementIterations,

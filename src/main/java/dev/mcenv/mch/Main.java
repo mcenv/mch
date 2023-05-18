@@ -25,7 +25,7 @@ public final class Main {
     try {
       validateEula();
       final var mchConfig = loadConfig(args);
-      Datapack.install(mchConfig, ServerProperties.load());
+      final var mcVersion = Datapack.install(mchConfig, ServerProperties.load());
 
       dryRun(mchConfig);
 
@@ -39,7 +39,7 @@ public final class Main {
         iterationRun(runResults, mchConfig, Options.Iteration.Mode.EXECUTE, benchmark);
       }
 
-      writeResults(runResults, mchConfig);
+      writeResults(runResults, mchConfig, mcVersion);
     } catch (final IllegalStateException e) {
       System.err.println("Error: " + e.getMessage());
       System.exit(1);
@@ -143,7 +143,8 @@ public final class Main {
 
   private static void writeResults(
     final Map<String, RunResult> runResults,
-    final MchConfig mchConfig
+    final MchConfig mchConfig,
+    final String mcVersion
   ) throws IOException {
     final var unit = String.format("%s/op", abbreviate(mchConfig.timeUnit()));
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
@@ -197,6 +198,7 @@ public final class Main {
           vmVersion,
           mc,
           mcArgs,
+          mcVersion,
           warmupIterations,
           warmupTime,
           measurementIterations,

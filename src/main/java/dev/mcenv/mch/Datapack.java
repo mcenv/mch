@@ -14,7 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public final class Datapack {
-  public static void install(
+  public static String install(
     final MchConfig mchConfig,
     final ServerProperties serverProperties
   ) throws IOException {
@@ -31,8 +31,9 @@ public final class Datapack {
         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         .create();
 
+      final Version version;
       try (final var server = new JarFile(mchConfig.mc())) {
-        final var version = gson.fromJson(new String(server.getInputStream(new JarEntry("version.json")).readAllBytes(), StandardCharsets.UTF_8), Version.class);
+        version = gson.fromJson(new String(server.getInputStream(new JarEntry("version.json")).readAllBytes(), StandardCharsets.UTF_8), Version.class);
         writeEntry(out, "pack.mcmeta", gson.toJson(new PackMetadata(new PackMetadataSection("", version.packVersion.data))));
       }
 
@@ -63,9 +64,10 @@ public final class Datapack {
       writeEntry(out, "data/mch/functions/post.mcfunction", """
         mch:post
         stop""");
-    }
 
-    System.out.printf("Installing datapack in %s\n", datapack);
+      System.out.printf("Installing datapack in %s\n", datapack);
+      return version.id;
+    }
   }
 
   private static void writeEntry(
@@ -78,6 +80,7 @@ public final class Datapack {
   }
 
   private record Version(
+    String id,
     PackVersion packVersion
   ) {
   }
