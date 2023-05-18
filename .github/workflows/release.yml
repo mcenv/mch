@@ -18,6 +18,8 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: optimizeJar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: softprops/action-gh-release@v1
         with:
           files: ./build/libs/mch.jar
