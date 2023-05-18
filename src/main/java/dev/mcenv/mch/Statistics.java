@@ -1,4 +1,4 @@
-package dev.mcenv.mch.main;
+package dev.mcenv.mch;
 
 import org.apache.commons.math3.distribution.TDistribution;
 

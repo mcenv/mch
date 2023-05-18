@@ -1,4 +1,4 @@
-package dev.mcenv.mch.main;
+package dev.mcenv.mch;
 
 import dev.mcenv.mch.Options;
 

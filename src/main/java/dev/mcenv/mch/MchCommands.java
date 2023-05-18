@@ -1,10 +1,11 @@
-package dev.mcenv.mch.agent;
+package dev.mcenv.mch;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mcenv.mch.Options;
 import dev.mcenv.mch.Keep;
+import dev.mcenv.spy.Commands;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,41 +22,44 @@ import static dev.mcenv.mch.Util.doubleToBytes;
 
 @SuppressWarnings("unused")
 @Keep
-public final class MchCommands {
+public final class MchCommands implements Commands {
   private static final String START = "mch:start";
   private static final String LOOP = "mch:loop";
   private static final String POST = "mch:post";
   private static final String NOOP = "mch:noop";
 
-  private static long startTime;
-  private static int iterationCount;
-  private static int operationCount;
-  private static double[] results;
-  private static ParseResults<Object> run;
-  private static ParseResults<Object> loop;
-  private static ParseResults<Object> post;
-  private static ParseResults<Object> setupIteration;
-  private static ParseResults<Object> teardownIteration;
-
-  private MchCommands() {
-  }
+  private long startTime;
+  private int iterationCount;
+  private int operationCount;
+  private double[] results;
+  private ParseResults<Object> run;
+  private ParseResults<Object> loop;
+  private ParseResults<Object> post;
+  private ParseResults<Object> setupIteration;
+  private ParseResults<Object> teardownIteration;
 
   @Keep
-  public static void register(
+  @Override
+  public void register(
     final CommandDispatcher<Object> dispatcher,
-    final Options options
-  ) throws IOException {
+    final String args
+  ) {
+    final var options = Options.parse(args);
     if (options instanceof Options.Dry) {
       registerDry(dispatcher);
     } else if (options instanceof Options.Iteration iteration) {
-      switch (iteration.mode()) {
-        case PARSING -> registerParsingIteration(dispatcher, iteration);
-        case EXECUTE -> registerExecuteIteration(dispatcher, iteration);
+      try {
+        switch (iteration.mode()) {
+          case PARSING -> registerParsingIteration(dispatcher, iteration);
+          case EXECUTE -> registerExecuteIteration(dispatcher, iteration);
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
     }
   }
 
-  private static void registerDry(
+  private void registerDry(
     final CommandDispatcher<Object> dispatcher
   ) {
     dispatcher.register(
@@ -67,7 +71,7 @@ public final class MchCommands {
     registerConst(dispatcher, NOOP);
   }
 
-  private static void registerParsingIteration(
+  private void registerParsingIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {
@@ -144,7 +148,7 @@ public final class MchCommands {
     registerConst(dispatcher, NOOP);
   }
 
-  private static String[] prepareCommands(
+  private String[] prepareCommands(
     final CommandDispatcher<Object> dispatcher,
     final String benchmark
   ) throws IOException {
@@ -169,7 +173,7 @@ public final class MchCommands {
     }
   }
 
-  private static void registerExecuteIteration(
+  private void registerExecuteIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {
@@ -258,7 +262,7 @@ public final class MchCommands {
     registerConst(dispatcher, NOOP);
   }
 
-  private static void parseFunctions(
+  private void parseFunctions(
     final CommandDispatcher<Object> dispatcher,
     final Object source,
     final String benchmark
@@ -270,7 +274,7 @@ public final class MchCommands {
     teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
   }
 
-  private static void registerConst(
+  private void registerConst(
     final CommandDispatcher<Object> dispatcher,
     final String name
   ) {

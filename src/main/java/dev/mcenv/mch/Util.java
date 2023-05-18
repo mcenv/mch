@@ -82,8 +82,4 @@ public final class Util {
   public static String getCurrentJvm() {
     return ProcessHandle.current().info().command().orElseThrow();
   }
-
-  public static boolean isWindows() {
-    return System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
-  }
 }

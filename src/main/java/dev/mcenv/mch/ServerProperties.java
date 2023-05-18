@@ -1,4 +1,4 @@
-package dev.mcenv.mch.main;
+package dev.mcenv.mch;
 
 import java.io.IOException;
 import java.nio.file.Files;

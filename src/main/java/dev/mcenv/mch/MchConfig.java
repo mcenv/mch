@@ -1,4 +1,4 @@
-package dev.mcenv.mch.main;
+package dev.mcenv.mch;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

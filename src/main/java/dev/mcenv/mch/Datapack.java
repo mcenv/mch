@@ -1,8 +1,7 @@
-package dev.mcenv.mch.main;
+package dev.mcenv.mch;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
-import dev.mcenv.mch.Keep;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;

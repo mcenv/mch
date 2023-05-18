@@ -1,15 +1,13 @@
-package dev.mcenv.mch.main;
+package dev.mcenv.mch;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
-import dev.mcenv.mch.Options;
-import dev.mcenv.mch.Keep;
+import dev.mcenv.spy.Spy;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,7 +22,7 @@ public final class Main {
   public static void main(
     final String[] args
   ) throws InterruptedException, IOException {
-    System.out.println("Starting dev.mcenv.mch.main.Main");
+    System.out.println("Starting dev.mcenv.mch.Main");
 
     try {
       validateEula();
@@ -83,9 +81,13 @@ public final class Main {
     final MchConfig mchConfig
   ) throws IOException, InterruptedException {
     final var options = Options.Dry.INSTANCE.toString();
-    final var command = getCommand(options, mchConfig);
-    final var builder = new ProcessBuilder(command);
-    final var process = builder.start();
+    final var process = Spy.create(
+      Paths.get(mchConfig.mc()),
+      MchCommands.class,
+      options,
+      mchConfig.mcArgs().toArray(new String[0]),
+      mchConfig.jvmArgs().toArray(new String[0])
+    ).start();
     process.getInputStream().transferTo(System.out);
     process.waitFor();
   }
@@ -126,38 +128,18 @@ public final class Main {
           mode,
           benchmark
         ).toString();
-        final var command = getCommand(options, mchConfig);
-        final var builder = new ProcessBuilder(command);
-        final var process = builder.start();
+        final var process = Spy.create(
+          Paths.get(mchConfig.mc()),
+          MchCommands.class,
+          options,
+          mchConfig.mcArgs().toArray(new String[0]),
+          mchConfig.jvmArgs().toArray(new String[0])
+        ).start();
         process.getInputStream().transferTo(System.out);
         process.waitFor();
 
         thread.join();
       }
-    }
-  }
-
-  private static List<String> getCommand(
-    final String options,
-    final MchConfig mchConfig
-  ) {
-    try {
-      final var java = getCurrentJvm();
-      final var jar = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().toString();
-      final var command = new ArrayList<String>();
-      command.add(java);
-      command.addAll(mchConfig.jvmArgs());
-      Collections.addAll(command,
-        "-javaagent:" + jar + "=" + options,
-        "-Dmch.server=" + mchConfig.mc(),
-        "-cp",
-        jar,
-        "dev.mcenv.mch.fork.Fork"
-      );
-      command.addAll(mchConfig.mcArgs());
-      return command;
-    } catch (final URISyntaxException e) {
-      throw new IllegalStateException(e);
     }
   }
 

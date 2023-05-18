@@ -45,8 +45,8 @@ tasks.withType(JavaCompile::class) {
 tasks.jar {
   manifest {
     attributes(
-      "Premain-Class" to "dev.mcenv.mch.agent.Agent",
-      "Main-Class" to "dev.mcenv.mch.main.Main",
+      "Premain-Class" to "dev.mcenv.spy.Agent",
+      "Main-Class" to "dev.mcenv.mch.Main",
     )
   }
 }
@@ -86,6 +86,8 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
   keep("@interface dev.mcenv.mch.Keep")
   keep("@dev.mcenv.mch.Keep class *")
   keepclassmembers("class * { @dev.mcenv.mch.Keep *; }")
+  keep("class dev.mcenv.spy.Agent { public static void premain(java.lang.String, java.lang.instrument.Instrumentation); }")
+  keep("class dev.mcenv.spy.Fork { public static void main(java.lang.String[]); }")
 
   optimizationpasses(optimizationPasses)
   repackageclasses("mch")
