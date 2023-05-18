@@ -1,4 +1,4 @@
-package mch;
+package dev.mcenv.mch;
 
 public @interface Keep {
 }

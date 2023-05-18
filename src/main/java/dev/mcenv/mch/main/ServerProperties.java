@@ -1,11 +1,11 @@
-package mch.main;
+package dev.mcenv.mch.main;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import static mch.Util.parseIntOrNull;
+import static dev.mcenv.mch.Util.parseIntOrNull;
 
 public record ServerProperties(
   String levelName

@@ -1,4 +1,4 @@
-package mch;
+package dev.mcenv.mch;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;

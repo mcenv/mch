@@ -1,7 +1,7 @@
-package mch.agent;
+package dev.mcenv.mch.agent;
 
-import mch.Keep;
-import mch.Options;
+import dev.mcenv.mch.Options;
+import dev.mcenv.mch.Keep;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -31,7 +31,7 @@ public final class Agent {
     final String args,
     final Instrumentation instrumentation
   ) throws IOException {
-    System.out.println("Starting mch.agent.Agent");
+    System.out.println("Starting dev.mcenv.mch.agent.Agent");
 
     instrumentation.appendToSystemClassLoaderSearch(getOrExtractBrigadier());
     instrumentation.addTransformer(new ClassFileTransformer() {

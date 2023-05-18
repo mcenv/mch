@@ -1,9 +1,9 @@
-package mch.main;
+package dev.mcenv.mch.main;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
-import mch.Keep;
-import mch.Options;
+import dev.mcenv.mch.Options;
+import dev.mcenv.mch.Keep;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 
 import java.io.BufferedOutputStream;
@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static mch.Util.*;
+import static dev.mcenv.mch.Util.*;
 
 @Keep
 public final class Main {
@@ -24,7 +24,7 @@ public final class Main {
   public static void main(
     final String[] args
   ) throws InterruptedException, IOException {
-    System.out.println("Starting mch.main.Main");
+    System.out.println("Starting dev.mcenv.mch.main.Main");
 
     try {
       validateEula();
@@ -152,7 +152,7 @@ public final class Main {
         "-Dmch.server=" + mchConfig.mc(),
         "-cp",
         jar,
-        "mch.fork.Fork"
+        "dev.mcenv.mch.fork.Fork"
       );
       command.addAll(mchConfig.mcArgs());
       return command;

@@ -1,4 +1,4 @@
-package mch.main;
+package dev.mcenv.mch.main;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static mch.Util.parseTimeUnit;
+import static dev.mcenv.mch.Util.parseTimeUnit;
 
 public record MchConfig(
   int warmupIterations,

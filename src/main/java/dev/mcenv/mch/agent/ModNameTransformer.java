@@ -1,4 +1,4 @@
-package mch.agent;
+package dev.mcenv.mch.agent;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -25,7 +25,7 @@ public final class ModNameTransformer extends ClassVisitor {
       return new MethodVisitor(ASM9, parent) {
         @Override
         public void visitLdcInsn(final Object value) {
-          super.visitLdcInsn("mch");
+          super.visitLdcInsn("dev/mcenv/mch");
         }
       };
     } else {

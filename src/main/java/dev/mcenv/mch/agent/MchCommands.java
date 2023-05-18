@@ -1,10 +1,10 @@
-package mch.agent;
+package dev.mcenv.mch.agent;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import mch.Keep;
-import mch.Options;
+import dev.mcenv.mch.Options;
+import dev.mcenv.mch.Keep;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
-import static mch.Util.doubleToBytes;
+import static dev.mcenv.mch.Util.doubleToBytes;
 
 @SuppressWarnings("unused")
 @Keep

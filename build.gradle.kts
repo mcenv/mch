@@ -45,8 +45,8 @@ tasks.withType(JavaCompile::class) {
 tasks.jar {
   manifest {
     attributes(
-      "Premain-Class" to "mch.agent.Agent",
-      "Main-Class" to "mch.main.Main",
+      "Premain-Class" to "dev.mcenv.mch.agent.Agent",
+      "Main-Class" to "dev.mcenv.mch.main.Main",
     )
   }
 }
@@ -83,9 +83,9 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
     }
   libraryjars(configurations.compileClasspath.get().asFileTree.find { it.endsWith("brigadier-$brigadierVersion.jar") })
 
-  keep("@interface mch.Keep")
-  keep("@mch.Keep class *")
-  keepclassmembers("class * { @mch.Keep *; }")
+  keep("@interface dev.mcenv.mch.Keep")
+  keep("@dev.mcenv.mch.Keep class *")
+  keepclassmembers("class * { @dev.mcenv.mch.Keep *; }")
 
   optimizationpasses(optimizationPasses)
   repackageclasses("mch")

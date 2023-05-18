@@ -1,6 +1,6 @@
-package mch.fork;
+package dev.mcenv.mch.fork;
 
-import mch.Keep;
+import dev.mcenv.mch.Keep;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -14,7 +14,7 @@ public final class Fork {
   public static void main(
     final String[] args
   ) throws Throwable {
-    System.out.println("Starting mch.fork.Fork");
+    System.out.println("Starting dev.mcenv.mch.fork.Fork");
 
     final var server = System.getProperty("mch.server");
     final var classLoader = new URLClassLoader(new URL[]{Paths.get(server).toUri().toURL()});

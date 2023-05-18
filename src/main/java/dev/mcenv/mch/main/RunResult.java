@@ -1,6 +1,6 @@
-package mch.main;
+package dev.mcenv.mch.main;
 
-import mch.Options;
+import dev.mcenv.mch.Options;
 
 import java.util.Collection;
 

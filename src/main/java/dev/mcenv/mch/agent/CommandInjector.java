@@ -1,6 +1,6 @@
-package mch.agent;
+package dev.mcenv.mch.agent;
 
-import mch.Options;
+import dev.mcenv.mch.Options;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
@@ -38,9 +38,9 @@ public final class CommandInjector extends ClassVisitor {
           if (opcode == RETURN) {
             visitVarInsn(ALOAD, 0);
             if (options instanceof Options.Dry) {
-              visitFieldInsn(GETSTATIC, "mch/Options$Dry", "INSTANCE", "Lmch/Options$Dry;");
+              visitFieldInsn(GETSTATIC, "dev/mcenv/mch/Options$Dry", "INSTANCE", "Ldev/mcenv/mch/Options$Dry;");
             } else if (options instanceof Options.Iteration iteration) {
-              visitTypeInsn(NEW, "mch/Options$Iteration");
+              visitTypeInsn(NEW, "dev/mcenv/mch/Options$Iteration");
               visitInsn(DUP);
               visitLdcInsn(iteration.warmupIterations());
               visitLdcInsn(iteration.measurementIterations());
@@ -48,11 +48,11 @@ public final class CommandInjector extends ClassVisitor {
               visitLdcInsn(iteration.forks());
               visitLdcInsn(iteration.fork());
               visitLdcInsn(iteration.port());
-              visitFieldInsn(GETSTATIC, "mch/Options$Iteration$Mode", iteration.mode().name(), "Lmch/Options$Iteration$Mode;");
+              visitFieldInsn(GETSTATIC, "dev/mcenv/mch/Options$Iteration$Mode", iteration.mode().name(), "Ldev/mcenv/mch/Options$Iteration$Mode;");
               visitLdcInsn(iteration.benchmark());
-              visitMethodInsn(INVOKESPECIAL, "mch/Options$Iteration", "<init>", "(IIIIIILmch/Options$Iteration$Mode;Ljava/lang/String;)V", false);
+              visitMethodInsn(INVOKESPECIAL, "dev/mcenv/mch/Options$Iteration", "<init>", "(IIIIIILdev/mcenv/mch/Options$Iteration$Mode;Ljava/lang/String;)V", false);
             }
-            visitMethodInsn(INVOKESTATIC, "mch/agent/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Lmch/Options;)V", false);
+            visitMethodInsn(INVOKESTATIC, "dev/mcenv/mch/agent/MchCommands", "register", "(Lcom/mojang/brigadier/CommandDispatcher;Ldev/mcenv/mch/Options;)V", false);
           }
           super.visitInsn(opcode);
         }

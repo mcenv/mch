@@ -1,6 +1,6 @@
-package mch.main;
+package dev.mcenv.mch.main;
 
-import mch.Keep;
+import dev.mcenv.mch.Keep;
 
 import java.util.Collection;
 

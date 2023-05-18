@@ -1,4 +1,4 @@
-package mch;
+package dev.mcenv.mch;
 
 @Keep
 public sealed interface Options permits Options.Dry, Options.Iteration {
