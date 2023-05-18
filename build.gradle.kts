@@ -83,9 +83,16 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
     }
   libraryjars(configurations.compileClasspath.get().asFileTree.find { it.endsWith("brigadier-$brigadierVersion.jar") })
 
-  keep("@interface dev.mcenv.mch.Keep")
-  keep("@dev.mcenv.mch.Keep class *")
-  keepclassmembers("class * { @dev.mcenv.mch.Keep *; }")
+  keep("class dev.mcenv.mch.Datapack\$Version { *; }")
+  keep("class dev.mcenv.mch.Datapack\$PackVersion { *; }")
+  keep("class dev.mcenv.mch.Datapack\$PackMetadata { *; }")
+  keep("class dev.mcenv.mch.Datapack\$PackMetadataSection { *; }")
+  keep("class dev.mcenv.mch.Datapack\$Tag { *; }")
+  keep("class dev.mcenv.mch.MchConfig { *; }")
+  keep("class dev.mcenv.mch.Results { *; }")
+  keep("class dev.mcenv.mch.Results\$Result { *; }")
+  keep("class dev.mcenv.mch.Main { public static void main(java.lang.String[]); }")
+  keep("class dev.mcenv.mch.MchCommands { public void register(com.mojang.brigadier.CommandDispatcher, java.lang.String); }")
   keep("class dev.mcenv.spy.Agent { public static void premain(java.lang.String, java.lang.instrument.Instrumentation); }")
   keep("class dev.mcenv.spy.Fork { public static void main(java.lang.String[]); }")
 

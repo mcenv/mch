@@ -1,6 +1,5 @@
 package dev.mcenv.mch;
 
-@Keep
 public sealed interface Options permits Options.Dry, Options.Iteration {
   static Options parse(
     final String string
@@ -23,9 +22,7 @@ public sealed interface Options permits Options.Dry, Options.Iteration {
     };
   }
 
-  @Keep
   final class Dry implements Options {
-    @Keep
     public static final Dry INSTANCE = new Dry();
 
     private Dry() {
@@ -37,7 +34,6 @@ public sealed interface Options permits Options.Dry, Options.Iteration {
     }
   }
 
-  @Keep
   record Iteration(
     int warmupIterations,
     int measurementIterations,
@@ -63,10 +59,9 @@ public sealed interface Options permits Options.Dry, Options.Iteration {
       );
     }
 
-    @Keep
     public enum Mode {
-      @Keep PARSING("parsing"),
-      @Keep EXECUTE("execute");
+      PARSING("parsing"),
+      EXECUTE("execute");
 
       private final String name;
 

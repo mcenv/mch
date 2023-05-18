@@ -77,34 +77,29 @@ public final class Datapack {
     out.write(content.getBytes(StandardCharsets.UTF_8));
   }
 
-  @Keep
   private record Version(
-    @Keep PackVersion packVersion
+    PackVersion packVersion
   ) {
   }
 
-  @Keep
   private record PackVersion(
-    @Keep int data
+    int data
   ) {
   }
 
-  @Keep
   private record PackMetadata(
-    @Keep PackMetadataSection pack
+    PackMetadataSection pack
   ) {
   }
 
-  @Keep
   private record PackMetadataSection(
-    @Keep String description,
-    @Keep int packFormat
+    String description,
+    int packFormat
   ) {
   }
 
-  @Keep
   private record Tag(
-    @Keep String... values
+    String... values
   ) {
   }
 }

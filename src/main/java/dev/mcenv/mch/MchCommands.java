@@ -3,8 +3,6 @@ package dev.mcenv.mch;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.mcenv.mch.Options;
-import dev.mcenv.mch.Keep;
 import dev.mcenv.spy.Commands;
 
 import java.io.BufferedReader;
@@ -21,7 +19,6 @@ import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static dev.mcenv.mch.Util.doubleToBytes;
 
 @SuppressWarnings("unused")
-@Keep
 public final class MchCommands implements Commands {
   private static final String START = "mch:start";
   private static final String LOOP = "mch:loop";
@@ -38,7 +35,6 @@ public final class MchCommands implements Commands {
   private ParseResults<Object> setupIteration;
   private ParseResults<Object> teardownIteration;
 
-  @Keep
   @Override
   public void register(
     final CommandDispatcher<Object> dispatcher,

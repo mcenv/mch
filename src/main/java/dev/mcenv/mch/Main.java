@@ -16,9 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import static dev.mcenv.mch.Util.*;
 
-@Keep
 public final class Main {
-  @Keep
   public static void main(
     final String[] args
   ) throws InterruptedException, IOException {
