@@ -14,7 +14,7 @@ plugins {
   id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-version = "0.9.1"
+version = "0.10.0"
 val brigadierVersion = "1.1.8"
 
 repositories {
