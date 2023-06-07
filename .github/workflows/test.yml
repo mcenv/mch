@@ -37,4 +37,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.minecraft.outputs.version }}
-          path: mch-results.json
+          path: test/mch-results.json
