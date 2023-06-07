@@ -60,8 +60,17 @@ tasks.test {
   useJUnitPlatform()
 }
 
+tasks.register<Zip>("zipDatapack") {
+  from(layout.projectDirectory.dir("mch"))
+  archiveFileName.set("mch.zip")
+  isPreserveFileTimestamps = false
+  isReproducibleFileOrder = true
+}
+
 @Suppress("UnstableApiUsage")
 tasks.withType<ProcessResources> {
+  dependsOn(tasks.getByName("zipDatapack"))
+  from(layout.buildDirectory.file("distributions/mch.zip"))
   filesMatching("version") {
     expand("version" to version)
   }
@@ -85,9 +94,6 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
 
   keep("class dev.mcenv.mch.Datapack\$Version { *; }")
   keep("class dev.mcenv.mch.Datapack\$PackVersion { *; }")
-  keep("class dev.mcenv.mch.Datapack\$PackMetadata { *; }")
-  keep("class dev.mcenv.mch.Datapack\$PackMetadataSection { *; }")
-  keep("class dev.mcenv.mch.Datapack\$Tag { *; }")
   keep("class dev.mcenv.mch.MchConfig { *; }")
   keep("class dev.mcenv.mch.Results { *; }")
   keep("class dev.mcenv.mch.Results\$Result { *; }")
