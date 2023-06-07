@@ -27,13 +27,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - id: minecraft
-        uses: mcenv/setup-minecraft@v3
+        uses: mcenv/setup-minecraft@dist
         with:
           version: "snapshot"
       - run: |
-          mv $MINECRAFT test/
           cd test
-          java -jar ../build/libs/mch.jar
+          java -jar ../build/libs/mch.jar --mc=$MINECRAFT
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.minecraft.outputs.version }}
