@@ -14,8 +14,10 @@ buildscript {
 plugins {
   java
   id("com.github.johnrengelman.shadow") version "8.1.1"
+  id("maven-publish")
 }
 
+group = "dev.mcenv"
 version = "0.10.0"
 val brigadierVersion = "1.1.8"
 
@@ -131,4 +133,22 @@ tasks.register<ProGuardTask>("optimizeJar") {
 
 tasks.register<ProGuardTask>("developmentOptimizeJar") {
   optimizeJar(0)
+}
+
+publishing {
+  repositories {
+    maven {
+      name = "GitHubPackages"
+      url = uri("https://maven.pkg.github.com/mcenv/mch")
+      credentials {
+        username = System.getenv("GITHUB_ACTOR")
+        password = System.getenv("GITHUB_TOKEN")
+      }
+    }
+  }
+  publications {
+    register<MavenPublication>("gpr") {
+      from(components["java"])
+    }
+  }
 }
