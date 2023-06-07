@@ -1,6 +1,6 @@
 package dev.mcenv.mch;
 
-public sealed interface Options permits Options.Dry, Options.Iteration {
+sealed interface Options permits Options.Dry, Options.Iteration {
   static Options parse(
     final String string
   ) {

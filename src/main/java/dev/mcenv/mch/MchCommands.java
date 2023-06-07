@@ -5,21 +5,15 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mcenv.spy.Commands;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static dev.mcenv.mch.Util.doubleToBytes;
 
 @SuppressWarnings("unused")
-public final class MchCommands implements Commands {
+final class MchCommands implements Commands {
   private static final String START = "mch:start";
   private static final String LOOP = "mch:loop";
   private static final String POST = "mch:post";

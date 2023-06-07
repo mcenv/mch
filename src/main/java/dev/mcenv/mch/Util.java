@@ -1,9 +1,8 @@
 package dev.mcenv.mch;
 
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public final class Util {
+final class Util {
   public static Integer parseIntOrNull(
     final String string
   ) {
