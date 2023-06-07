@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import static dev.mcenv.mch.Util.parseIntOrNull;
 
-public record ServerProperties(
+record ServerProperties(
   String levelName
 ) {
   public static final String FUNCTION_PERMISSION_LEVEL_KEY = "function-permission-level";

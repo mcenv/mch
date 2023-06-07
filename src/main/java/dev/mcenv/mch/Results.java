@@ -2,7 +2,7 @@ package dev.mcenv.mch;
 
 import java.util.Collection;
 
-public record Results(
+record Results(
   String mchVersion,
   int forks,
   String jvm,

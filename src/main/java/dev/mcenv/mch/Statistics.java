@@ -2,7 +2,7 @@ package dev.mcenv.mch;
 
 import org.apache.commons.math3.distribution.TDistribution;
 
-public final class Statistics {
+final class Statistics {
   public static double mean(
     final double[] values
   ) {

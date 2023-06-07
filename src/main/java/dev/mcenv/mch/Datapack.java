@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public final class Datapack {
+final class Datapack {
   public static String install(
     final MchConfig mchConfig,
     final ServerProperties serverProperties

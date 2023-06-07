@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import static dev.mcenv.mch.Util.parseTimeUnit;
 
-public record MchConfig(
+record MchConfig(
   int warmupIterations,
   int measurementIterations,
   int time,
