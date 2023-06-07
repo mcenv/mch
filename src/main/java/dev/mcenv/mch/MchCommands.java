@@ -13,7 +13,7 @@ import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 import static dev.mcenv.mch.Util.doubleToBytes;
 
 @SuppressWarnings("unused")
-final class MchCommands implements Commands {
+public final class MchCommands implements Commands {
   private static final String START = "mch:start";
   private static final String LOOP = "mch:loop";
   private static final String POST = "mch:post";
