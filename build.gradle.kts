@@ -71,12 +71,14 @@ tasks.register<Zip>("zipDatapack") {
 
 tasks.register("computeHash") {
   dependsOn(tasks.getByName("zipDatapack"))
-  val digest = MessageDigest.getInstance("SHA-256")
-  DigestInputStream(layout.buildDirectory.file("distributions/mch.zip").get().asFile.inputStream().buffered(), digest).use { input ->
-    input.readBytes()
-  }
-  layout.buildDirectory.file("distributions/hash").get().asFile.outputStream().buffered().use { output ->
-    output.write(digest.digest())
+  doLast {
+    val digest = MessageDigest.getInstance("SHA-256")
+    DigestInputStream(layout.buildDirectory.file("distributions/mch.zip").get().asFile.inputStream().buffered(), digest).use { input ->
+      input.readBytes()
+    }
+    layout.buildDirectory.file("distributions/hash").get().asFile.outputStream().buffered().use { output ->
+      output.write(digest.digest())
+    }
   }
 }
 
