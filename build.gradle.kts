@@ -1,4 +1,6 @@
 import proguard.gradle.ProGuardTask
+import java.security.DigestInputStream
+import java.security.MessageDigest
 
 buildscript {
   repositories {
@@ -67,10 +69,24 @@ tasks.register<Zip>("zipDatapack") {
   isReproducibleFileOrder = true
 }
 
+tasks.register("computeHash") {
+  dependsOn(tasks.getByName("zipDatapack"))
+  val digest = MessageDigest.getInstance("SHA-256")
+  DigestInputStream(layout.buildDirectory.file("distributions/mch.zip").get().asFile.inputStream().buffered(), digest).use { input ->
+    input.readBytes()
+  }
+  layout.buildDirectory.file("distributions/hash").get().asFile.outputStream().buffered().use { output ->
+    output.write(digest.digest())
+  }
+}
+
 @Suppress("UnstableApiUsage")
 tasks.withType<ProcessResources> {
-  dependsOn(tasks.getByName("zipDatapack"))
-  from(layout.buildDirectory.file("distributions/mch.zip"))
+  dependsOn(tasks.getByName("computeHash"))
+  from(
+    layout.buildDirectory.file("distributions/mch.zip"),
+    layout.buildDirectory.file("distributions/hash"),
+  )
   filesMatching("version") {
     expand("version" to version)
   }
