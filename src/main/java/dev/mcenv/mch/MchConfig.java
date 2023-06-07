@@ -66,15 +66,27 @@ public record MchConfig(
 
       if (options.has(warmupIterationsSpec)) {
         warmupIterations = options.valueOf(warmupIterationsSpec);
+        if (warmupIterations < 0) {
+          throw new IllegalStateException("Warmup iterations must be greater than or equal to 0");
+        }
       }
       if (options.has(measurementIterationsSpec)) {
         measurementIterations = options.valueOf(measurementIterationsSpec);
+        if (measurementIterations < 2) {
+          throw new IllegalStateException("Measurement iterations must be greater than 1");
+        }
       }
       if (options.has(timeSpec)) {
         time = options.valueOf(timeSpec);
+        if (time < 1) {
+          throw new IllegalStateException("Time must be greater than 0");
+        }
       }
       if (options.has(forksSpec)) {
         forks = options.valueOf(forksSpec);
+        if (forks < 1) {
+          throw new IllegalStateException("Forks must be greater than 0");
+        }
       }
       if (options.has(timeUnitSpec)) {
         timeUnit = parseTimeUnit(options.valueOf(timeUnitSpec));
