@@ -27,7 +27,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - id: minecraft
-        uses: mcenv/setup-minecraft@dist
+        uses: mcenv/setup-minecraft@v3
         with:
           version: "snapshot"
       - run: |
