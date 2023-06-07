@@ -2,9 +2,13 @@ name: Test
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - dev
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - dev
   workflow_dispatch:
 
 jobs:
@@ -19,6 +23,16 @@ jobs:
       - uses: gradle/wrapper-validation-action@v1
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: test
+          arguments: developmentOptimizeJar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: mcenv/setup-minecraft@v3
+        with:
+          version: "snapshot"
+      - run: |
+          cd test
+          java -jar ../build/libs/mch.jar --mc=$MINECRAFT
+      - uses: actions/upload-artifact@v3
+        with:
+          name: test
+          path: mch-results.json
