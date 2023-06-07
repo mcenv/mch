@@ -26,13 +26,15 @@ jobs:
           arguments: developmentOptimizeJar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: mcenv/setup-minecraft@v3
+      - id: minecraft
+        uses: mcenv/setup-minecraft@v3
         with:
           version: "snapshot"
       - run: |
+          mv $MINECRAFT test/
           cd test
-          java -jar ../build/libs/mch.jar --mc=$MINECRAFT
+          java -jar ../build/libs/mch.jar
       - uses: actions/upload-artifact@v3
         with:
-          name: test
+          name: ${{ steps.minecraft.outputs.version }}
           path: mch-results.json
