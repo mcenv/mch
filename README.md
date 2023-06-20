@@ -63,4 +63,10 @@ You can check the supported versions [here](https://github.com/mcenv/mch/blob/ve
 | `#mch:teardown.trial`     | To be run after each run of the execute benchmark        |
 | `#mch:teardown.iteration` | To be run after each iteration of the execute benchmark  |
 
+## Commands
+
+| Command    | Description                          |
+|:-----------|:-------------------------------------|
+| `mch:noop` | Do nothing except for returning `0`. |
+
 [^1]: NOT OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG.
