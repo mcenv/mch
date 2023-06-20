@@ -25,6 +25,17 @@ record MchConfig(
   Collection<String> parsingBenchmarks,
   Collection<String> executeBenchmarks
 ) {
+  public static final String WARMUP_ITERATIONS = "warmup_iterations";
+  public static final String MEASUREMENT_ITERATIONS = "measurement_iterations";
+  public static final String TIME = "time";
+  public static final String FORKS = "forks";
+  public static final String TIME_UNIT = "time_unit";
+  public static final String MC = "mc";
+  public static final String JVM_ARGS = "jvm_args";
+  public static final String MC_ARGS = "mc_args";
+  public static final String PARSING_BENCHMARKS = "parsing_benchmarks";
+  public static final String EXECUTE_BENCHMARKS = "execute_benchmarks";
+
   public static final int WARMUP_ITERATIONS_DEFAULT = 5;
   public static final int MEASUREMENT_ITERATIONS_DEFAULT = 5;
   public static final int TIME_DEFAULT = 10;
@@ -52,16 +63,16 @@ record MchConfig(
 
     public MchConfig build() {
       final var parser = new OptionParser();
-      final var warmupIterationsSpec = parser.accepts("warmup-iterations").withOptionalArg().ofType(Integer.class);
-      final var measurementIterationsSpec = parser.accepts("measurement-iterations").withOptionalArg().ofType(Integer.class);
-      final var timeSpec = parser.accepts("time").withOptionalArg().ofType(Integer.class);
-      final var forksSpec = parser.accepts("forks").withOptionalArg().ofType(Integer.class);
-      final var timeUnitSpec = parser.accepts("time-unit").withOptionalArg().ofType(String.class);
-      final var mcSpec = parser.accepts("mc").withOptionalArg().ofType(String.class);
-      final var jvmArgsSpec = parser.accepts("jvm-args").withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
-      final var mcArgsSpec = parser.accepts("mc-args").withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
-      final var parsingBenchmarksSpec = parser.accepts("parsing-benchmarks").withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
-      final var executeBenchmarkSpec = parser.accepts("execute-benchmarks").withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
+      final var warmupIterationsSpec = parser.accepts(WARMUP_ITERATIONS).withOptionalArg().ofType(Integer.class);
+      final var measurementIterationsSpec = parser.accepts(MEASUREMENT_ITERATIONS).withOptionalArg().ofType(Integer.class);
+      final var timeSpec = parser.accepts(TIME).withOptionalArg().ofType(Integer.class);
+      final var forksSpec = parser.accepts(FORKS).withOptionalArg().ofType(Integer.class);
+      final var timeUnitSpec = parser.accepts(TIME_UNIT).withOptionalArg().ofType(String.class);
+      final var mcSpec = parser.accepts(MC).withOptionalArg().ofType(String.class);
+      final var jvmArgsSpec = parser.accepts(JVM_ARGS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
+      final var mcArgsSpec = parser.accepts(MC_ARGS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
+      final var parsingBenchmarksSpec = parser.accepts(PARSING_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
+      final var executeBenchmarkSpec = parser.accepts(EXECUTE_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var options = parser.parse(args);
 
       if (options.has(warmupIterationsSpec)) {
@@ -135,35 +146,35 @@ record MchConfig(
     ) throws JsonParseException {
       final var object = json.getAsJsonObject();
 
-      if (object.get("warmup_iterations") != null) {
-        super.warmupIterations = object.get("warmup_iterations").getAsInt();
+      if (object.get(WARMUP_ITERATIONS) != null) {
+        super.warmupIterations = object.get(WARMUP_ITERATIONS).getAsInt();
       }
-      if (object.get("measurement_iterations") != null) {
-        super.measurementIterations = object.get("measurement_iterations").getAsInt();
+      if (object.get(MEASUREMENT_ITERATIONS) != null) {
+        super.measurementIterations = object.get(MEASUREMENT_ITERATIONS).getAsInt();
       }
-      if (object.get("time") != null) {
-        super.time = object.get("time").getAsInt();
+      if (object.get(TIME) != null) {
+        super.time = object.get(TIME).getAsInt();
       }
-      if (object.get("forks") != null) {
-        super.forks = object.get("forks").getAsInt();
+      if (object.get(FORKS) != null) {
+        super.forks = object.get(FORKS).getAsInt();
       }
-      if (object.get("time_unit") != null) {
-        super.timeUnit = parseTimeUnit(object.get("time_unit").getAsString());
+      if (object.get(TIME_UNIT) != null) {
+        super.timeUnit = parseTimeUnit(object.get(TIME_UNIT).getAsString());
       }
-      if (object.get("mc") != null) {
-        super.mc = object.get("mc").getAsString();
+      if (object.get(MC) != null) {
+        super.mc = object.get(MC).getAsString();
       }
-      if (object.get("jvm_args") != null) {
-        super.jvmArgs = object.get("jvm_args").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      if (object.get(JVM_ARGS) != null) {
+        super.jvmArgs = object.get(JVM_ARGS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
       }
-      if (object.get("mc_args") != null) {
-        super.mcArgs = object.get("mc_args").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      if (object.get(MC_ARGS) != null) {
+        super.mcArgs = object.get(MC_ARGS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
       }
-      if (object.get("parsing_benchmarks") != null) {
-        super.parsingBenchmarks = object.get("parsing_benchmarks").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      if (object.get(PARSING_BENCHMARKS) != null) {
+        super.parsingBenchmarks = object.get(PARSING_BENCHMARKS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
       }
-      if (object.get("execute_benchmarks") != null) {
-        super.executeBenchmarks = object.get("execute_benchmarks").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+      if (object.get(EXECUTE_BENCHMARKS) != null) {
+        super.executeBenchmarks = object.get(EXECUTE_BENCHMARKS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
       }
 
       return build();
