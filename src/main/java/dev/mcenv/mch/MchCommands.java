@@ -75,7 +75,7 @@ public final class MchCommands implements Commands {
 
     dispatcher.register(
       literal(START).executes(c -> {
-        System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
+        printIteration(options);
 
         var startTime = System.nanoTime();
         final var source = c.getSource();
@@ -137,7 +137,7 @@ public final class MchCommands implements Commands {
 
     dispatcher.register(
       literal(START).executes(c -> {
-        System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks());
+        printIteration(options);
 
         parseFunctions(dispatcher, c.getSource(), options.benchmark());
         dispatcher.execute(setupIteration);
@@ -231,5 +231,11 @@ public final class MchCommands implements Commands {
     final String name
   ) {
     dispatcher.register(literal(name).executes(c -> 0));
+  }
+
+  private void printIteration(
+    final Options.Iteration options
+  ) {
+    System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks() + " (" + String.format("%.2f", options.progress()) + "%)");
   }
 }

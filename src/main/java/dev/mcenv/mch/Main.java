@@ -12,10 +12,7 @@ import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static dev.mcenv.mch.Util.*;
@@ -100,6 +97,8 @@ public final class Main {
     final Options.Iteration.Mode mode,
     final String benchmark
   ) throws IOException, InterruptedException {
+    final var base = runResults.size() * mchConfig.forks();
+    final var total = (float) ((mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size()) * mchConfig.forks());
     for (var fork = 0; fork < mchConfig.forks(); ++fork) {
       try (final var server = new ServerSocket(0)) {
         final var thread = new Thread(() -> {
@@ -121,6 +120,7 @@ public final class Main {
         thread.start();
 
         final var port = server.getLocalPort();
+        final var progress = (100.0f * (base + fork)) / total;
         final var options = new Options.Iteration(
           mchConfig.warmupIterations(),
           mchConfig.measurementIterations(),
@@ -128,6 +128,7 @@ public final class Main {
           mchConfig.forks(),
           fork,
           port,
+          progress,
           mode,
           benchmark
         ).toString();
@@ -155,7 +156,7 @@ public final class Main {
     try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
       final String mchVersion;
       try (final var version = Main.class.getClassLoader().getResourceAsStream("version")) {
-        mchVersion = new String(version.readAllBytes(), StandardCharsets.UTF_8).trim();
+        mchVersion = new String(Objects.requireNonNull(version).readAllBytes(), StandardCharsets.UTF_8).trim();
       }
       final var forks = mchConfig.forks();
       final var jvm = getCurrentJvm();
