@@ -6,11 +6,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mcenv.spy.Commands;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
-import static dev.mcenv.mch.Util.doubleToBytes;
 
 @SuppressWarnings("unused")
 public final class MchCommands implements Commands {
@@ -22,7 +22,7 @@ public final class MchCommands implements Commands {
   private long startTime;
   private int iterationCount;
   private int operationCount;
-  private double[] results;
+  private double[] scores;
   private ParseResults<Object> run;
   private ParseResults<Object> loop;
   private ParseResults<Object> post;
@@ -69,7 +69,7 @@ public final class MchCommands implements Commands {
     final var warmupCount = options.warmupIterations();
     final var measurementCount = options.warmupIterations() + options.measurementIterations();
     final var time = TimeUnit.SECONDS.toNanos(options.time());
-    results = new double[options.measurementIterations()];
+    scores = new double[options.measurementIterations()];
 
     final var command = options.benchmark();
 
@@ -92,7 +92,7 @@ public final class MchCommands implements Commands {
                 System.out.println("Warmup iteration: " + result + " ns/op");
               } else {
                 System.out.println("Measurement iteration: " + result + " ns/op");
-                results[iterationCount - warmupCount] = result;
+                scores[iterationCount - warmupCount] = result;
               }
             } else {
               return 0;
@@ -111,8 +111,8 @@ public final class MchCommands implements Commands {
     dispatcher.register(
       literal(POST).executes(c -> {
         try {
-          for (final var result : results) {
-            socket.getOutputStream().write(doubleToBytes(result));
+          try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
+            out.writeObject(new Message.RunResult(scores));
           }
           socket.close();
         } catch (IOException e) {
@@ -133,7 +133,7 @@ public final class MchCommands implements Commands {
     final var warmupCount = options.warmupIterations();
     final var measurementCount = options.warmupIterations() + options.measurementIterations();
     final var time = TimeUnit.SECONDS.toNanos(options.time());
-    results = new double[options.measurementIterations()];
+    scores = new double[options.measurementIterations()];
 
     dispatcher.register(
       literal(START).executes(c -> {
@@ -174,7 +174,7 @@ public final class MchCommands implements Commands {
               System.out.println("Warmup iteration: " + result + " ns/op");
             } else {
               System.out.println("Measurement iteration: " + result + " ns/op");
-              results[iterationCount - warmupCount] = result;
+              scores[iterationCount - warmupCount] = result;
             }
 
             if (iterationCount < measurementCount - 1) {
@@ -200,8 +200,8 @@ public final class MchCommands implements Commands {
     dispatcher.register(
       literal(POST).executes(c -> {
         try {
-          for (final var result : results) {
-            socket.getOutputStream().write(doubleToBytes(result));
+          try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
+            out.writeObject(new Message.RunResult(scores));
           }
           socket.close();
         } catch (IOException e) {

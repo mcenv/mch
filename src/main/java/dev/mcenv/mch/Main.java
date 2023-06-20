@@ -7,11 +7,15 @@ import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static dev.mcenv.mch.Util.*;
@@ -101,15 +105,16 @@ public final class Main {
         final var thread = new Thread(() -> {
           try {
             final var client = server.accept();
-            try (final var in = client.getInputStream()) {
-              final var scores = new ArrayList<Double>();
-              final var buffer = new byte[Double.BYTES];
-              while (in.readNBytes(buffer, 0, Double.BYTES) == Double.BYTES) {
-                scores.add(bytesToDouble(buffer));
+            try (final var in = new ObjectInputStream(client.getInputStream())) {
+              final var object = in.readObject();
+              if (object instanceof Message.RunResult runResult) {
+                final var scores = runResults.computeIfAbsent(benchmark, k -> new RunResult(new ArrayList<>(), mode)).scores();
+                for (final var score : runResult.scores()) {
+                  scores.add(score);
+                }
               }
-              runResults.computeIfAbsent(benchmark, k -> new RunResult(new ArrayList<>(), mode)).scores().addAll(scores);
             }
-          } catch (final IOException e) {
+          } catch (final IOException | ClassNotFoundException e) {
             throw new IllegalStateException(e);
           }
         });
