@@ -128,7 +128,7 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
 }
 
 tasks.register<ProGuardTask>("optimizeJar") {
-  optimizeJar(10)
+  optimizeJar(20)
 }
 
 tasks.register<ProGuardTask>("developmentOptimizeJar") {
