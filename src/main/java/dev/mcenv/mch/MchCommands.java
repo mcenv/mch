@@ -15,10 +15,12 @@ import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 @SuppressWarnings("unused")
 public final class MchCommands implements Commands {
   private static final String START = "mch:start";
+  private static final String CHECK = "mch:check";
   private static final String LOOP = "mch:loop";
   private static final String POST = "mch:post";
   private static final String NOOP = "mch:noop";
 
+  private boolean maxCommandChainLengthExceeded = true;
   private long startTime;
   private int iterationCount;
   private int operationCount;
@@ -56,6 +58,7 @@ public final class MchCommands implements Commands {
       literal(START).executes(c -> dispatcher.execute("function #mch:setup", c.getSource()))
     );
 
+    registerConst(dispatcher, CHECK);
     registerConst(dispatcher, LOOP);
     registerConst(dispatcher, POST);
     registerConst(dispatcher, NOOP);
@@ -106,6 +109,7 @@ public final class MchCommands implements Commands {
       })
     );
 
+    registerConst(dispatcher, CHECK);
     registerConst(dispatcher, LOOP);
 
     dispatcher.register(
@@ -163,6 +167,13 @@ public final class MchCommands implements Commands {
     );
 
     dispatcher.register(
+      literal(CHECK).executes(c -> {
+        maxCommandChainLengthExceeded = false;
+        return 0;
+      })
+    );
+
+    dispatcher.register(
       literal(LOOP).executes(c -> {
         final var stopTime = System.nanoTime();
         if (stopTime - startTime >= time) {
@@ -201,7 +212,12 @@ public final class MchCommands implements Commands {
       literal(POST).executes(c -> {
         try {
           try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(new Message.RunResult(scores));
+            if (maxCommandChainLengthExceeded) {
+              System.err.println("maxCommandChainLength exceeded!");
+              out.writeObject(new Message.MaxCommandChainLengthExceeded());
+            } else {
+              out.writeObject(new Message.RunResult(scores));
+            }
           }
           socket.close();
         } catch (IOException e) {
