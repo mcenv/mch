@@ -23,7 +23,7 @@ record ServerProperties(
     final var properties = new Properties();
     final var path = Paths.get("server.properties");
 
-    if (Files.exists(path) && Files.isRegularFile(path)) {
+    if (Files.isRegularFile(path)) {
       try (final var in = Files.newInputStream(path)) {
         properties.load(in);
       }

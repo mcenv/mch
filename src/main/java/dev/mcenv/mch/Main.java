@@ -52,7 +52,7 @@ public final class Main {
 
   private static void validateEula() throws IOException {
     final var path = Paths.get("eula.txt");
-    if (Files.exists(path) && Files.isRegularFile(path)) {
+    if (Files.isRegularFile(path)) {
       try (final var in = Files.newInputStream(path)) {
         final var properties = new Properties();
         properties.load(in);
@@ -69,7 +69,7 @@ public final class Main {
     final String[] args
   ) throws IOException {
     final var mchConfigPath = Paths.get("mch-config.json");
-    if (Files.exists(mchConfigPath) && Files.isRegularFile(mchConfigPath)) {
+    if (Files.isRegularFile(mchConfigPath)) {
       return new GsonBuilder()
         .registerTypeAdapter(MchConfig.class, new MchConfig.Deserializer(args))
         .create()
