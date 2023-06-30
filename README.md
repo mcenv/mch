@@ -12,7 +12,7 @@
 ## Supported versions
 
 You can check the supported versions [here](https://github.com/mcenv/mch/blob/versions/versions.csv).
-(Automatically updated every 6 hours)
+(Automatically updated every day)
 
 ## Usages
 
