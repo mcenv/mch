@@ -2,7 +2,7 @@ name: Check
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
@@ -44,25 +44,14 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: versions
-      - uses: actions/github-script@v6
-        id: check
-        with:
-          script: |
-            const versions = require("./versions.json");
-            return versions["${{ matrix.version }}"]?.supported === true;
-      - if: steps.check.outputs.result == 'true'
-        run: echo "{}" > mch-results.json
-      - if: steps.check.outputs.result == 'false'
-        uses: actions/setup-java@v3
+      - uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: "17"
-      - if: steps.check.outputs.result == 'false'
-        uses: mcenv/setup-minecraft@v3
+      - uses: mcenv/setup-minecraft@v3
         with:
           version: ${{ matrix.version }}
-      - if: steps.check.outputs.result == 'false'
-        run: |
+      - run: |
           curl -L -o mch.jar https://github.com/mcenv/mch/releases/latest/download/mch.jar
           echo "eula=true" > eula.txt
           java -jar mch.jar --mc=$MINECRAFT
