@@ -20,6 +20,7 @@ record MchConfig(
   int forks,
   TimeUnit timeUnit,
   String mc,
+  Collection<Format> formats,
   Collection<String> jvmArgs,
   Collection<String> mcArgs,
   Collection<String> parsingBenchmarks,
@@ -32,6 +33,7 @@ record MchConfig(
   public static final String FORKS = "forks";
   public static final String TIME_UNIT = "time_unit";
   public static final String MC = "mc";
+  public static final String FORMATS = "formats";
   public static final String JVM_ARGS = "jvm_args";
   public static final String MC_ARGS = "mc_args";
   public static final String PARSING_BENCHMARKS = "parsing_benchmarks";
@@ -44,6 +46,7 @@ record MchConfig(
   public static final int FORKS_DEFAULT = 5;
   public static final TimeUnit TIME_UNIT_DEFAULT = TimeUnit.SECONDS;
   public static final String MC_DEFAULT = "server.jar";
+  public static final Collection<Format> FORMATS_DEFAULT = List.of();
   public static final String MC_ARGS_DEFAULT = "nogui";
 
   public static class Builder {
@@ -54,6 +57,7 @@ record MchConfig(
     private int forks = FORKS_DEFAULT;
     private TimeUnit timeUnit = TIME_UNIT_DEFAULT;
     private String mc = MC_DEFAULT;
+    private Collection<Format> formats = FORMATS_DEFAULT;
     private Collection<String> jvmArgs = List.of();
     private Collection<String> mcArgs = List.of(MC_ARGS_DEFAULT);
     private Collection<String> parsingBenchmarks = List.of();
@@ -72,6 +76,7 @@ record MchConfig(
       final var forksSpec = parser.accepts(FORKS).withOptionalArg().ofType(Integer.class);
       final var timeUnitSpec = parser.accepts(TIME_UNIT).withOptionalArg().ofType(String.class);
       final var mcSpec = parser.accepts(MC).withOptionalArg().ofType(String.class);
+      final var formatSpec = parser.accepts(FORMATS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var jvmArgsSpec = parser.accepts(JVM_ARGS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var mcArgsSpec = parser.accepts(MC_ARGS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var parsingBenchmarksSpec = parser.accepts(PARSING_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
@@ -109,6 +114,9 @@ record MchConfig(
       if (options.has(mcSpec)) {
         mc = options.valueOf(mcSpec);
       }
+      if (options.has(formatSpec)) {
+        formats = options.valuesOf(formatSpec).stream().map(Format::parse).toList();
+      }
       if (options.has(jvmArgsSpec)) {
         jvmArgs = options.valuesOf(jvmArgsSpec);
       }
@@ -132,6 +140,7 @@ record MchConfig(
         forks,
         timeUnit,
         mc,
+        formats,
         jvmArgs,
         mcArgs,
         parsingBenchmarks,
@@ -171,6 +180,9 @@ record MchConfig(
       }
       if (object.get(MC) != null) {
         super.mc = object.get(MC).getAsString();
+      }
+      if (object.get(FORMATS) != null) {
+        super.formats = object.get(FORMATS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).map(Format::parse).toList();
       }
       if (object.get(JVM_ARGS) != null) {
         super.jvmArgs = object.get(JVM_ARGS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();

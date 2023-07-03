@@ -48,6 +48,7 @@ You can check the supported versions [here](https://github.com/mcenv/mch/blob/ve
 | `forks`                  | Number of forks                                                   | `5`           |
 | `time_unit`              | Output time unit (`ns`, `us`, `ms`, `s`, `m`)                     | `s`           |
 | `mc`                     | Path to Minecraft server                                          | `server.jar`  |
+| `formats`                | Output formats (`json`, `md`)                                     | <code></code> |
 | `jvm_args`               | JVM arguments to use with forks                                   | <code></code> |
 | `mc_args`                | Minecraft arguments to use with forks                             | `nogui`       |
 | `parsing_benchmarks`     | Comma-separated list of commands for parsing benchmark            | <code></code> |
