@@ -49,6 +49,19 @@
       "type": "string",
       "default": "server.jar"
     },
+    "formats": {
+      "title": "Formats",
+      "description": "Output formats",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "json",
+          "md"
+        ]
+      },
+      "default": []
+    },
     "jvm_args": {
       "title": "JVM Arguments",
       "description": "JVM arguments to use with forks",

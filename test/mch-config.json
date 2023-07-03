@@ -4,6 +4,10 @@
   "time": 1,
   "forks": 2,
   "time_unit": "ns",
+  "formats": [
+    "json",
+    "md"
+  ],
   "parsing_benchmarks": [
     "seed",
     "execute run seed"
