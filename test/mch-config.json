@@ -2,9 +2,10 @@
   "warmup_iterations": 2,
   "measurement_iterations": 2,
   "time": 1,
-  "forks": 1,
+  "forks": 2,
   "time_unit": "ns",
   "execute_benchmarks": [
-    "test"
+    "a",
+    "b"
   ]
 }
