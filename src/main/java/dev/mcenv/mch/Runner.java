@@ -33,7 +33,7 @@ final class Runner {
   ) {
     this.mchConfig = mchConfig;
     this.mcVersion = mcVersion;
-    total = (mchConfig.parsingBenchmarks().size() + mchConfig.functionBenchmarks().size()) * mchConfig.forks();
+    total = (mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size() + mchConfig.functionBenchmarks().size()) * mchConfig.forks();
   }
 
   public void run() throws InterruptedException, IOException {
