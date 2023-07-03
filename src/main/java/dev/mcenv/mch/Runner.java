@@ -42,7 +42,9 @@ final class Runner {
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
       iterationRun(Options.Iteration.Mode.PARSING, benchmark);
     }
-
+    for (final var benchmark : mchConfig.executeBenchmarks()) {
+      iterationRun(Options.Iteration.Mode.EXECUTE, benchmark);
+    }
     for (final var benchmark : mchConfig.functionBenchmarks()) {
       iterationRun(Options.Iteration.Mode.FUNCTION, benchmark);
     }

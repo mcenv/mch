@@ -78,6 +78,15 @@
       },
       "default": []
     },
+    "execute_benchmarks": {
+      "title": "Execute Benchmarks",
+      "description": "Comma-separated list of commands for execute benchmark",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
     "function_benchmarks": {
       "title": "Function Benchmarks",
       "description": "Comma-separated list of function names for function benchmark",
