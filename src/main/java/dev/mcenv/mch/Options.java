@@ -15,9 +15,10 @@ sealed interface Options permits Options.Dry, Options.Iteration {
         Integer.parseInt(args[4]),
         Integer.parseInt(args[5]),
         Integer.parseInt(args[6]),
-        Float.parseFloat(args[7]),
-        Iteration.Mode.parse(args[8]),
-        args[9]
+        Integer.parseInt(args[7]),
+        Integer.parseInt(args[8]),
+        Iteration.Mode.parse(args[9]),
+        args[10]
       );
       default -> throw new IllegalArgumentException("Unknown tag: " + tag);
     };
@@ -42,21 +43,23 @@ sealed interface Options permits Options.Dry, Options.Iteration {
     int forks,
     int fork,
     int port,
-    float progress,
+    int done,
+    int total,
     Mode mode,
     String benchmark
   ) implements Options {
     @Override
     public String toString() {
       return String.format(
-        "iteration,%d,%d,%d,%d,%d,%d,%.2f,%s,%s",
+        "iteration,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s",
         warmupIterations,
         measurementIterations,
         time,
         forks,
         fork,
         port,
-        progress,
+        done,
+        total,
         mode,
         benchmark
       );

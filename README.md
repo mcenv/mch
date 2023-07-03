@@ -62,6 +62,7 @@ You can check the supported versions [here](https://github.com/mcenv/mch/blob/ve
 | `#mch:setup.iteration`    | To be run before each iteration of the execute benchmark |
 | `#mch:teardown.trial`     | To be run after each run of the execute benchmark        |
 | `#mch:teardown.iteration` | To be run after each iteration of the execute benchmark  |
+| `#mch:teardown`           | To be run once after the benchmarks                      |
 
 ## Commands
 

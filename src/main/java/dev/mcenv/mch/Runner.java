@@ -64,8 +64,8 @@ final class Runner {
     final Options.Iteration.Mode mode,
     final String benchmark
   ) throws IOException, InterruptedException {
-    final var base = runResults.size() * mchConfig.forks();
-    final var total = (float) ((mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size()) * mchConfig.forks());
+    var done = 0;
+    final var total = (mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size()) * mchConfig.forks();
     for (var fork = 0; fork < mchConfig.forks(); ++fork) {
       try (final var server = new ServerSocket(0)) {
         final var thread = new Thread(() -> {
@@ -87,7 +87,6 @@ final class Runner {
         thread.start();
 
         final var port = server.getLocalPort();
-        final var progress = (100.0f * (base + fork)) / total;
         final var options = new Options.Iteration(
           mchConfig.warmupIterations(),
           mchConfig.measurementIterations(),
@@ -95,7 +94,8 @@ final class Runner {
           mchConfig.forks(),
           fork,
           port,
-          progress,
+          done++,
+          total,
           mode,
           benchmark
         ).toString();

@@ -115,6 +115,10 @@ public final class MchCommands implements Commands {
     dispatcher.register(
       literal(POST).executes(c -> {
         try {
+          if (options.done() + 1 == options.total()) {
+            dispatcher.execute("function #mch:teardown", c.getSource());
+          }
+
           try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
             out.writeObject(new Message.RunResult(scores));
           }
@@ -252,6 +256,7 @@ public final class MchCommands implements Commands {
   private void printIteration(
     final Options.Iteration options
   ) {
-    System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks() + " (" + String.format("%.2f", options.progress()) + "%)");
+    final var progress = (double) options.done() / (double) options.total();
+    System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks() + " (" + String.format("%.2f", progress) + "%)");
   }
 }
