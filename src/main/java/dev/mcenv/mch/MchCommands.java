@@ -115,10 +115,6 @@ public final class MchCommands implements Commands {
     dispatcher.register(
       literal(POST).executes(c -> {
         try {
-          if (options.done() + 1 == options.total()) {
-            dispatcher.execute("function #mch:teardown", c.getSource());
-          }
-
           try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
             out.writeObject(new Message.RunResult(scores));
           }
@@ -215,6 +211,10 @@ public final class MchCommands implements Commands {
     dispatcher.register(
       literal(POST).executes(c -> {
         try {
+          if (options.done() + 1 == options.total()) {
+            dispatcher.execute("function #mch:teardown", c.getSource());
+          }
+
           try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
             if (maxCommandChainLengthExceeded) {
               System.err.println("maxCommandChainLength exceeded!");
