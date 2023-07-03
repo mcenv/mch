@@ -1,7 +1,9 @@
 package dev.mcenv.mch;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mcenv.spy.Commands;
 
@@ -20,6 +22,7 @@ public final class MchCommands implements Commands {
   private static final String POST = "mch:post";
   private static final String NOOP = "mch:noop";
 
+  private Socket socket;
   private boolean maxCommandChainLengthExceeded = true;
   private long startTime;
   private int iterationCount;
@@ -36,15 +39,18 @@ public final class MchCommands implements Commands {
     final CommandDispatcher<Object> dispatcher,
     final String args
   ) {
+    registerConst(dispatcher, NOOP);
+
     final var options = Options.parse(args);
     if (options instanceof Options.Dry) {
       registerDry(dispatcher);
-    } else if (options instanceof Options.Iteration iteration) {
+    } else if (options instanceof Options.Iteration iterationOptions) {
       try {
-        switch (iteration.mode()) {
-          case PARSING -> registerParsingIteration(dispatcher, iteration);
-          case EXECUTE -> registerExecuteIteration(dispatcher, iteration);
-          case FUNCTION -> registerFunctionIteration(dispatcher, iteration);
+        socket = new Socket((String) null, iterationOptions.port());
+        switch (iterationOptions.mode()) {
+          case PARSING -> registerParsingIteration(dispatcher, iterationOptions);
+          case EXECUTE -> registerExecuteIteration(dispatcher, iterationOptions);
+          case FUNCTION -> registerFunctionIteration(dispatcher, iterationOptions);
         }
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -62,14 +68,12 @@ public final class MchCommands implements Commands {
     registerConst(dispatcher, CHECK);
     registerConst(dispatcher, LOOP);
     registerConst(dispatcher, POST);
-    registerConst(dispatcher, NOOP);
   }
 
   private void registerParsingIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {
-    final var socket = new Socket((String) null, options.port());
     final var warmupCount = options.warmupIterations();
     final var measurementCount = options.warmupIterations() + options.measurementIterations();
     final var time = TimeUnit.SECONDS.toNanos(options.time());
@@ -78,7 +82,7 @@ public final class MchCommands implements Commands {
     final var command = options.benchmark();
 
     dispatcher.register(
-      literal(START).executes(c -> {
+      literal(START).executes((VoidCommand) c -> {
         printIteration(options);
 
         var startTime = System.nanoTime();
@@ -99,7 +103,7 @@ public final class MchCommands implements Commands {
                 scores[iterationCount - warmupCount] = result;
               }
             } else {
-              return 0;
+              return;
             }
 
             ++iterationCount;
@@ -114,7 +118,7 @@ public final class MchCommands implements Commands {
     registerConst(dispatcher, LOOP);
 
     dispatcher.register(
-      literal(POST).executes(c -> {
+      literal(POST).executes((VoidCommand) c -> {
         try {
           try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
             out.writeObject(new Message.RunResult(scores));
@@ -123,25 +127,21 @@ public final class MchCommands implements Commands {
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
-        return 0;
       })
     );
-
-    registerConst(dispatcher, NOOP);
   }
 
   private void registerExecuteIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {
-    final var socket = new Socket((String) null, options.port());
     final var warmupCount = options.warmupIterations();
     final var measurementCount = options.warmupIterations() + options.measurementIterations();
     final var time = TimeUnit.SECONDS.toNanos(options.time());
     scores = new double[options.measurementIterations()];
 
     dispatcher.register(
-      literal(START).executes(c -> {
+      literal(START).executes((VoidCommand) c -> {
         printIteration(options);
 
         var startTime = System.nanoTime();
@@ -163,7 +163,7 @@ public final class MchCommands implements Commands {
                 scores[iterationCount - warmupCount] = result;
               }
             } else {
-              return 0;
+              return;
             }
 
             ++iterationCount;
@@ -178,7 +178,7 @@ public final class MchCommands implements Commands {
     registerConst(dispatcher, LOOP);
 
     dispatcher.register(
-      literal(POST).executes(c -> {
+      literal(POST).executes((VoidCommand) c -> {
         try {
           try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
             out.writeObject(new Message.RunResult(scores));
@@ -187,28 +187,30 @@ public final class MchCommands implements Commands {
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
-        return 0;
       })
     );
-
-    registerConst(dispatcher, NOOP);
   }
 
   private void registerFunctionIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {
-    final var socket = new Socket((String) null, options.port());
     final var warmupCount = options.warmupIterations();
     final var measurementCount = options.warmupIterations() + options.measurementIterations();
     final var time = TimeUnit.SECONDS.toNanos(options.time());
     scores = new double[options.measurementIterations()];
 
     dispatcher.register(
-      literal(START).executes(c -> {
+      literal(START).executes((VoidCommand) c -> {
         printIteration(options);
 
-        parseFunctions(dispatcher, c.getSource(), options.benchmark());
+        final var source = c.getSource();
+        run = dispatcher.parse("function " + options.benchmark(), source);
+        loop = dispatcher.parse("function mch:loop", source);
+        post = dispatcher.parse("function mch:post", source);
+        setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
+        teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
+
         dispatcher.execute(setupIteration);
 
         startTime = System.nanoTime();
@@ -226,20 +228,17 @@ public final class MchCommands implements Commands {
         }
         dispatcher.execute(loop);
         ++operationCount;
-
-        return 0;
       })
     );
 
     dispatcher.register(
-      literal(CHECK).executes(c -> {
+      literal(CHECK).executes((VoidCommand) c -> {
         maxCommandChainLengthExceeded = false;
-        return 0;
       })
     );
 
     dispatcher.register(
-      literal(LOOP).executes(c -> {
+      literal(LOOP).executes((VoidCommand) c -> {
         final var stopTime = System.nanoTime();
         if (stopTime - startTime >= time) {
           if (iterationCount < measurementCount) {
@@ -257,7 +256,7 @@ public final class MchCommands implements Commands {
               dispatcher.execute(setupIteration);
             }
           } else {
-            return 0;
+            return;
           }
 
           ++iterationCount;
@@ -268,13 +267,11 @@ public final class MchCommands implements Commands {
         dispatcher.execute(run);
         dispatcher.execute(loop);
         ++operationCount;
-
-        return 0;
       })
     );
 
     dispatcher.register(
-      literal(POST).executes(c -> {
+      literal(POST).executes((VoidCommand) c -> {
         try {
           if (options.done() + 1 == options.total()) {
             dispatcher.execute("function #mch:teardown", c.getSource());
@@ -292,30 +289,16 @@ public final class MchCommands implements Commands {
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
-        return 0;
       })
     );
-
-    registerConst(dispatcher, NOOP);
-  }
-
-  private void parseFunctions(
-    final CommandDispatcher<Object> dispatcher,
-    final Object source,
-    final String benchmark
-  ) {
-    run = dispatcher.parse("function " + benchmark, source);
-    loop = dispatcher.parse("function mch:loop", source);
-    post = dispatcher.parse("function mch:post", source);
-    setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
-    teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
   }
 
   private void registerConst(
     final CommandDispatcher<Object> dispatcher,
     final String name
   ) {
-    dispatcher.register(literal(name).executes(c -> 0));
+    dispatcher.register(literal(name).executes((VoidCommand) c -> {
+    }));
   }
 
   private void printIteration(
@@ -323,5 +306,16 @@ public final class MchCommands implements Commands {
   ) {
     final var progress = 100.0 * options.done() / (double) options.total();
     System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks() + " (" + String.format("%.2f", progress) + "%)");
+  }
+
+  @FunctionalInterface
+  private interface VoidCommand extends Command<Object> {
+    void runVoid(CommandContext<Object> context) throws CommandSyntaxException;
+
+    @Override
+    default int run(CommandContext<Object> context) throws CommandSyntaxException {
+      runVoid(context);
+      return 0;
+    }
   }
 }
