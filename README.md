@@ -51,6 +51,7 @@ You can check the supported versions [here](https://github.com/mcenv/mch/blob/ve
 | `jvm_args`               | JVM arguments to use with forks                                   | <code></code> |
 | `mc_args`                | Minecraft arguments to use with forks                             | `nogui`       |
 | `parsing_benchmarks`     | Comma-separated list of commands for parsing benchmark            | <code></code> |
+| `execute_benchmarks`     | Comma-separated list of commands for execute benchmark            | <code></code> |
 | `function_benchmarks`    | Comma-separated list of function **names** for function benchmark | <code></code> |
 
 ## Fixtures

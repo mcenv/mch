@@ -43,6 +43,7 @@ public final class MchCommands implements Commands {
       try {
         switch (iteration.mode()) {
           case PARSING -> registerParsingIteration(dispatcher, iteration);
+          case EXECUTE -> registerExecuteIteration(dispatcher, iteration);
           case FUNCTION -> registerFunctionIteration(dispatcher, iteration);
         }
       } catch (IOException e) {
@@ -85,6 +86,70 @@ public final class MchCommands implements Commands {
 
         while (true) {
           dispatcher.parse(command, source);
+          final var stopTime = System.nanoTime();
+          ++operationCount;
+
+          if (stopTime - startTime >= time) {
+            if (iterationCount < measurementCount) {
+              final var result = (double) (stopTime - startTime) / (double) operationCount;
+              if (iterationCount < warmupCount) {
+                System.out.println("Warmup iteration: " + result + " ns/op");
+              } else {
+                System.out.println("Measurement iteration: " + result + " ns/op");
+                scores[iterationCount - warmupCount] = result;
+              }
+            } else {
+              return 0;
+            }
+
+            ++iterationCount;
+            operationCount = 0;
+            startTime = System.nanoTime();
+          }
+        }
+      })
+    );
+
+    registerConst(dispatcher, CHECK);
+    registerConst(dispatcher, LOOP);
+
+    dispatcher.register(
+      literal(POST).executes(c -> {
+        try {
+          try (final var out = new ObjectOutputStream(socket.getOutputStream())) {
+            out.writeObject(new Message.RunResult(scores));
+          }
+          socket.close();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        return 0;
+      })
+    );
+
+    registerConst(dispatcher, NOOP);
+  }
+
+  private void registerExecuteIteration(
+    final CommandDispatcher<Object> dispatcher,
+    final Options.Iteration options
+  ) throws IOException {
+    final var socket = new Socket((String) null, options.port());
+    final var warmupCount = options.warmupIterations();
+    final var measurementCount = options.warmupIterations() + options.measurementIterations();
+    final var time = TimeUnit.SECONDS.toNanos(options.time());
+    scores = new double[options.measurementIterations()];
+
+    dispatcher.register(
+      literal(START).executes(c -> {
+        printIteration(options);
+
+        var startTime = System.nanoTime();
+        final var source = c.getSource();
+        final var command = dispatcher.parse(options.benchmark(), source);
+
+        while (true) {
+          dispatcher.execute(command);
           final var stopTime = System.nanoTime();
           ++operationCount;
 

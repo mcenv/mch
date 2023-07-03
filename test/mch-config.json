@@ -4,6 +4,14 @@
   "time": 1,
   "forks": 2,
   "time_unit": "ns",
+  "parsing_benchmarks": [
+    "seed",
+    "execute run seed"
+  ],
+  "execute_benchmarks": [
+    "seed",
+    "execute run seed"
+  ],
   "function_benchmarks": [
     "a",
     "b"
