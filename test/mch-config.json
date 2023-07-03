@@ -4,7 +4,7 @@
   "time": 1,
   "forks": 2,
   "time_unit": "ns",
-  "execute_benchmarks": [
+  "function_benchmarks": [
     "a",
     "b"
   ]

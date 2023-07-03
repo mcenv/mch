@@ -43,7 +43,7 @@ public final class MchCommands implements Commands {
       try {
         switch (iteration.mode()) {
           case PARSING -> registerParsingIteration(dispatcher, iteration);
-          case EXECUTE -> registerExecuteIteration(dispatcher, iteration);
+          case FUNCTION -> registerFunctionIteration(dispatcher, iteration);
         }
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -129,7 +129,7 @@ public final class MchCommands implements Commands {
     registerConst(dispatcher, NOOP);
   }
 
-  private void registerExecuteIteration(
+  private void registerFunctionIteration(
     final CommandDispatcher<Object> dispatcher,
     final Options.Iteration options
   ) throws IOException {
