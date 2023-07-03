@@ -67,7 +67,7 @@ sealed interface Options permits Options.Dry, Options.Iteration {
 
     public enum Mode {
       PARSING("parsing"),
-      EXECUTE("execute");
+      FUNCTION("function");
 
       private final String name;
 
@@ -82,7 +82,7 @@ sealed interface Options permits Options.Dry, Options.Iteration {
       ) {
         return switch (string) {
           case "parsing" -> PARSING;
-          case "execute" -> EXECUTE;
+          case "function" -> FUNCTION;
           default -> throw new IllegalArgumentException("Unknown mode: " + string);
         };
       }
