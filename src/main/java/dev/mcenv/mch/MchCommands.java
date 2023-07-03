@@ -256,7 +256,7 @@ public final class MchCommands implements Commands {
   private void printIteration(
     final Options.Iteration options
   ) {
-    final var progress = (double) options.done() / (double) options.total();
+    final var progress = 100.0 * options.done() / (double) options.total();
     System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks() + " (" + String.format("%.2f", progress) + "%)");
   }
 }

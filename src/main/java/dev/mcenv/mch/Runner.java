@@ -24,6 +24,8 @@ final class Runner {
   private final MchConfig mchConfig;
   private final String mcVersion;
   private final Map<String, RunResult> runResults = new LinkedHashMap<>();
+  private final int total;
+  private int done = 0;
 
   public Runner(
     final MchConfig mchConfig,
@@ -31,6 +33,7 @@ final class Runner {
   ) {
     this.mchConfig = mchConfig;
     this.mcVersion = mcVersion;
+    total = (mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size()) * mchConfig.forks();
   }
 
   public void run() throws InterruptedException, IOException {
@@ -64,8 +67,6 @@ final class Runner {
     final Options.Iteration.Mode mode,
     final String benchmark
   ) throws IOException, InterruptedException {
-    var done = 0;
-    final var total = (mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size()) * mchConfig.forks();
     for (var fork = 0; fork < mchConfig.forks(); ++fork) {
       try (final var server = new ServerSocket(0)) {
         final var thread = new Thread(() -> {
