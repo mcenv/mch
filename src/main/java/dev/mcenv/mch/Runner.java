@@ -7,13 +7,12 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 final class Runner {
   private final MchConfig mchConfig;
   private final String mcVersion;
-  private final Map<String, RunResult> runResults = new LinkedHashMap<>();
+  private final List<RunResult> runResults = new ArrayList<>();
   private final int total;
   private int done = 0;
 
@@ -30,13 +29,13 @@ final class Runner {
     dryRun();
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
-      iterationRun(Options.Iteration.Mode.PARSING, benchmark);
+      iterationRun(benchmark, Options.Iteration.Mode.PARSING);
     }
     for (final var benchmark : mchConfig.executeBenchmarks()) {
-      iterationRun(Options.Iteration.Mode.EXECUTE, benchmark);
+      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE);
     }
     for (final var benchmark : mchConfig.functionBenchmarks()) {
-      iterationRun(Options.Iteration.Mode.FUNCTION, benchmark);
+      iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);
     }
 
     for (final var format : mchConfig.formats()) {
@@ -58,9 +57,10 @@ final class Runner {
   }
 
   private void iterationRun(
-    final Options.Iteration.Mode mode,
-    final String benchmark
+    final String benchmark,
+    final Options.Iteration.Mode mode
   ) throws IOException, InterruptedException {
+    final var scores = new ArrayList<Double>();
     for (var fork = 0; fork < mchConfig.forks(); ++fork) {
       try (final var server = new ServerSocket(0)) {
         final var thread = new Thread(() -> {
@@ -69,7 +69,6 @@ final class Runner {
             try (final var in = new ObjectInputStream(client.getInputStream())) {
               final var object = in.readObject();
               if (object instanceof Message.RunResult runResult) {
-                final var scores = runResults.computeIfAbsent(benchmark, k -> new RunResult(new ArrayList<>(), mode)).scores();
                 for (final var score : runResult.scores()) {
                   scores.add(score);
                 }
@@ -107,5 +106,6 @@ final class Runner {
         thread.join();
       }
     }
+    runResults.add(new RunResult(benchmark, mode, scores));
   }
 }

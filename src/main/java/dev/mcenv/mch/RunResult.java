@@ -3,7 +3,8 @@ package dev.mcenv.mch;
 import java.util.Collection;
 
 record RunResult(
-  Collection<Double> scores,
-  Options.Iteration.Mode mode
+  String benchmark,
+  Options.Iteration.Mode mode,
+  Collection<Double> scores
 ) {
 }

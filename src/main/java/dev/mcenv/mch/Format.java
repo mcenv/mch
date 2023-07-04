@@ -10,7 +10,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +28,7 @@ sealed interface Format permits Format.Json, Format.Md {
   void write(
     final MchConfig mchConfig,
     final String mcVersion,
-    final Map<String, RunResult> runResults
+    final List<RunResult> runResults
   ) throws IOException;
 
   final class Json implements Format {
@@ -41,7 +41,7 @@ sealed interface Format permits Format.Json, Format.Md {
     public void write(
       final MchConfig mchConfig,
       final String mcVersion,
-      final Map<String, RunResult> runResults
+      final List<RunResult> runResults
     ) throws IOException {
       final var unit = String.format("%s/op", abbreviate(mchConfig.timeUnit()));
       try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
@@ -62,14 +62,11 @@ sealed interface Format permits Format.Json, Format.Md {
         final var measurementIterations = mchConfig.measurementIterations();
         final var measurementTime = String.format("%d %s", mchConfig.time(), abbreviate(TimeUnit.SECONDS));
         final var entries = runResults
-          .entrySet()
           .stream()
-          .map(entry -> {
-            final var benchmark = entry.getKey();
-            final var runResult = entry.getValue();
+          .map(runResult -> {
             try {
               return new Results.Result(
-                benchmark,
+                runResult.benchmark(),
                 runResult.mode().toString(),
                 mchConfig.measurementIterations() * mchConfig.forks(),
                 convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
@@ -117,18 +114,16 @@ sealed interface Format permits Format.Json, Format.Md {
     public void write(
       final MchConfig mchConfig,
       final String mcVersion,
-      final Map<String, RunResult> runResults
+      final List<RunResult> runResults
     ) throws IOException {
       final var unit = String.format("%s/op", abbreviate(mchConfig.timeUnit()));
       try (final var out = new OutputStreamWriter(new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.md"))))) {
         out.write("### Results\n");
         out.write("| Benchmark | Mode | Count | Score | Error | Unit |\n");
         out.write("| :-------- | :--: | ----: | ----: | :---- | :--- |\n");
-        for (final var entry : runResults.entrySet()) {
-          final var benchmark = entry.getKey();
-          final var runResult = entry.getValue();
+        for (final var runResult : runResults) {
           out.write(String.format("| %s | %s | %d | %f | ± %f | %s |\n",
-            benchmark,
+            runResult.benchmark(),
             runResult.mode(),
             mchConfig.measurementIterations() * mchConfig.forks(),
             convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
