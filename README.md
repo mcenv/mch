@@ -33,31 +33,31 @@ Automatically updated every day.
 
 ```json
 {
-   "$schema": "https://raw.githubusercontent.com/mcenv/mch/main/mch-config-schema.json",
-   "warmup_iterations": 5,
-   "measurement_iterations": 5,
-   "time": 10,
-   "forks": 5,
-   "time_unit": "ns",
-   "mc": "server.jar",
-   "formats": [
-      "json",
-      "md"
-   ],
-   "jvm_args": [],
-   "mc_args": [
-      "nogui"
-   ],
-   "parsing_benchmarks": [
-      "seed"
-   ],
-   "execute_benchmarks": [
-      "seed"
-   ],
-   "function_benchmarks": [
-      "f",
-      "g"
-   ]
+  "$schema": "https://raw.githubusercontent.com/mcenv/mch/main/mch-config-schema.json",
+  "warmup_iterations": 5,
+  "measurement_iterations": 5,
+  "time": 10,
+  "forks": 5,
+  "time_unit": "ns",
+  "mc": "server.jar",
+  "formats": [
+    "json",
+    "md"
+  ],
+  "jvm_args": [],
+  "mc_args": [
+    "nogui"
+  ],
+  "parsing_benchmarks": [
+    "seed"
+  ],
+  "execute_benchmarks": [
+    "seed"
+  ],
+  "function_benchmarks": [
+    "f",
+    "g"
+  ]
 }
 ```
 
