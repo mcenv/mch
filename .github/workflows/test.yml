@@ -39,3 +39,4 @@ jobs:
           path: |
             test/mch-results.json
             test/mch-results.md
+      - run: cat test/mch-results.md >> $GITHUB_STEP_SUMMARY
