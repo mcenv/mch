@@ -6,6 +6,7 @@ import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -66,14 +67,13 @@ sealed interface Format permits Format.Json, Format.Md {
           .map(entry -> {
             final var benchmark = entry.getKey();
             final var runResult = entry.getValue();
-            final var values = runResult.scores().stream().mapToDouble(x -> x).toArray();
             try {
               return new Results.Result(
                 benchmark,
                 runResult.mode().toString(),
                 mchConfig.measurementIterations() * mchConfig.forks(),
-                convert(Statistics.mean(values), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
-                convert(Statistics.error(values), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
+                convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
+                convert(Statistics.error(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
                 unit
               );
             } catch (NotStrictlyPositiveException e) {
@@ -119,8 +119,23 @@ sealed interface Format permits Format.Json, Format.Md {
       final String mcVersion,
       final Map<String, RunResult> runResults
     ) throws IOException {
-      try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.md")))) {
-        // TODO
+      final var unit = String.format("%s/op", abbreviate(mchConfig.timeUnit()));
+      try (final var out = new OutputStreamWriter(new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.md"))))) {
+        out.write("### Results\n");
+        out.write("| Benchmark | Mode | Count | Score | Error | Unit |\n");
+        out.write("| :-------- | :--: | ----: | ----: | :---- | :--- |\n");
+        for (final var entry : runResults.entrySet()) {
+          final var benchmark = entry.getKey();
+          final var runResult = entry.getValue();
+          out.write(String.format("| %s | %s | %d | %f | ± %f | %s |\n",
+            benchmark,
+            runResult.mode(),
+            mchConfig.measurementIterations() * mchConfig.forks(),
+            convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
+            convert(Statistics.error(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
+            unit
+          ));
+        }
       }
     }
   }
