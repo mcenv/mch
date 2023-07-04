@@ -5,34 +5,61 @@
 <samp>mch</samp> is a highly-compatible lightweight benchmark harness for Minecraft: Java Edition[^1].
 
 > **Warning**
-> - Back up your world. It is recommended to create a world specifically for benchmarking.
-> - Ensure that the benchmarked functions are [idempotent](https://en.wikipedia.org/wiki/Idempotence); otherwise, the benchmark results will be inaccurate.
+> - Use a world dedicated for benchmarking.
+> - Ensure that the benchmark target is [idempotent](https://en.wikipedia.org/wiki/Idempotence) for accurate results.
 > - Remember that the benchmark results may be affected by Minecraft/JVM/OS/HW.
+> - Do not replace functions in `mch` namespace.
 
-## Supported versions
+## [Supported versions](https://github.com/mcenv/mch/blob/versions/versions.csv)
 
-You can check the supported versions [here](https://github.com/mcenv/mch/blob/versions/versions.csv).
-(Automatically updated every day)
+Automatically updated every day.
 
-## Usages
+## Usage
 
-### Basic usage
-
-1. Download [`mch.jar`](https://github.com/mcenv/mch/releases/latest/download/mch.jar) and place it in the same directory as `server.jar`.
-2. Run `java -jar mch.jar --function_benchmarks=a,b`. This will start the benchmarks for functions `a` and `b`.
-3. The benchmark results will be dumped to `mch-results.json`.
-
-### Advanced usage
-
-1. Download [`mch.jar`](https://github.com/mcenv/mch/releases/latest/download/mch.jar).
-2. Create `mch-config.json` with the following content in the same directory as `mch.jar` and add options to it.
+1. Download [<samp>mch.jar</samp>](https://github.com/mcenv/mch/releases/latest/download/mch.jar) into the same directory as <samp>server.jar</samp>.
+2. Create <samp>mch-config.json</samp> with the following content in the directory and add options to it.
    ```json
    {
      "$schema": "https://raw.githubusercontent.com/mcenv/mch/main/mch-config-schema.json"
    }
    ```
-3. Run `java -jar mch.jar`. This will start the benchmarks with the options in `mch-config.json`.
-4. The benchmark results will be dumped to `mch-results.json`.
+3. Run the following command to start the benchmarks.
+   ```shell
+   java -jar mch.jar
+   ```
+4. The benchmark results will be dumped to <samp>mch-results.*format*</samp>.
+
+### Example
+
+```json
+{
+   "$schema": "https://raw.githubusercontent.com/mcenv/mch/main/mch-config-schema.json",
+   "warmup_iterations": 5,
+   "measurement_iterations": 5,
+   "time": 10,
+   "forks": 5,
+   "time_unit": "ns",
+   "mc": "server.jar",
+   "formats": [
+      "json",
+      "md"
+   ],
+   "jvm_args": [],
+   "mc_args": [
+      "nogui"
+   ],
+   "parsing_benchmarks": [
+      "seed"
+   ],
+   "execute_benchmarks": [
+      "seed"
+   ],
+   "function_benchmarks": [
+      "f",
+      "g"
+   ]
+}
+```
 
 ## Requirements
 
