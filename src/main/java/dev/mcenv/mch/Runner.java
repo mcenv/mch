@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class Runner {
+  private final static String BASELINE = "mch:baseline";
   private final MchConfig mchConfig;
   private final String mcVersion;
   private final List<RunResult> runResults = new ArrayList<>();
@@ -34,8 +35,11 @@ final class Runner {
     for (final var benchmark : mchConfig.executeBenchmarks()) {
       iterationRun(benchmark, Options.Iteration.Mode.EXECUTE);
     }
-    for (final var benchmark : mchConfig.functionBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);
+    if (!mchConfig.functionBenchmarks().isEmpty()) {
+      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION);
+      for (final var benchmark : mchConfig.functionBenchmarks()) {
+        iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);
+      }
     }
 
     for (final var format : mchConfig.formats()) {
