@@ -96,9 +96,12 @@ tasks.withType<ProcessResources> {
   }
 }
 
-fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
+fun ProGuardTask.optimizeJar(optimizationPasses: Int, obfuscate: Boolean) {
   dependsOn(tasks.getByName("shadowJar"))
 
+  if (!obfuscate) {
+    dontobfuscate()
+  }
   injars(layout.buildDirectory.file("libs/mch-shadow.jar"))
   outjars(layout.buildDirectory.file("libs/mch.jar"))
 
@@ -128,11 +131,11 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
 }
 
 tasks.register<ProGuardTask>("optimizeJar") {
-  optimizeJar(20)
+  optimizeJar(20, true)
 }
 
 tasks.register<ProGuardTask>("developmentOptimizeJar") {
-  optimizeJar(0)
+  optimizeJar(0, false)
 }
 
 publishing {
