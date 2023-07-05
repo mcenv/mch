@@ -1,12 +1,100 @@
 package dev.mcenv.mch;
 
-import java.io.DataOutput;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 sealed interface Nbt {
   byte id();
 
-  void write(final DataOutput out) throws IOException;
+  static Nbt load(final DataInput in, final byte id) throws IOException {
+    switch (id) {
+      case 1 -> {
+        return new Byte(in.readByte());
+      }
+      case 2 -> {
+        return new Short(in.readShort());
+      }
+      case 3 -> {
+        return new Int(in.readInt());
+      }
+      case 4 -> {
+        return new Long(in.readLong());
+      }
+      case 5 -> {
+        return new Float(in.readFloat());
+      }
+      case 6 -> {
+        return new Double(in.readDouble());
+      }
+      case 7 -> {
+        final var size = in.readInt();
+        final var values = new byte[size];
+        in.readFully(values);
+        return new ByteArray(values);
+      }
+      case 8 -> {
+        return new String(in.readUTF());
+      }
+      case 9 -> {
+        final var type = in.readByte();
+        final var size = in.readInt();
+        final var elements = new ArrayList<Nbt>(size);
+        for (var i = 0; i < size; ++i) {
+          elements.add(load(in, type));
+        }
+        return new List(elements);
+      }
+      case 10 -> {
+        final var elements = new HashMap<java.lang.String, Nbt>();
+        byte type;
+        while ((type = in.readByte()) != 0) {
+          final var name = in.readUTF();
+          elements.put(name, load(in, type));
+        }
+        return new Compound(elements);
+      }
+      case 11 -> {
+        final var size = in.readInt();
+        final var values = new int[size];
+        for (var i = 0; i < size; ++i) {
+          values[i] = in.readInt();
+        }
+        return new IntArray(values);
+      }
+      case 12 -> {
+        final var size = in.readInt();
+        final var values = new long[size];
+        for (var i = 0; i < size; ++i) {
+          values[i] = in.readLong();
+        }
+        return new LongArray(values);
+      }
+      default -> throw new IllegalStateException("Unexpected id: " + id);
+    }
+  }
+
+  static void write(final Nbt nbt, final Path path) throws IOException {
+    try (final var out = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(path))))) {
+      out.writeByte(nbt.id());
+      out.writeUTF("");
+      nbt.store(out);
+    }
+  }
+
+  static Compound read(final Path path) throws IOException {
+    try (final var in = new DataInputStream(new BufferedInputStream(new GZIPInputStream(Files.newInputStream(path))))) {
+      final var type = in.readByte();
+      in.readUTF();
+      return (Compound) load(in, type);
+    }
+  }
+
+  void store(final DataOutput out) throws IOException;
 
   record Byte(
     byte value
@@ -17,7 +105,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeByte(value);
     }
   }
@@ -31,7 +119,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeShort(value);
     }
   }
@@ -45,7 +133,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeInt(value);
     }
   }
@@ -59,7 +147,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeLong(value);
     }
   }
@@ -73,7 +161,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeFloat(value);
     }
   }
@@ -87,7 +175,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeDouble(value);
     }
   }
@@ -101,7 +189,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeInt(values.length);
       out.write(values);
     }
@@ -116,7 +204,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeUTF(value);
     }
   }
@@ -130,11 +218,11 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeByte(elements.get(0).id());
       out.writeInt(elements.size());
       for (final Nbt nbt : elements) {
-        nbt.write(out);
+        nbt.store(out);
       }
     }
   }
@@ -148,11 +236,11 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       for (final var entry : elements.entrySet()) {
         out.writeByte(entry.getValue().id());
         out.writeUTF(entry.getKey());
-        entry.getValue().write(out);
+        entry.getValue().store(out);
       }
       out.writeByte(0);
     }
@@ -167,7 +255,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeInt(values.length);
       for (final var value : values) {
         out.writeInt(value);
@@ -184,7 +272,7 @@ sealed interface Nbt {
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
+    public void store(final DataOutput out) throws IOException {
       out.writeInt(values.length);
       for (final var value : values) {
         out.writeLong(value);
