@@ -32,6 +32,9 @@ final class Runner {
   }
 
   public void run() throws InterruptedException, IOException {
+    final var benchmarkDataPacks = mchConfig.functionBenchmarks().keySet();
+    modifyLevelStorage(benchmarkDataPacks, null);
+
     dryRun();
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
@@ -42,9 +45,7 @@ final class Runner {
       iterationRun(benchmark, Options.Iteration.Mode.EXECUTE);
     }
 
-    final var benchmarkDataPacks = mchConfig.functionBenchmarks().keySet();
     if (!mchConfig.functionBenchmarks().isEmpty()) {
-      modifyLevelStorage(benchmarkDataPacks, null);
       iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION);
 
       for (final var entry : mchConfig.functionBenchmarks().entrySet()) {
@@ -66,7 +67,8 @@ final class Runner {
   ) throws IOException {
     final var levelDat = Paths.get(levelName, "level.dat");
     final var levelStorage = Nbt.read(levelDat);
-    final var dataPacks = (Nbt.Compound) levelStorage.elements().get("DataPacks");
+    final var data = (Nbt.Compound) levelStorage.elements().get("Data");
+    final var dataPacks = (Nbt.Compound) data.elements().get("DataPacks");
 
     final var enabledDataPacks = new LinkedHashSet<Nbt.String>();
     for (final var element : ((Nbt.List) dataPacks.elements().get("Enabled")).elements()) {
