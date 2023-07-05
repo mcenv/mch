@@ -17,11 +17,11 @@
     "execute run seed"
   ],
   "function_benchmarks": {
-    "a": [
+    "file/a": [
       "a0",
       "a1"
     ],
-    "b": [
+    "file/b": [
       "b0",
       "b1"
     ]
