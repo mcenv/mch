@@ -219,7 +219,7 @@ sealed interface Nbt {
 
     @Override
     public void store(final DataOutput out) throws IOException {
-      out.writeByte(elements.get(0).id());
+      out.writeByte(elements.isEmpty() ? 0 : elements.get(0).id());
       out.writeInt(elements.size());
       for (final Nbt nbt : elements) {
         nbt.store(out);
