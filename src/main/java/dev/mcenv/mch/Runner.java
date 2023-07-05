@@ -32,10 +32,10 @@ final class Runner {
   }
 
   public void run() throws InterruptedException, IOException {
+    dryRun();
+
     final var benchmarkDataPacks = mchConfig.functionBenchmarks().keySet();
     modifyLevelStorage(benchmarkDataPacks, null);
-
-    dryRun();
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
       iterationRun(benchmark, Options.Iteration.Mode.PARSING);
@@ -89,7 +89,7 @@ final class Runner {
 
     dataPacks.elements().put("Enabled", new Nbt.List(enabledDataPacks.stream().toList()));
     dataPacks.elements().put("Disabled", new Nbt.List(disabledDataPacks.stream().toList()));
-    System.out.println("Overwriting DataPacks in level.dat");
+    System.out.println("Overwriting Data.DataPacks in level.dat");
     Nbt.write(levelStorage, levelDat);
   }
 
