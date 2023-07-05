@@ -40,7 +40,7 @@ final class Runner {
     if (!mchConfig.functionBenchmarks().isEmpty()) {
       iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION);
       for (final var entry : mchConfig.functionBenchmarks().entrySet()) {
-        final var datapack = entry.getKey(); // TODO
+        final var dataPack = entry.getKey(); // TODO
         final var benchmarks = entry.getValue();
         for (final var benchmark : benchmarks) {
           iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);

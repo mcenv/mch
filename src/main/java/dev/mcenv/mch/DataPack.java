@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-final class Datapack {
+final class DataPack {
   public static String install(
     final MchConfig mchConfig,
     final ServerProperties serverProperties
@@ -27,18 +27,18 @@ final class Datapack {
       throw new IllegalStateException("No server.jar was found");
     }
 
-    final var datapack = Paths.get(serverProperties.levelName(), "datapacks", "mch.zip");
-    Files.createDirectories(datapack.getParent());
+    final var dataPack = Paths.get(serverProperties.levelName(), "datapacks", "mch.zip");
+    Files.createDirectories(dataPack.getParent());
 
     final byte[] actualHash;
-    if (Files.isRegularFile(datapack)) {
+    if (Files.isRegularFile(dataPack)) {
       final MessageDigest digest;
       try {
         digest = MessageDigest.getInstance("SHA-256");
       } catch (NoSuchAlgorithmException e) {
         throw new RuntimeException(e);
       }
-      try (final var in = new DigestInputStream(new BufferedInputStream(Files.newInputStream(datapack)), digest)) {
+      try (final var in = new DigestInputStream(new BufferedInputStream(Files.newInputStream(dataPack)), digest)) {
         in.readAllBytes();
       }
       actualHash = digest.digest();
@@ -52,9 +52,9 @@ final class Datapack {
     }
 
     if (!Arrays.equals(actualHash, expectedHash)) {
-      System.out.printf("Installing datapack in %s\n", datapack);
+      System.out.printf("Installing mch.zip in %s\n", dataPack);
 
-      try (final var out = new BufferedOutputStream(Files.newOutputStream(datapack))) {
+      try (final var out = new BufferedOutputStream(Files.newOutputStream(dataPack))) {
         try (final var in = Main.class.getResourceAsStream("/mch.zip")) {
           Objects.requireNonNull(in).transferTo(out);
         }
