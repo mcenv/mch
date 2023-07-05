@@ -210,7 +210,7 @@ sealed interface Nbt {
   }
 
   record List(
-    java.util.List<Nbt> elements
+    java.util.List<? extends Nbt> elements
   ) implements Nbt {
     @Override
     public byte id() {
