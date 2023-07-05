@@ -21,12 +21,6 @@ jobs:
           java-version: "17"
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
-      - name: Publish
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
