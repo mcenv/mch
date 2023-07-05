@@ -62,7 +62,7 @@ final class Runner {
   }
 
   private void modifyLevelStorage(
-    final Set<String> benchmarkDatapacks,
+    final Set<String> benchmarkDataPacks,
     final String enabledDatapack
   ) throws IOException {
     final var levelDat = Paths.get(levelName, "level.dat");
@@ -72,7 +72,7 @@ final class Runner {
 
     final var enabledDataPacks = new LinkedHashSet<Nbt.String>();
     for (final var element : ((Nbt.List) dataPacks.elements().get("Enabled")).elements()) {
-      if (!benchmarkDatapacks.contains(((Nbt.String) element).value())) {
+      if (!benchmarkDataPacks.contains(((Nbt.String) element).value())) {
         enabledDataPacks.add((Nbt.String) element);
       }
     }
@@ -82,13 +82,18 @@ final class Runner {
 
     final var disabledDataPacks = new LinkedHashSet<Nbt.String>();
     for (final var element : ((Nbt.List) dataPacks.elements().get("Disabled")).elements()) {
-      if (benchmarkDatapacks.contains(((Nbt.String) element).value())) {
-        disabledDataPacks.add(((Nbt.String) element));
-      }
+      disabledDataPacks.add(((Nbt.String) element));
+    }
+    for (final var benchmarkDataPack : benchmarkDataPacks) {
+      disabledDataPacks.add(new Nbt.String(benchmarkDataPack));
+    }
+    if (enabledDatapack != null) {
+      disabledDataPacks.remove(new Nbt.String(enabledDatapack));
     }
 
     dataPacks.elements().put("Enabled", new Nbt.List(enabledDataPacks.stream().toList()));
     dataPacks.elements().put("Disabled", new Nbt.List(disabledDataPacks.stream().toList()));
+
     System.out.println("Overwriting Data.DataPacks in level.dat");
     Nbt.write(levelStorage, levelDat);
   }
