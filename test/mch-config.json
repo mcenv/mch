@@ -16,8 +16,14 @@
     "seed",
     "execute run seed"
   ],
-  "function_benchmarks": [
-    "a",
-    "b"
-  ]
+  "function_benchmarks": {
+    "a": [
+      "a0",
+      "a1"
+    ],
+    "b": [
+      "b0",
+      "b1"
+    ]
+  }
 }

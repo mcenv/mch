@@ -9,7 +9,9 @@ import joptsimple.OptionParser;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static dev.mcenv.mch.Util.parseTimeUnit;
 
@@ -25,7 +27,7 @@ record MchConfig(
   Collection<String> mcArgs,
   Collection<String> parsingBenchmarks,
   Collection<String> executeBenchmarks,
-  Collection<String> functionBenchmarks
+  Map<String, Collection<String>> functionBenchmarks
 ) {
   public static final String WARMUP_ITERATIONS = "warmup_iterations";
   public static final String MEASUREMENT_ITERATIONS = "measurement_iterations";
@@ -62,7 +64,7 @@ record MchConfig(
     private Collection<String> mcArgs = List.of(MC_ARGS_DEFAULT);
     private Collection<String> parsingBenchmarks = List.of();
     private Collection<String> executeBenchmarks = List.of();
-    private Collection<String> functionBenchmarks = List.of();
+    private Map<String, Collection<String>> functionBenchmarks = Map.of();
 
     public Builder(final String[] args) {
       this.args = args;
@@ -81,7 +83,6 @@ record MchConfig(
       final var mcArgsSpec = parser.accepts(MC_ARGS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var parsingBenchmarksSpec = parser.accepts(PARSING_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var executeBenchmarksSpec = parser.accepts(EXECUTE_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
-      final var functionBenchmarkSpec = parser.accepts(FUNCTION_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var options = parser.parse(args);
 
       if (options.has(warmupIterationsSpec)) {
@@ -128,9 +129,6 @@ record MchConfig(
       }
       if (options.has(executeBenchmarksSpec)) {
         executeBenchmarks = options.valuesOf(executeBenchmarksSpec);
-      }
-      if (options.has(functionBenchmarkSpec)) {
-        functionBenchmarks = options.valuesOf(functionBenchmarkSpec);
       }
 
       return new MchConfig(
@@ -197,7 +195,7 @@ record MchConfig(
         super.executeBenchmarks = object.get(EXECUTE_BENCHMARKS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
       }
       if (object.get(FUNCTION_BENCHMARKS) != null) {
-        super.functionBenchmarks = object.get(FUNCTION_BENCHMARKS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
+        super.functionBenchmarks = object.get(FUNCTION_BENCHMARKS).getAsJsonObject().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList()));
       }
 
       return build();

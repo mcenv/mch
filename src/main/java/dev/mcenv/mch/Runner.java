@@ -32,13 +32,19 @@ final class Runner {
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
       iterationRun(benchmark, Options.Iteration.Mode.PARSING);
     }
+
     for (final var benchmark : mchConfig.executeBenchmarks()) {
       iterationRun(benchmark, Options.Iteration.Mode.EXECUTE);
     }
+
     if (!mchConfig.functionBenchmarks().isEmpty()) {
       iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION);
-      for (final var benchmark : mchConfig.functionBenchmarks()) {
-        iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);
+      for (final var entry : mchConfig.functionBenchmarks().entrySet()) {
+        final var datapack = entry.getKey(); // TODO
+        final var benchmarks = entry.getValue();
+        for (final var benchmark : benchmarks) {
+          iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);
+        }
       }
     }
 
