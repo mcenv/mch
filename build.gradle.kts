@@ -115,8 +115,8 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int, obfuscate: Boolean) {
     }
   libraryjars(configurations.compileClasspath.get().asFileTree.find { it.endsWith("brigadier-$brigadierVersion.jar") })
 
-  keep("class dev.mcenv.mch.Datapack\$Version { *; }")
-  keep("class dev.mcenv.mch.Datapack\$PackVersion { *; }")
+  keep("class dev.mcenv.mch.DataPack\$Version { *; }")
+  keep("class dev.mcenv.mch.DataPack\$PackVersion { *; }")
   keep("class dev.mcenv.mch.MchConfig { *; }")
   keep("class dev.mcenv.mch.Results { *; }")
   keep("class dev.mcenv.mch.Results\$Result { *; }")
