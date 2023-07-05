@@ -7,11 +7,14 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 final class Runner {
   private final static String BASELINE = "mch:baseline";
   private final MchConfig mchConfig;
+  private final String levelName;
   private final String mcVersion;
   private final List<RunResult> runResults = new ArrayList<>();
   private final int total;
@@ -19,9 +22,11 @@ final class Runner {
 
   public Runner(
     final MchConfig mchConfig,
+    final String levelName,
     final String mcVersion
   ) {
     this.mchConfig = mchConfig;
+    this.levelName = levelName;
     this.mcVersion = mcVersion;
     total = (mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size() + mchConfig.functionBenchmarks().size()) * mchConfig.forks();
   }
@@ -37,12 +42,14 @@ final class Runner {
       iterationRun(benchmark, Options.Iteration.Mode.EXECUTE);
     }
 
+    final var benchmarkDataPacks = mchConfig.functionBenchmarks().keySet();
     if (!mchConfig.functionBenchmarks().isEmpty()) {
+      modifyLevelStorage(benchmarkDataPacks, null);
       iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION);
+
       for (final var entry : mchConfig.functionBenchmarks().entrySet()) {
-        final var dataPack = entry.getKey(); // TODO
-        final var benchmarks = entry.getValue();
-        for (final var benchmark : benchmarks) {
+        modifyLevelStorage(benchmarkDataPacks, entry.getKey());
+        for (final var benchmark : entry.getValue()) {
           iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);
         }
       }
@@ -51,6 +58,36 @@ final class Runner {
     for (final var format : mchConfig.formats()) {
       format.write(mchConfig, mcVersion, runResults);
     }
+  }
+
+  private void modifyLevelStorage(
+    final Set<String> benchmarkDatapacks,
+    final String enabledDatapack
+  ) throws IOException {
+    final var levelDat = Paths.get(levelName, "level.dat");
+    final var levelStorage = Nbt.read(levelDat);
+    final var dataPacks = (Nbt.Compound) levelStorage.elements().get("DataPacks");
+
+    final var enabledDataPacks = new LinkedHashSet<Nbt.String>();
+    for (final var element : ((Nbt.List) dataPacks.elements().get("Enabled")).elements()) {
+      if (!benchmarkDatapacks.contains(((Nbt.String) element).value())) {
+        enabledDataPacks.add((Nbt.String) element);
+      }
+    }
+    if (enabledDatapack != null) {
+      enabledDataPacks.add(new Nbt.String(enabledDatapack));
+    }
+
+    final var disabledDataPacks = new LinkedHashSet<Nbt.String>();
+    for (final var element : ((Nbt.List) dataPacks.elements().get("Disabled")).elements()) {
+      if (benchmarkDatapacks.contains(((Nbt.String) element).value())) {
+        disabledDataPacks.add(((Nbt.String) element));
+      }
+    }
+
+    dataPacks.elements().put("Enabled", new Nbt.List(enabledDataPacks.stream().toList()));
+    dataPacks.elements().put("Disabled", new Nbt.List(disabledDataPacks.stream().toList()));
+    Nbt.write(levelStorage, levelDat);
   }
 
   private void dryRun() throws IOException, InterruptedException {
