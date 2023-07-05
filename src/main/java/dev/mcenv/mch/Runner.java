@@ -87,6 +87,7 @@ final class Runner {
 
     dataPacks.elements().put("Enabled", new Nbt.List(enabledDataPacks.stream().toList()));
     dataPacks.elements().put("Disabled", new Nbt.List(disabledDataPacks.stream().toList()));
+    System.out.println("Overwriting DataPacks in level.dat");
     Nbt.write(levelStorage, levelDat);
   }
 
