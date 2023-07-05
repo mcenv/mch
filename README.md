@@ -67,20 +67,20 @@ Automatically updated every day.
 
 ## Options
 
-| Name                     | Description                                                       | Default       |
-|:-------------------------|:------------------------------------------------------------------|:--------------|
-| `warmup_iterations`      | Number of warmup iterations                                       | `5`           |
-| `measurement_iterations` | Number of measurement iterations                                  | `5`           |
-| `time`                   | Duration of iterations in seconds                                 | `10`          |
-| `forks`                  | Number of forks                                                   | `5`           |
-| `time_unit`              | Output time unit (`ns`, `us`, `ms`, `s`, `m`)                     | `s`           |
-| `mc`                     | Path to Minecraft server                                          | `server.jar`  |
-| `formats`                | Output formats (`json`, `md`)                                     | <code></code> |
-| `jvm_args`               | JVM arguments to use with forks                                   | <code></code> |
-| `mc_args`                | Minecraft arguments to use with forks                             | `nogui`       |
-| `parsing_benchmarks`     | Comma-separated list of commands for parsing benchmark            | <code></code> |
-| `execute_benchmarks`     | Comma-separated list of commands for execute benchmark            | <code></code> |
-| `function_benchmarks`    | Comma-separated list of function **names** for function benchmark | <code></code> |
+| Name                     | Description                                   | Default       |
+|:-------------------------|:----------------------------------------------|:--------------|
+| `warmup_iterations`      | Number of warmup iterations                   | `5`           |
+| `measurement_iterations` | Number of measurement iterations              | `5`           |
+| `time`                   | Duration of iterations in seconds             | `10`          |
+| `forks`                  | Number of forks                               | `5`           |
+| `time_unit`              | Output time unit (`ns`, `us`, `ms`, `s`, `m`) | `s`           |
+| `mc`                     | Path to Minecraft server                      | `server.jar`  |
+| `formats`                | Output formats (`json`, `md`)                 | <code></code> |
+| `jvm_args`               | JVM arguments to use with forks               | <code></code> |
+| `mc_args`                | Minecraft arguments to use with forks         | `nogui`       |
+| `parsing_benchmarks`     | Commands for parsing benchmark                | <code></code> |
+| `execute_benchmarks`     | Commands for execute benchmark                | <code></code> |
+| `function_benchmarks`    | Function **names** for function benchmark     | <code></code> |
 
 ## Fixtures
 

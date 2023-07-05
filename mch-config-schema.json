@@ -84,7 +84,7 @@
     },
     "parsing_benchmarks": {
       "title": "Parsing Benchmarks",
-      "description": "Comma-separated list of commands for parsing benchmark",
+      "description": "Commands for parsing benchmark",
       "type": "array",
       "items": {
         "type": "string"
@@ -93,7 +93,7 @@
     },
     "execute_benchmarks": {
       "title": "Execute Benchmarks",
-      "description": "Comma-separated list of commands for execute benchmark",
+      "description": "Commands for execute benchmark",
       "type": "array",
       "items": {
         "type": "string"
@@ -102,7 +102,7 @@
     },
     "function_benchmarks": {
       "title": "Function Benchmarks",
-      "description": "Comma-separated list of function names for function benchmark",
+      "description": "Function names for function benchmark",
       "type": "array",
       "items": {
         "type": "string"
