@@ -7,8 +7,8 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 final class Runner {
@@ -16,7 +16,7 @@ final class Runner {
   private final MchConfig mchConfig;
   private final String levelName;
   private final String mcVersion;
-  private final List<RunResult> runResults = new ArrayList<>();
+  private final Collection<RunResult> runResults = new ArrayList<>();
   private final int total;
   private int done = 0;
 
@@ -38,20 +38,21 @@ final class Runner {
     modifyLevelStorage(benchmarkDataPacks, null);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.PARSING);
+      iterationRun(benchmark, Options.Iteration.Mode.PARSING, null);
     }
 
     for (final var benchmark : mchConfig.executeBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE);
+      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, null);
     }
 
     if (!mchConfig.functionBenchmarks().isEmpty()) {
-      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION);
+      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, null);
 
       for (final var entry : mchConfig.functionBenchmarks().entrySet()) {
-        modifyLevelStorage(benchmarkDataPacks, entry.getKey());
+        final var dataPack = entry.getKey();
+        modifyLevelStorage(benchmarkDataPacks, dataPack);
         for (final var benchmark : entry.getValue()) {
-          iterationRun(benchmark, Options.Iteration.Mode.FUNCTION);
+          iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack);
         }
       }
     }
@@ -113,7 +114,8 @@ final class Runner {
 
   private void iterationRun(
     final String benchmark,
-    final Options.Iteration.Mode mode
+    final Options.Iteration.Mode mode,
+    final String group
   ) throws IOException, InterruptedException {
     final var scores = new ArrayList<Double>();
     for (var fork = 0; fork < mchConfig.forks(); ++fork) {
@@ -161,6 +163,6 @@ final class Runner {
         thread.join();
       }
     }
-    runResults.add(new RunResult(benchmark, mode, scores));
+    runResults.add(new RunResult(group, benchmark, mode, scores));
   }
 }

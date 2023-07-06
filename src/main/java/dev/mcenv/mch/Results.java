@@ -20,6 +20,7 @@ record Results(
   Collection<Result> results
 ) {
   public record Result(
+    String group,
     String benchmark,
     String mode,
     int count,
