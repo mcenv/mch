@@ -48,10 +48,11 @@ final class Runner {
     total += mchConfig.parsingBenchmarks().size();
     total += mchConfig.executeBenchmarks().size();
     for (final var dataPack : mchConfig.functionBenchmarks()) {
-      if (benchmarkDataPacks.contains(dataPack)) {
+      final var prefixedDataPack = "file/" + dataPack;
+      if (benchmarkDataPacks.contains(prefixedDataPack)) {
         final var benchmarks = collectBenchmarkFunctions(dataPack);
         total += benchmarks.size();
-        benchmarksByDataPack.put(dataPack, benchmarks);
+        benchmarksByDataPack.put(prefixedDataPack, benchmarks);
       } else {
         System.err.println("Warning: Data pack " + dataPack + " is not for benchmarking");
       }
@@ -68,12 +69,13 @@ final class Runner {
       iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, null);
     }
 
-    if (!mchConfig.functionBenchmarks().isEmpty()) {
+    if (!benchmarksByDataPack.isEmpty()) {
       iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, null);
 
-      for (final var dataPack : mchConfig.functionBenchmarks()) {
+      for (final var entry : benchmarksByDataPack.entrySet()) {
+        final var dataPack = entry.getKey();
+        final var benchmarks = entry.getValue();
         modifyLevelStorage(benchmarkDataPacks, dataPack);
-        final var benchmarks = benchmarksByDataPack.get(dataPack);
         for (final var benchmark : benchmarks) {
           iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack);
         }
@@ -115,7 +117,7 @@ final class Runner {
     final String dataPack
   ) throws IOException {
     final var functions = new ArrayList<String>();
-    final var root = Paths.get(levelName, "datapacks", dataPack.substring("file/".length()), "data");
+    final var root = Paths.get(levelName, "datapacks", dataPack, "data");
     final var visitor = new SimpleFileVisitor<Path>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
