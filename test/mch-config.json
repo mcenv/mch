@@ -16,14 +16,8 @@
     "seed",
     "say |"
   ],
-  "function_benchmarks": {
-    "file/a": [
-      "a0",
-      "a1"
-    ],
-    "file/b": [
-      "b0",
-      "b1"
-    ]
-  }
+  "function_benchmarks": [
+    "file/a",
+    "file/b"
+  ]
 }
