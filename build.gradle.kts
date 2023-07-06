@@ -117,6 +117,8 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
   keep("class dev.mcenv.mch.MchConfig { *; }")
   keep("class dev.mcenv.mch.Results { *; }")
   keep("class dev.mcenv.mch.Results\$Result { *; }")
+  keep("class dev.mcenv.mch.Runner\$PackMetadata { *; }")
+  keep("class dev.mcenv.mch.Runner\$PackMetadataSection { *; }")
   keep("class dev.mcenv.mch.Main { public static void main(java.lang.String[]); }")
   keep("class dev.mcenv.mch.MchCommands { public void register(com.mojang.brigadier.CommandDispatcher, java.lang.String); }")
   keep("class dev.mcenv.spy.Agent { public static void premain(java.lang.String, java.lang.instrument.Instrumentation); }")
