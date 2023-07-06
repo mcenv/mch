@@ -15,12 +15,14 @@ import java.util.regex.Pattern;
 final class Runner {
   private final static String BASELINE = "mch:baseline";
   private final static Pattern RESOURCE_LOCATION = Pattern.compile("^([a-z0-9_.-]+)/functions/([a-z0-9/._-]+)\\.mcfunction$");
+  private final static FileSystem FILE_SYSTEM = FileSystems.getDefault();
+  private final static PathMatcher MCFUNCTION_MATCHER = FILE_SYSTEM.getPathMatcher("glob:*/functions/**.mcfunction");
 
   private final MchConfig mchConfig;
   private final String levelName;
   private final String mcVersion;
   private final Collection<RunResult> runResults = new ArrayList<>();
-  private int total = 0;
+  private int total = 1; // for baseline
   private int done = 0;
 
   public Runner(
@@ -80,17 +82,14 @@ final class Runner {
     final var functions = new ArrayList<String>();
     final var root = Paths.get(levelName, "datapacks", dataPack.substring("file/".length()), "data");
     final var visitor = new SimpleFileVisitor<Path>() {
-      private final FileSystem fileSystem = FileSystems.getDefault();
-      private final PathMatcher mcfunctionMatcher = fileSystem.getPathMatcher("glob:*/functions/**.mcfunction");
-
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         final var relativePath = root.relativize(file);
-        if (mcfunctionMatcher.matches(relativePath)) {
+        if (MCFUNCTION_MATCHER.matches(relativePath)) {
           try (final var reader = new BufferedReader(new FileReader(file.toFile()))) {
             final var line = reader.readLine();
             if ("# @benchmark".equals(line)) {
-              final var invariantSeparatorsPathString = relativePath.toString().replace(fileSystem.getSeparator(), "/");
+              final var invariantSeparatorsPathString = relativePath.toString().replace(FILE_SYSTEM.getSeparator(), "/");
               final var matcher = RESOURCE_LOCATION.matcher(invariantSeparatorsPathString);
               if (matcher.matches()) {
                 final var namespace = matcher.group(1);
