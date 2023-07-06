@@ -154,8 +154,7 @@ public final class MchCommands implements Commands {
         while (true) {
           try {
             dispatcher.execute(command);
-          } catch (final CommandSyntaxException e) {
-            System.out.println(e.getMessage());
+          } catch (final CommandSyntaxException ignored) {
           }
           final var stopTime = System.nanoTime();
           ++operationCount;
