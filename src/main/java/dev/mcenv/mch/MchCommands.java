@@ -14,6 +14,7 @@ import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 
 @SuppressWarnings("unused")
 public final class MchCommands implements Commands {
+  private static final String SETUP = "mch:setup";
   private static final String START = "mch:start";
   private static final String CHECK = "mch:check";
   private static final String LOOP = "mch:loop";
@@ -59,10 +60,8 @@ public final class MchCommands implements Commands {
   private void registerDry(
     final CommandDispatcher<Object> dispatcher
   ) {
-    dispatcher.register(
-      literal(START).executes(c -> dispatcher.execute("function #mch:setup", c.getSource()))
-    );
-
+    dispatcher.register(literal(SETUP).executes(c -> dispatcher.execute("function #mch:setup", c.getSource())));
+    registerConst(dispatcher, START);
     registerConst(dispatcher, CHECK);
     registerConst(dispatcher, LOOP);
     registerConst(dispatcher, POST);
@@ -78,6 +77,8 @@ public final class MchCommands implements Commands {
     scores = new double[options.measurementIterations()];
 
     final var command = options.benchmark();
+
+    registerConst(dispatcher, SETUP);
 
     dispatcher.register(
       literal(START).executes(c -> {
@@ -113,6 +114,7 @@ public final class MchCommands implements Commands {
     );
 
     registerConst(dispatcher, CHECK);
+
     registerConst(dispatcher, LOOP);
 
     dispatcher.register(
@@ -138,6 +140,8 @@ public final class MchCommands implements Commands {
     final var measurementCount = options.warmupIterations() + options.measurementIterations();
     final var time = TimeUnit.SECONDS.toNanos(options.time());
     scores = new double[options.measurementIterations()];
+
+    registerConst(dispatcher, SETUP);
 
     dispatcher.register(
       literal(START).executes(c -> {
@@ -174,6 +178,7 @@ public final class MchCommands implements Commands {
     );
 
     registerConst(dispatcher, CHECK);
+
     registerConst(dispatcher, LOOP);
 
     dispatcher.register(
@@ -199,6 +204,8 @@ public final class MchCommands implements Commands {
     final var measurementCount = options.warmupIterations() + options.measurementIterations();
     final var time = TimeUnit.SECONDS.toNanos(options.time());
     scores = new double[options.measurementIterations()];
+
+    registerConst(dispatcher, SETUP);
 
     dispatcher.register(
       literal(START).executes(c -> {
