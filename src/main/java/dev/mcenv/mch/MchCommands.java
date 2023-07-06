@@ -152,7 +152,11 @@ public final class MchCommands implements Commands {
         final var command = dispatcher.parse(options.benchmark(), source);
 
         while (true) {
-          dispatcher.execute(command);
+          try {
+            dispatcher.execute(command);
+          } catch (final CommandSyntaxException e) {
+            System.out.println(e.getMessage());
+          }
           final var stopTime = System.nanoTime();
           ++operationCount;
 
