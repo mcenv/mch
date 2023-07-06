@@ -14,7 +14,7 @@
   ],
   "execute_benchmarks": [
     "seed",
-    "say |"
+    "data modify storage _ _ set value '|'"
   ],
   "function_benchmarks": [
     "file/a",
