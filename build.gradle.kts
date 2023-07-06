@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "dev.mcenv"
-version = "0.12.0"
+version = "0.13.1"
 val brigadierVersion = "1.1.8"
 
 repositories {
