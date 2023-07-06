@@ -2,14 +2,14 @@ package dev.mcenv.mch;
 
 import dev.mcenv.spy.Spy;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
 
 final class Runner {
   private final static String BASELINE = "mch:baseline";
@@ -34,7 +34,7 @@ final class Runner {
   public void run() throws InterruptedException, IOException {
     dryRun();
 
-    final var benchmarkDataPacks = mchConfig.functionBenchmarks().keySet();
+    final var benchmarkDataPacks = new HashSet<>(mchConfig.functionBenchmarks());
     modifyLevelStorage(benchmarkDataPacks, null, false);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
@@ -48,10 +48,10 @@ final class Runner {
     if (!mchConfig.functionBenchmarks().isEmpty()) {
       iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, null);
 
-      for (final var entry : mchConfig.functionBenchmarks().entrySet()) {
-        final var dataPack = entry.getKey();
+      for (final var dataPack : mchConfig.functionBenchmarks()) {
         modifyLevelStorage(benchmarkDataPacks, dataPack, true);
-        for (final var benchmark : entry.getValue()) {
+        final var benchmarks = collectBenchmarkFunctions(dataPack);
+        for (final var benchmark : benchmarks) {
           iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack);
         }
       }
@@ -60,6 +60,32 @@ final class Runner {
     for (final var format : mchConfig.formats()) {
       format.write(mchConfig, mcVersion, runResults);
     }
+  }
+
+  private Collection<String> collectBenchmarkFunctions(
+    final String dataPack
+  ) throws IOException {
+    final var functions = new ArrayList<String>();
+    final var root = Paths.get(levelName, "datapacks", dataPack, "data");
+    final var visitor = new SimpleFileVisitor<Path>() {
+      private final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*/functions/**/*.mcfunction");
+
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        final var path = root.relativize(file);
+        if (matcher.matches(path)) {
+          try (final var reader = new BufferedReader(new FileReader(file.toFile()))) {
+            final var line = reader.readLine();
+            if ("# @benchmark".equals(line)) {
+              functions.add(path.toString());
+            }
+          }
+        }
+        return FileVisitResult.CONTINUE;
+      }
+    };
+    Files.walkFileTree(root, visitor);
+    return functions;
   }
 
   private void modifyLevelStorage(
