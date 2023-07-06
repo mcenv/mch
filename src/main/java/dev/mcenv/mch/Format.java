@@ -124,7 +124,7 @@ sealed interface Format permits Format.Json, Format.Md {
         out.write("| :---- | :-------- | :--: | ----: | ----: | :---- | :--- |\n");
         for (final var runResult : runResults) {
           out.write(String.format("| %s | %s | %s | %d | %f | ± %f | %s |\n",
-            runResult.group(),
+            runResult.group() == null ? "" : runResult.group(),
             runResult.benchmark(),
             runResult.mode(),
             mchConfig.measurementIterations() * mchConfig.forks(),
