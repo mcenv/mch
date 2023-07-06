@@ -66,7 +66,7 @@ final class Runner {
     final String dataPack
   ) throws IOException {
     final var functions = new ArrayList<String>();
-    final var root = Paths.get(levelName, "datapacks", dataPack, "data");
+    final var root = Paths.get(levelName, "datapacks", dataPack.substring("file/".length()), "data");
     final var visitor = new SimpleFileVisitor<Path>() {
       private final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*/functions/**/*.mcfunction");
 
