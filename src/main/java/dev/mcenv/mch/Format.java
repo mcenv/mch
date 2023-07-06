@@ -121,7 +121,7 @@ sealed interface Format permits Format.Json, Format.Md {
       try (final var out = new OutputStreamWriter(new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.md"))))) {
         out.write("### Results\n");
         out.write("| Group | Benchmark | Mode | Count | Score | Error | Unit |\n");
-        out.write("| :---- | :-------- | :--: | ----: | ----: | :---- | :--- |\n");
+        out.write("| :---- | :-------- | :--: | ----: | ----: | ----: | :--- |\n");
         for (final var runResult : runResults) {
           out.write(String.format("| %s | %s | %s | %d | %f | ± %f | %s |\n",
             escape(runResult.group() == null ? "" : runResult.group()),
