@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class Runner {
+  private final static String FILE_PREFIX = "file/";
   private final static String BASELINE = "mch:baseline";
   private final static Pattern RESOURCE_LOCATION = Pattern.compile("^([a-z0-9_.-]+)/functions/([a-z0-9/._-]+)\\.mcfunction$");
   private final static FileSystem FILE_SYSTEM = FileSystems.getDefault();
@@ -48,7 +49,7 @@ final class Runner {
     total += mchConfig.parsingBenchmarks().size();
     total += mchConfig.executeBenchmarks().size();
     for (final var dataPack : mchConfig.functionBenchmarks()) {
-      final var prefixedDataPack = "file/" + dataPack;
+      final var prefixedDataPack = FILE_PREFIX + dataPack;
       if (benchmarkDataPacks.contains(prefixedDataPack)) {
         final var benchmarks = collectBenchmarkFunctions(dataPack);
         total += benchmarks.size();
@@ -77,7 +78,7 @@ final class Runner {
         final var benchmarks = entry.getValue();
         modifyLevelStorage(benchmarkDataPacks, dataPack);
         for (final var benchmark : benchmarks) {
-          iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack);
+          iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack.substring(FILE_PREFIX.length()));
         }
       }
     }
@@ -101,7 +102,7 @@ final class Runner {
           try (final var reader = Files.newBufferedReader(packMetadataPath)) {
             final var packMetadata = gson.fromJson(reader, PackMetadata.class);
             if (Boolean.TRUE.equals(packMetadata.pack.mch)) {
-              return Stream.of("file/" + dataPacksRoot.relativize(packMetadataPath.getParent()));
+              return Stream.of(FILE_PREFIX + dataPacksRoot.relativize(packMetadataPath.getParent()));
             } else {
               return Stream.of();
             }
