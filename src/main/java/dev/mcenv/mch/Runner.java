@@ -1,5 +1,7 @@
 package dev.mcenv.mch;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.GsonBuilder;
 import dev.mcenv.spy.Spy;
 
 import java.io.BufferedReader;
@@ -11,6 +13,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class Runner {
   private final static String BASELINE = "mch:baseline";
@@ -38,17 +42,22 @@ final class Runner {
   public void run() throws InterruptedException, IOException {
     dryRun();
 
+    final var benchmarkDataPacks = collectBenchmarkDataPacks();
+    final var benchmarksByDataPack = new LinkedHashMap<String, Collection<String>>();
+
     total += mchConfig.parsingBenchmarks().size();
     total += mchConfig.executeBenchmarks().size();
-    final var benchmarksByDataPack = new LinkedHashMap<String, Collection<String>>();
     for (final var dataPack : mchConfig.functionBenchmarks()) {
-      final var benchmarks = collectBenchmarkFunctions(dataPack);
-      total += benchmarks.size();
-      benchmarksByDataPack.put(dataPack, benchmarks);
+      if (benchmarkDataPacks.contains(dataPack)) {
+        final var benchmarks = collectBenchmarkFunctions(dataPack);
+        total += benchmarks.size();
+        benchmarksByDataPack.put(dataPack, benchmarks);
+      } else {
+        System.err.println("Warning: Data pack " + dataPack + " is not for benchmarking");
+      }
     }
     total *= mchConfig.forks();
 
-    final var benchmarkDataPacks = benchmarksByDataPack.keySet();
     modifyLevelStorage(benchmarkDataPacks, null);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
@@ -73,6 +82,32 @@ final class Runner {
 
     for (final var format : mchConfig.formats()) {
       format.write(mchConfig, mcVersion, runResults);
+    }
+  }
+
+  private Set<String> collectBenchmarkDataPacks() throws IOException {
+    final var gson = new GsonBuilder()
+      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+      .create();
+
+    final var dataPacksRoot = Paths.get(levelName, "datapacks");
+    try (final var dataPacks = Files.list(dataPacksRoot)) {
+      return dataPacks
+        .map(dataPackRoot -> dataPackRoot.resolve("pack.mcmeta"))
+        .filter(Files::isRegularFile)
+        .flatMap(packMetadataPath -> {
+          try (final var reader = Files.newBufferedReader(packMetadataPath)) {
+            final var packMetadata = gson.fromJson(reader, PackMetadata.class);
+            if (packMetadata.pack.mch) {
+              return Stream.of("file/" + dataPacksRoot.relativize(packMetadataPath.getParent()));
+            } else {
+              return Stream.of();
+            }
+          } catch (IOException e) {
+            return Stream.of();
+          }
+        })
+        .collect(Collectors.toSet());
     }
   }
 
@@ -208,5 +243,16 @@ final class Runner {
       }
     }
     runResults.add(new RunResult(group, benchmark, mode, scores));
+  }
+
+  private record PackMetadata(
+    PackMetadataSection pack
+  ) {
+  }
+
+  private record PackMetadataSection(
+    int packFormat,
+    Boolean mch
+  ) {
   }
 }

@@ -29,37 +29,7 @@ Automatically updated every day.
    ```
 4. The benchmark results will be dumped to <samp>mch-results.*format*</samp>.
 
-### Example
-
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/mcenv/mch/main/mch-config-schema.json",
-  "warmup_iterations": 5,
-  "measurement_iterations": 5,
-  "time": 10,
-  "forks": 5,
-  "time_unit": "ns",
-  "mc": "server.jar",
-  "formats": [
-    "json",
-    "md"
-  ],
-  "jvm_args": [],
-  "mc_args": [
-    "nogui"
-  ],
-  "parsing_benchmarks": [
-    "seed"
-  ],
-  "execute_benchmarks": [
-    "seed"
-  ],
-  "function_benchmarks": [
-    "f",
-    "g"
-  ]
-}
-```
+See [samples](https://github.com/mcenv/mch/tree/main/samples) for more details.
 
 ## Requirements
 

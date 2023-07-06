@@ -46,10 +46,12 @@ public final class Main {
   ) throws IOException {
     final var mchConfigPath = Paths.get("mch-config.json");
     if (Files.isRegularFile(mchConfigPath)) {
-      return new GsonBuilder()
-        .registerTypeAdapter(MchConfig.class, new MchConfig.Deserializer(args))
-        .create()
-        .fromJson(Files.newBufferedReader(mchConfigPath), MchConfig.class);
+      try (final var reader = Files.newBufferedReader(mchConfigPath)) {
+        return new GsonBuilder()
+          .registerTypeAdapter(MchConfig.class, new MchConfig.Deserializer(args))
+          .create()
+          .fromJson(reader, MchConfig.class);
+      }
     } else {
       return new MchConfig.Builder(args).build();
     }

@@ -80,7 +80,10 @@ sealed interface Format permits Format.Json, Format.Md {
           })
           .toList();
 
-        final var gson = new GsonBuilder().setPrettyPrinting().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        final var gson = new GsonBuilder()
+          .setPrettyPrinting()
+          .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+          .create();
         out.write(gson
           .toJson(new Results(
             mchVersion,
