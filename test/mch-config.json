@@ -14,7 +14,7 @@
   ],
   "execute_benchmarks": [
     "seed",
-    "execute run seed"
+    "say |"
   ],
   "function_benchmarks": {
     "file/a": [

@@ -124,8 +124,8 @@ sealed interface Format permits Format.Json, Format.Md {
         out.write("| :---- | :-------- | :--: | ----: | ----: | :---- | :--- |\n");
         for (final var runResult : runResults) {
           out.write(String.format("| %s | %s | %s | %d | %f | ± %f | %s |\n",
-            runResult.group() == null ? "" : runResult.group(),
-            runResult.benchmark(),
+            escape(runResult.group() == null ? "" : runResult.group()),
+            escape(runResult.benchmark()),
             runResult.mode(),
             mchConfig.measurementIterations() * mchConfig.forks(),
             convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
@@ -134,6 +134,10 @@ sealed interface Format permits Format.Json, Format.Md {
           ));
         }
       }
+    }
+
+    private String escape(final String s) {
+      return s.replace("|", "\\|");
     }
   }
 }
