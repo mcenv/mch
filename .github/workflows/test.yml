@@ -31,12 +31,12 @@ jobs:
         with:
           version: "snapshot"
       - run: |
-          cd test
+          cd samples
           java -jar ../build/libs/mch.jar --mc=$MINECRAFT
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.minecraft.outputs.version }}
           path: |
-            test/mch-results.json
-            test/mch-results.md
-      - run: cat test/mch-results.md >> $GITHUB_STEP_SUMMARY
+            samples/mch-results.json
+            samples/mch-results.md
+      - run: cat samples/mch-results.md >> $GITHUB_STEP_SUMMARY

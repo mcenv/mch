@@ -17,7 +17,7 @@
     "data modify storage _ _ set value '|'"
   ],
   "function_benchmarks": [
-    "file/a",
-    "file/b"
+    "file/benchmark_a",
+    "file/benchmark_b"
   ]
 }
