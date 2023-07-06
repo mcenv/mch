@@ -98,7 +98,7 @@ final class Runner {
         .flatMap(packMetadataPath -> {
           try (final var reader = Files.newBufferedReader(packMetadataPath)) {
             final var packMetadata = gson.fromJson(reader, PackMetadata.class);
-            if (packMetadata.pack.mch) {
+            if (Boolean.TRUE.equals(packMetadata.pack.mch)) {
               return Stream.of("file/" + dataPacksRoot.relativize(packMetadataPath.getParent()));
             } else {
               return Stream.of();
