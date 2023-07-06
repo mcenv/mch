@@ -1,0 +1,11 @@
+/libraries/
+/logs/
+/versions/
+/world/
+!/world/datapacks/
+/banned-ips.json
+/banned-players.json
+/mch-results.*
+/ops.json
+/usercache.json
+/whitelist.json
