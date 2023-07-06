@@ -35,7 +35,7 @@ final class Runner {
     dryRun();
 
     final var benchmarkDataPacks = mchConfig.functionBenchmarks().keySet();
-    modifyLevelStorage(benchmarkDataPacks, null);
+    modifyLevelStorage(benchmarkDataPacks, null, false);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
       iterationRun(benchmark, Options.Iteration.Mode.PARSING, null);
@@ -50,7 +50,7 @@ final class Runner {
 
       for (final var entry : mchConfig.functionBenchmarks().entrySet()) {
         final var dataPack = entry.getKey();
-        modifyLevelStorage(benchmarkDataPacks, dataPack);
+        modifyLevelStorage(benchmarkDataPacks, dataPack, true);
         for (final var benchmark : entry.getValue()) {
           iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack);
         }
@@ -64,7 +64,8 @@ final class Runner {
 
   private void modifyLevelStorage(
     final Set<String> benchmarkDataPacks,
-    final String enabledDatapack
+    final String enabledDataPack,
+    final boolean enableMchDataPack
   ) throws IOException {
     final var levelDat = Paths.get(levelName, "level.dat");
     final var levelStorage = Nbt.read(levelDat);
@@ -77,8 +78,11 @@ final class Runner {
         enabledDataPacks.add((Nbt.String) element);
       }
     }
-    if (enabledDatapack != null) {
-      enabledDataPacks.add(new Nbt.String(enabledDatapack));
+    if (enabledDataPack != null) {
+      enabledDataPacks.add(new Nbt.String(enabledDataPack));
+    }
+    if (enableMchDataPack) {
+      enabledDataPacks.add(new Nbt.String(MchDataPack.NAME));
     }
 
     final var disabledDataPacks = new LinkedHashSet<Nbt.String>();
@@ -88,8 +92,11 @@ final class Runner {
     for (final var benchmarkDataPack : benchmarkDataPacks) {
       disabledDataPacks.add(new Nbt.String(benchmarkDataPack));
     }
-    if (enabledDatapack != null) {
-      disabledDataPacks.remove(new Nbt.String(enabledDatapack));
+    if (enabledDataPack != null) {
+      disabledDataPacks.remove(new Nbt.String(enabledDataPack));
+    }
+    if (!enableMchDataPack) {
+      disabledDataPacks.add(new Nbt.String(MchDataPack.NAME));
     }
 
     dataPacks.elements().put("Enabled", new Nbt.List(enabledDataPacks.stream().toList()));

@@ -17,7 +17,9 @@ import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-final class DataPack {
+final class MchDataPack {
+  public final static String NAME = "file/mch.zip";
+
   public static String install(
     final MchConfig mchConfig,
     final ServerProperties serverProperties
