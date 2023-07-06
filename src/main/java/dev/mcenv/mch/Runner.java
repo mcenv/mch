@@ -10,14 +10,17 @@ import java.net.ServerSocket;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.regex.Pattern;
 
 final class Runner {
   private final static String BASELINE = "mch:baseline";
+  private final static Pattern RESOURCE_LOCATION = Pattern.compile("^([a-z0-9_.-]+)/functions/([a-z0-9/._-]+)\\.mcfunction$");
+
   private final MchConfig mchConfig;
   private final String levelName;
   private final String mcVersion;
   private final Collection<RunResult> runResults = new ArrayList<>();
-  private final int total;
+  private int total = 0;
   private int done = 0;
 
   public Runner(
@@ -28,13 +31,22 @@ final class Runner {
     this.mchConfig = mchConfig;
     this.levelName = levelName;
     this.mcVersion = mcVersion;
-    total = (mchConfig.parsingBenchmarks().size() + mchConfig.executeBenchmarks().size() + mchConfig.functionBenchmarks().size()) * mchConfig.forks();
   }
 
   public void run() throws InterruptedException, IOException {
     dryRun();
 
-    final var benchmarkDataPacks = new HashSet<>(mchConfig.functionBenchmarks());
+    total += mchConfig.parsingBenchmarks().size();
+    total += mchConfig.executeBenchmarks().size();
+    final var benchmarksByDataPack = new LinkedHashMap<String, Collection<String>>();
+    for (final var dataPack : mchConfig.functionBenchmarks()) {
+      final var benchmarks = collectBenchmarkFunctions(dataPack);
+      total += benchmarks.size();
+      benchmarksByDataPack.put(dataPack, benchmarks);
+    }
+    total *= mchConfig.forks();
+
+    final var benchmarkDataPacks = benchmarksByDataPack.keySet();
     modifyLevelStorage(benchmarkDataPacks, null, false);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
@@ -50,7 +62,7 @@ final class Runner {
 
       for (final var dataPack : mchConfig.functionBenchmarks()) {
         modifyLevelStorage(benchmarkDataPacks, dataPack, true);
-        final var benchmarks = collectBenchmarkFunctions(dataPack);
+        final var benchmarks = benchmarksByDataPack.get(dataPack);
         for (final var benchmark : benchmarks) {
           iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack);
         }
@@ -68,16 +80,23 @@ final class Runner {
     final var functions = new ArrayList<String>();
     final var root = Paths.get(levelName, "datapacks", dataPack.substring("file/".length()), "data");
     final var visitor = new SimpleFileVisitor<Path>() {
-      private final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*/functions/**/*.mcfunction");
+      private final FileSystem fileSystem = FileSystems.getDefault();
+      private final PathMatcher mcfunctionMatcher = fileSystem.getPathMatcher("glob:*/functions/**.mcfunction");
 
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        final var path = root.relativize(file);
-        if (matcher.matches(path)) {
+        final var relativePath = root.relativize(file);
+        if (mcfunctionMatcher.matches(relativePath)) {
           try (final var reader = new BufferedReader(new FileReader(file.toFile()))) {
             final var line = reader.readLine();
             if ("# @benchmark".equals(line)) {
-              functions.add(path.toString());
+              final var invariantSeparatorsPathString = relativePath.toString().replace(fileSystem.getSeparator(), "/");
+              final var matcher = RESOURCE_LOCATION.matcher(invariantSeparatorsPathString);
+              if (matcher.matches()) {
+                final var namespace = matcher.group(1);
+                final var path = matcher.group(2);
+                functions.add(namespace + ':' + path);
+              }
             }
           }
         }
