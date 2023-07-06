@@ -19,6 +19,7 @@ public final class Main {
       final var serverProperties = ServerProperties.load();
       final var mcVersion = MchDataPack.install(mchConfig, serverProperties);
       new Runner(mchConfig, serverProperties.levelName(), mcVersion).run();
+      System.out.println("Finished");
     } catch (final IllegalStateException e) {
       System.err.println("Error: " + e.getMessage());
       System.exit(1);
