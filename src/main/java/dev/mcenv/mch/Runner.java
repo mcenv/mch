@@ -49,7 +49,7 @@ final class Runner {
     total *= mchConfig.forks();
 
     final var benchmarkDataPacks = benchmarksByDataPack.keySet();
-    modifyLevelStorage(benchmarkDataPacks, null, false);
+    modifyLevelStorage(benchmarkDataPacks, null);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
       iterationRun(benchmark, Options.Iteration.Mode.PARSING, null);
@@ -63,7 +63,7 @@ final class Runner {
       iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, null);
 
       for (final var dataPack : mchConfig.functionBenchmarks()) {
-        modifyLevelStorage(benchmarkDataPacks, dataPack, true);
+        modifyLevelStorage(benchmarkDataPacks, dataPack);
         final var benchmarks = benchmarksByDataPack.get(dataPack);
         for (final var benchmark : benchmarks) {
           iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack);
@@ -108,8 +108,7 @@ final class Runner {
 
   private void modifyLevelStorage(
     final Set<String> benchmarkDataPacks,
-    final String enabledDataPack,
-    final boolean enableMchDataPack
+    final String enabledDataPack
   ) throws IOException {
     final var levelDat = Paths.get(levelName, "level.dat");
     final var levelStorage = Nbt.read(levelDat);
@@ -125,9 +124,6 @@ final class Runner {
     if (enabledDataPack != null) {
       enabledDataPacks.add(new Nbt.String(enabledDataPack));
     }
-    if (enableMchDataPack) {
-      enabledDataPacks.add(new Nbt.String(MchDataPack.NAME));
-    }
 
     final var disabledDataPacks = new LinkedHashSet<Nbt.String>();
     for (final var element : ((Nbt.List) dataPacks.elements().get("Disabled")).elements()) {
@@ -138,9 +134,6 @@ final class Runner {
     }
     if (enabledDataPack != null) {
       disabledDataPacks.remove(new Nbt.String(enabledDataPack));
-    }
-    if (!enableMchDataPack) {
-      disabledDataPacks.add(new Nbt.String(MchDataPack.NAME));
     }
 
     dataPacks.elements().put("Enabled", new Nbt.List(enabledDataPacks.stream().toList()));
