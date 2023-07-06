@@ -17,7 +17,7 @@ public final class Main {
       validateEula();
       final var mchConfig = loadConfig(args);
       final var serverProperties = ServerProperties.load();
-      final var mcVersion = MchDataPack.install(mchConfig, serverProperties);
+      final var mcVersion = Installer.install(mchConfig, serverProperties);
       new Runner(mchConfig, serverProperties.levelName(), mcVersion).run();
       System.out.println("Finished");
     } catch (final IllegalStateException e) {

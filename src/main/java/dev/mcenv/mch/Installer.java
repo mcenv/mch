@@ -17,9 +17,7 @@ import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-final class MchDataPack {
-  public final static String NAME = "file/mch.zip";
-
+final class Installer {
   public static String install(
     final MchConfig mchConfig,
     final ServerProperties serverProperties
@@ -67,9 +65,10 @@ final class MchDataPack {
       final var gson = new GsonBuilder()
         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         .create();
-      final var version = gson.fromJson(new String(server.getInputStream(new JarEntry("version.json")).readAllBytes(), StandardCharsets.UTF_8), Version.class);
-
-      return version.id;
+      try (final var in = server.getInputStream(new JarEntry("version.json"))) {
+        final var version = gson.fromJson(new String(in.readAllBytes(), StandardCharsets.UTF_8), Version.class);
+        return version.id;
+      }
     }
   }
 
