@@ -2,31 +2,33 @@ package dev.mcenv.mch;
 
 import java.util.Collection;
 
+@Keep
 record Results(
-  String mchVersion,
-  int forks,
-  String jvm,
-  Collection<String> jvmArgs,
-  String jdkVersion,
-  String vmName,
-  String vmVersion,
-  String mc,
-  Collection<String> mcArgs,
-  String mcVersion,
-  int warmupIterations,
-  String warmupTime,
-  int measurementIterations,
-  String measurementTime,
-  Collection<Result> results
+  @Keep String mchVersion,
+  @Keep int forks,
+  @Keep String jvm,
+  @Keep Collection<String> jvmArgs,
+  @Keep String jdkVersion,
+  @Keep String vmName,
+  @Keep String vmVersion,
+  @Keep String mc,
+  @Keep Collection<String> mcArgs,
+  @Keep String mcVersion,
+  @Keep int warmupIterations,
+  @Keep String warmupTime,
+  @Keep int measurementIterations,
+  @Keep String measurementTime,
+  @Keep Collection<Result> results
 ) {
+  @Keep
   public record Result(
-    String group,
-    String benchmark,
-    String mode,
-    int count,
-    double score,
-    double error,
-    String unit
+    @Keep String group,
+    @Keep String benchmark,
+    @Keep String mode,
+    @Keep int count,
+    @Keep double score,
+    @Keep double error,
+    @Keep String unit
   ) {
   }
 }

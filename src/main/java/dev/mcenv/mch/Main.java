@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+@Keep
 public final class Main {
+  @Keep
   public static void main(
     final String[] args
   ) throws InterruptedException, IOException {
