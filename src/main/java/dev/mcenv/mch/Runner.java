@@ -63,15 +63,15 @@ final class Runner {
     modifyLevelStorage(benchmarkDataPacks, null);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.PARSING, null);
+      iterationRun(benchmark, Options.Iteration.Mode.PARSING, "");
     }
 
     for (final var benchmark : mchConfig.executeBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, null);
+      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, "");
     }
 
     if (!benchmarksByDataPack.isEmpty()) {
-      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, null);
+      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, "");
 
       for (final var entry : benchmarksByDataPack.entrySet()) {
         final var dataPack = entry.getKey();
