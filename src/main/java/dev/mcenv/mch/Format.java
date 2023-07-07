@@ -3,6 +3,11 @@ package dev.mcenv.mch;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
+import org.commonmark.ext.gfm.tables.*;
+import org.commonmark.node.Document;
+import org.commonmark.node.Heading;
+import org.commonmark.node.Text;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -11,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -120,27 +126,127 @@ sealed interface Format permits Format.Json, Format.Md {
       final String mcVersion,
       final Collection<RunResult> runResults
     ) throws IOException {
-      final var unit = String.format("%s/op", abbreviate(mchConfig.timeUnit()));
       try (final var out = new OutputStreamWriter(new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.md"))))) {
-        out.write("### Results\n");
-        out.write("| Group | Benchmark | Mode | Count | Score | Error | Unit |\n");
-        out.write("| :---- | :-------- | :--: | ----: | ----: | ----: | :--- |\n");
-        for (final var runResult : runResults) {
-          out.write(String.format("| %s | %s | %s | %d | %f | ± %f | %s |\n",
-            escape(runResult.group() == null ? "" : runResult.group()),
-            escape(runResult.benchmark()),
-            runResult.mode(),
-            mchConfig.measurementIterations() * mchConfig.forks(),
-            convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
-            convert(Statistics.error(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
-            unit
-          ));
+        final var document = new Document();
+        {
+          {
+            final var heading = new Heading();
+            heading.setLevel(3);
+            heading.appendChild(new Text("Results"));
+            document.appendChild(heading);
+          }
+          {
+            final var table = new TableBlock();
+            {
+              final var thead = new TableHead();
+              {
+                final var tr = new TableRow();
+                {
+                  final var group = new TableCell();
+                  group.setHeader(true);
+                  group.setAlignment(TableCell.Alignment.LEFT);
+                  tr.appendChild(group);
+                }
+                {
+                  final var benchmark = new TableCell();
+                  benchmark.setHeader(true);
+                  benchmark.setAlignment(TableCell.Alignment.LEFT);
+                  tr.appendChild(benchmark);
+                }
+                {
+                  final var mode = new TableCell();
+                  mode.setHeader(true);
+                  mode.setAlignment(TableCell.Alignment.CENTER);
+                  tr.appendChild(mode);
+                }
+                {
+                  final var count = new TableCell();
+                  count.setHeader(true);
+                  count.setAlignment(TableCell.Alignment.RIGHT);
+                  tr.appendChild(count);
+                }
+                {
+                  final var score = new TableCell();
+                  score.setHeader(true);
+                  score.setAlignment(TableCell.Alignment.RIGHT);
+                  tr.appendChild(score);
+                }
+                {
+                  final var error = new TableCell();
+                  error.setHeader(true);
+                  error.setAlignment(TableCell.Alignment.RIGHT);
+                  tr.appendChild(error);
+                }
+                {
+                  final var unit = new TableCell();
+                  unit.setHeader(true);
+                  unit.setAlignment(TableCell.Alignment.LEFT);
+                  tr.appendChild(unit);
+                }
+                thead.appendChild(tr);
+              }
+              table.appendChild(thead);
+            }
+            final var unitText = new Text(String.format("%s/op", abbreviate(mchConfig.timeUnit())));
+            for (final var runResult : runResults) {
+              final var tbody = new TableBody();
+              {
+                final var tr = new TableRow();
+                {
+                  final var group = new TableCell();
+                  group.setAlignment(TableCell.Alignment.LEFT);
+                  group.appendChild(new Text(runResult.group()));
+                  tr.appendChild(group);
+                }
+                {
+                  final var benchmark = new TableCell();
+                  benchmark.setAlignment(TableCell.Alignment.LEFT);
+                  benchmark.appendChild(new Text(runResult.benchmark()));
+                  tr.appendChild(benchmark);
+                }
+                {
+                  final var mode = new TableCell();
+                  mode.setAlignment(TableCell.Alignment.CENTER);
+                  mode.appendChild(new Text(runResult.mode().toString()));
+                  tr.appendChild(mode);
+                }
+                {
+                  final var count = new TableCell();
+                  count.setAlignment(TableCell.Alignment.RIGHT);
+                  count.appendChild(new Text(String.valueOf(mchConfig.measurementIterations() * mchConfig.forks())));
+                  tr.appendChild(count);
+                }
+                {
+                  final var score = new TableCell();
+                  score.setAlignment(TableCell.Alignment.RIGHT);
+                  score.appendChild(new Text(String.format("%f", convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()))));
+                  tr.appendChild(score);
+                }
+                {
+                  final var error = new TableCell();
+                  error.setAlignment(TableCell.Alignment.RIGHT);
+                  error.appendChild(new Text(String.format("± %f", convert(Statistics.error(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()))));
+                  tr.appendChild(error);
+                }
+                {
+                  final var unit = new TableCell();
+                  unit.setAlignment(TableCell.Alignment.LEFT);
+                  unit.appendChild(unitText);
+                  tr.appendChild(unit);
+                }
+                tbody.appendChild(tr);
+              }
+              table.appendChild(tbody);
+            }
+          }
         }
-      }
-    }
 
-    private String escape(final String s) {
-      return s.replace("|", "\\|");
+        HtmlRenderer
+          .builder()
+          .extensions(List.of(TablesExtension.create()))
+          .build()
+          .render(document, out);
+      }
     }
   }
 }
