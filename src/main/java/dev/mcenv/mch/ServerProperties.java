@@ -49,13 +49,13 @@ record ServerProperties(
         System.out.printf("Overwriting %s in server.properties to %d\n", MAX_TICK_TIME_KEY, MAX_TICK_TIME_REQUIRED);
       }
 
-      final var initialEnabledPacks = properties.getProperty(INITIAL_ENABLED_PACKS).split(",");
+      final var initialEnabledPacks = properties.getProperty(INITIAL_ENABLED_PACKS, ",").split(",");
       if (Arrays.asList(initialEnabledPacks).contains("file/mch.zip")) {
         initialEnabledPacksRequired = Arrays.stream(initialEnabledPacks).filter(s -> !"file/mch.zip".equals(s)).collect(Collectors.joining(","));
         System.out.printf("Overwriting %s in server.properties to %s\n", INITIAL_ENABLED_PACKS, initialEnabledPacksRequired);
       }
 
-      final var initialDisabledPacks = properties.getProperty(INITIAL_DISABLED_PACKS).split(",");
+      final var initialDisabledPacks = properties.getProperty(INITIAL_DISABLED_PACKS, ",").split(",");
       if (!Arrays.asList(initialDisabledPacks).contains("file/mch.zip")) {
         initialDisabledPacksRequired = properties.getProperty(INITIAL_DISABLED_PACKS) + ",file/mch.zip";
         System.out.printf("Overwriting %s in server.properties to %s\n", INITIAL_DISABLED_PACKS, initialDisabledPacksRequired);
