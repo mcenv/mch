@@ -149,42 +149,49 @@ sealed interface Format permits Format.Json, Format.Md {
                   tr.appendChild(group);
                   group.setHeader(true);
                   group.setAlignment(TableCell.Alignment.LEFT);
+                  group.appendChild(new Text("Group"));
                 }
                 {
                   final var benchmark = new TableCell();
                   tr.appendChild(benchmark);
                   benchmark.setHeader(true);
                   benchmark.setAlignment(TableCell.Alignment.LEFT);
+                  benchmark.appendChild(new Text("Benchmark"));
                 }
                 {
                   final var mode = new TableCell();
                   tr.appendChild(mode);
                   mode.setHeader(true);
                   mode.setAlignment(TableCell.Alignment.CENTER);
+                  mode.appendChild(new Text("Mode"));
                 }
                 {
                   final var count = new TableCell();
                   tr.appendChild(count);
                   count.setHeader(true);
                   count.setAlignment(TableCell.Alignment.RIGHT);
+                  count.appendChild(new Text("Count"));
                 }
                 {
                   final var score = new TableCell();
                   tr.appendChild(score);
                   score.setHeader(true);
                   score.setAlignment(TableCell.Alignment.RIGHT);
+                  score.appendChild(new Text("Score"));
                 }
                 {
                   final var error = new TableCell();
                   tr.appendChild(error);
                   error.setHeader(true);
                   error.setAlignment(TableCell.Alignment.RIGHT);
+                  error.appendChild(new Text("Error"));
                 }
                 {
                   final var unit = new TableCell();
                   tr.appendChild(unit);
                   unit.setHeader(true);
                   unit.setAlignment(TableCell.Alignment.LEFT);
+                  unit.appendChild(new Text("Unit"));
                 }
               }
             }
