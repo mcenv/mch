@@ -39,6 +39,8 @@ dependencies {
   implementation("net.sf.jopt-simple:jopt-simple:5.0.4")
   implementation("org.ow2.asm:asm:9.5")
   implementation("org.apache.commons:commons-math3:3.6.1")
+  implementation("org.commonmark:commonmark:0.20.0")
+  implementation("org.commonmark:commonmark-ext-gfm-tables:0.20.0")
 }
 
 tasks.withType(JavaCompile::class) {
