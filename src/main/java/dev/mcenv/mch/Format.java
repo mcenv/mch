@@ -131,112 +131,113 @@ sealed interface Format permits Format.Json, Format.Md {
         {
           {
             final var heading = new Heading();
+            document.appendChild(heading);
             heading.setLevel(3);
             heading.appendChild(new Text("Results"));
-            document.appendChild(heading);
           }
           {
             final var table = new TableBlock();
+            document.appendChild(table);
             {
               final var thead = new TableHead();
+              table.appendChild(thead);
               {
                 final var tr = new TableRow();
+                thead.appendChild(tr);
                 {
                   final var group = new TableCell();
+                  tr.appendChild(group);
                   group.setHeader(true);
                   group.setAlignment(TableCell.Alignment.LEFT);
-                  tr.appendChild(group);
                 }
                 {
                   final var benchmark = new TableCell();
+                  tr.appendChild(benchmark);
                   benchmark.setHeader(true);
                   benchmark.setAlignment(TableCell.Alignment.LEFT);
-                  tr.appendChild(benchmark);
                 }
                 {
                   final var mode = new TableCell();
+                  tr.appendChild(mode);
                   mode.setHeader(true);
                   mode.setAlignment(TableCell.Alignment.CENTER);
-                  tr.appendChild(mode);
                 }
                 {
                   final var count = new TableCell();
+                  tr.appendChild(count);
                   count.setHeader(true);
                   count.setAlignment(TableCell.Alignment.RIGHT);
-                  tr.appendChild(count);
                 }
                 {
                   final var score = new TableCell();
+                  tr.appendChild(score);
                   score.setHeader(true);
                   score.setAlignment(TableCell.Alignment.RIGHT);
-                  tr.appendChild(score);
                 }
                 {
                   final var error = new TableCell();
+                  tr.appendChild(error);
                   error.setHeader(true);
                   error.setAlignment(TableCell.Alignment.RIGHT);
-                  tr.appendChild(error);
                 }
                 {
                   final var unit = new TableCell();
+                  tr.appendChild(unit);
                   unit.setHeader(true);
                   unit.setAlignment(TableCell.Alignment.LEFT);
-                  tr.appendChild(unit);
                 }
-                thead.appendChild(tr);
               }
-              table.appendChild(thead);
             }
             final var unitText = new Text(String.format("%s/op", abbreviate(mchConfig.timeUnit())));
             for (final var runResult : runResults) {
               final var tbody = new TableBody();
+              table.appendChild(tbody);
               {
                 final var tr = new TableRow();
+                tbody.appendChild(tr);
                 {
                   final var group = new TableCell();
+                  tr.appendChild(group);
                   group.setAlignment(TableCell.Alignment.LEFT);
                   group.appendChild(new Text(runResult.group()));
-                  tr.appendChild(group);
                 }
                 {
                   final var benchmark = new TableCell();
+                  tr.appendChild(benchmark);
                   benchmark.setAlignment(TableCell.Alignment.LEFT);
                   benchmark.appendChild(new Text(runResult.benchmark()));
-                  tr.appendChild(benchmark);
                 }
                 {
                   final var mode = new TableCell();
+                  tr.appendChild(mode);
                   mode.setAlignment(TableCell.Alignment.CENTER);
                   mode.appendChild(new Text(runResult.mode().toString()));
-                  tr.appendChild(mode);
                 }
                 {
                   final var count = new TableCell();
+                  tr.appendChild(count);
                   count.setAlignment(TableCell.Alignment.RIGHT);
                   count.appendChild(new Text(String.valueOf(mchConfig.measurementIterations() * mchConfig.forks())));
-                  tr.appendChild(count);
                 }
                 {
                   final var score = new TableCell();
+                  tr.appendChild(score);
                   score.setAlignment(TableCell.Alignment.RIGHT);
                   score.appendChild(new Text(String.format("%f", convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()))));
-                  tr.appendChild(score);
                 }
                 {
                   final var error = new TableCell();
+                  tr.appendChild(error);
                   error.setAlignment(TableCell.Alignment.RIGHT);
                   error.appendChild(new Text(String.format("± %f", convert(Statistics.error(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()))));
-                  tr.appendChild(error);
                 }
                 {
                   final var unit = new TableCell();
+                  tr.appendChild(unit);
                   unit.setAlignment(TableCell.Alignment.LEFT);
                   unit.appendChild(unitText);
-                  tr.appendChild(unit);
                 }
-                tbody.appendChild(tr);
               }
-              table.appendChild(tbody);
             }
           }
         }
