@@ -4,6 +4,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.commonmark.ext.gfm.tables.*;
+import org.commonmark.node.Code;
 import org.commonmark.node.Document;
 import org.commonmark.node.Heading;
 import org.commonmark.node.Text;
@@ -212,7 +213,7 @@ sealed interface Format permits Format.Json, Format.Md {
                   final var benchmark = new TableCell();
                   tr.appendChild(benchmark);
                   benchmark.setAlignment(TableCell.Alignment.LEFT);
-                  benchmark.appendChild(new Text(runResult.benchmark()));
+                  benchmark.appendChild(new Code(runResult.benchmark()));
                 }
                 {
                   final var mode = new TableCell();
