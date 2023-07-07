@@ -2,15 +2,6 @@ import proguard.gradle.ProGuardTask
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath("com.guardsquare:proguard-gradle:7.3.2")
-  }
-}
-
 plugins {
   java
   id("com.github.johnrengelman.shadow") version "8.1.1"
