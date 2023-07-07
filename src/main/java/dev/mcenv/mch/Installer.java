@@ -72,14 +72,16 @@ final class Installer {
     }
   }
 
+  @Keep
   private record Version(
-    String id,
-    PackVersion packVersion
+    @Keep String id,
+    @Keep PackVersion packVersion
   ) {
   }
 
+  @Keep
   private record PackVersion(
-    int data
+    @Keep int data
   ) {
   }
 }

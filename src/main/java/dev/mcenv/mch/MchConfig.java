@@ -13,20 +13,21 @@ import java.util.concurrent.TimeUnit;
 
 import static dev.mcenv.mch.Util.parseTimeUnit;
 
+@Keep
 record MchConfig(
-  boolean autoStart,
-  int warmupIterations,
-  int measurementIterations,
-  int time,
-  int forks,
-  TimeUnit timeUnit,
-  String mc,
-  Collection<Format> formats,
-  Collection<String> jvmArgs,
-  Collection<String> mcArgs,
-  Collection<String> parsingBenchmarks,
-  Collection<String> executeBenchmarks,
-  Collection<String> functionBenchmarks
+  @Keep boolean autoStart,
+  @Keep int warmupIterations,
+  @Keep int measurementIterations,
+  @Keep int time,
+  @Keep int forks,
+  @Keep TimeUnit timeUnit,
+  @Keep String mc,
+  @Keep Collection<Format> formats,
+  @Keep Collection<String> jvmArgs,
+  @Keep Collection<String> mcArgs,
+  @Keep Collection<String> parsingBenchmarks,
+  @Keep Collection<String> executeBenchmarks,
+  @Keep Collection<String> functionBenchmarks
 ) {
   public static final String AUTO_START = "auto_start";
   public static final String WARMUP_ITERATIONS = "warmup_iterations";

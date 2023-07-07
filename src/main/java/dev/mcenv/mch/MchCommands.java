@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 
+@Keep
 @SuppressWarnings("unused")
 public final class MchCommands implements Commands {
   private static final String PRE = "mch:pre";
@@ -35,6 +36,7 @@ public final class MchCommands implements Commands {
   private ParseResults<Object> setupIteration;
   private ParseResults<Object> teardownIteration;
 
+  @Keep
   @Override
   public void register(
     final CommandDispatcher<Object> dispatcher,

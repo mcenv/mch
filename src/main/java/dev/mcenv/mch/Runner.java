@@ -250,14 +250,16 @@ final class Runner {
     runResults.add(new RunResult(group, benchmark, mode, scores));
   }
 
+  @Keep
   private record PackMetadata(
-    PackMetadataSection pack
+    @Keep PackMetadataSection pack
   ) {
   }
 
+  @Keep
   private record PackMetadataSection(
-    int packFormat,
-    Boolean mch
+    @Keep int packFormat,
+    @Keep Boolean mch
   ) {
   }
 }
