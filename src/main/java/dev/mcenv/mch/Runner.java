@@ -125,14 +125,16 @@ final class Runner {
         final var relativePath = root.relativize(file);
         if (MCFUNCTION_MATCHER.matches(relativePath)) {
           try (final var reader = new BufferedReader(new FileReader(file.toFile()))) {
-            final var line = reader.readLine();
-            if ("# @benchmark".equals(line)) {
-              final var invariantSeparatorsPathString = relativePath.toString().replace(FILE_SYSTEM.getSeparator(), "/");
-              final var matcher = RESOURCE_LOCATION.matcher(invariantSeparatorsPathString);
-              if (matcher.matches()) {
-                final var namespace = matcher.group(1);
-                final var path = matcher.group(2);
-                functions.add(namespace + ':' + path);
+            String line;
+            while ((line = reader.readLine().trim()).startsWith("#")) {
+              if ("# @benchmark".equals(line)) {
+                final var invariantSeparatorsPathString = relativePath.toString().replace(FILE_SYSTEM.getSeparator(), "/");
+                final var matcher = RESOURCE_LOCATION.matcher(invariantSeparatorsPathString);
+                if (matcher.matches()) {
+                  final var namespace = matcher.group(1);
+                  final var path = matcher.group(2);
+                  functions.add(namespace + ':' + path);
+                }
               }
             }
           }
