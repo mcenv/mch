@@ -221,6 +221,7 @@ final class Runner {
 
         final var port = server.getLocalPort();
         final var options = new Options.Iteration(
+          mchConfig.autoStart(),
           mchConfig.warmupIterations(),
           mchConfig.measurementIterations(),
           mchConfig.time(),
@@ -232,15 +233,14 @@ final class Runner {
           mode,
           benchmark
         ).toString();
-        final var process = Spy.create(
+
+        Spy.create(
           Paths.get(mchConfig.mc()),
           MchCommands.class,
           options,
           mchConfig.mcArgs().toArray(new String[0]),
           mchConfig.jvmArgs().toArray(new String[0])
-        ).start();
-        process.getInputStream().transferTo(System.out);
-        process.waitFor();
+        ).inheritIO().start().waitFor();
 
         thread.join();
       }

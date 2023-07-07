@@ -9,7 +9,7 @@ sealed interface Options permits Options.Dry, Options.Iteration {
     return switch (tag) {
       case "dry" -> Dry.INSTANCE;
       case "iteration" -> new Iteration(
-        Integer.parseInt(args[1]),
+        Boolean.parseBoolean(args[1]),
         Integer.parseInt(args[2]),
         Integer.parseInt(args[3]),
         Integer.parseInt(args[4]),
@@ -17,8 +17,9 @@ sealed interface Options permits Options.Dry, Options.Iteration {
         Integer.parseInt(args[6]),
         Integer.parseInt(args[7]),
         Integer.parseInt(args[8]),
-        Iteration.Mode.parse(args[9]),
-        args[10]
+        Integer.parseInt(args[9]),
+        Iteration.Mode.parse(args[10]),
+        args[11]
       );
       default -> throw new IllegalArgumentException("Unknown tag: " + tag);
     };
@@ -37,6 +38,7 @@ sealed interface Options permits Options.Dry, Options.Iteration {
   }
 
   record Iteration(
+    boolean autoStart,
     int warmupIterations,
     int measurementIterations,
     int time,
@@ -51,7 +53,8 @@ sealed interface Options permits Options.Dry, Options.Iteration {
     @Override
     public String toString() {
       return String.format(
-        "iteration,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s",
+        "iteration,%b,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s",
+        autoStart,
         warmupIterations,
         measurementIterations,
         time,

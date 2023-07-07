@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import static dev.mcenv.mch.Util.parseTimeUnit;
 
 record MchConfig(
+  boolean autoStart,
   int warmupIterations,
   int measurementIterations,
   int time,
@@ -27,6 +28,7 @@ record MchConfig(
   Collection<String> executeBenchmarks,
   Collection<String> functionBenchmarks
 ) {
+  public static final String AUTO_START = "auto_start";
   public static final String WARMUP_ITERATIONS = "warmup_iterations";
   public static final String MEASUREMENT_ITERATIONS = "measurement_iterations";
   public static final String TIME = "time";
@@ -40,6 +42,7 @@ record MchConfig(
   public static final String EXECUTE_BENCHMARKS = "execute_benchmarks";
   public static final String FUNCTION_BENCHMARKS = "function_benchmarks";
 
+  public static final boolean AUTO_START_DEFAULT = true;
   public static final int WARMUP_ITERATIONS_DEFAULT = 5;
   public static final int MEASUREMENT_ITERATIONS_DEFAULT = 5;
   public static final int TIME_DEFAULT = 10;
@@ -51,6 +54,7 @@ record MchConfig(
 
   public static class Builder {
     private final String[] args;
+    private boolean autoStart = AUTO_START_DEFAULT;
     private int warmupIterations = WARMUP_ITERATIONS_DEFAULT;
     private int measurementIterations = MEASUREMENT_ITERATIONS_DEFAULT;
     private int time = TIME_DEFAULT;
@@ -70,6 +74,7 @@ record MchConfig(
 
     public MchConfig build() {
       final var parser = new OptionParser();
+      final var autoStartSpec = parser.accepts(AUTO_START).withOptionalArg().ofType(Boolean.class);
       final var warmupIterationsSpec = parser.accepts(WARMUP_ITERATIONS).withOptionalArg().ofType(Integer.class);
       final var measurementIterationsSpec = parser.accepts(MEASUREMENT_ITERATIONS).withOptionalArg().ofType(Integer.class);
       final var timeSpec = parser.accepts(TIME).withOptionalArg().ofType(Integer.class);
@@ -84,6 +89,9 @@ record MchConfig(
       final var functionBenchmarksSpec = parser.accepts(FUNCTION_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var options = parser.parse(args);
 
+      if (options.has(autoStartSpec)) {
+        autoStart = options.valueOf(autoStartSpec);
+      }
       if (options.has(warmupIterationsSpec)) {
         warmupIterations = options.valueOf(warmupIterationsSpec);
         if (warmupIterations < 0) {
@@ -134,6 +142,7 @@ record MchConfig(
       }
 
       return new MchConfig(
+        autoStart,
         warmupIterations,
         measurementIterations,
         time,
@@ -163,6 +172,9 @@ record MchConfig(
     ) throws JsonParseException {
       final var object = json.getAsJsonObject();
 
+      if (object.get(AUTO_START) != null) {
+        super.autoStart = object.get(AUTO_START).getAsBoolean();
+      }
       if (object.get(WARMUP_ITERATIONS) != null) {
         super.warmupIterations = object.get(WARMUP_ITERATIONS).getAsInt();
       }
