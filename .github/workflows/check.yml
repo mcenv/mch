@@ -54,7 +54,7 @@ jobs:
       - run: |
           curl -L -o mch.jar https://github.com/mcenv/mch/releases/latest/download/mch.jar
           echo "eula=true" > eula.txt
-          java -jar mch.jar --mc=$MINECRAFT
+          java -jar mch.jar --mc=$MINECRAFT --formats=json
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.version }}
