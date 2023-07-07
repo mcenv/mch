@@ -86,7 +86,6 @@ tasks.register("computeHash") {
   }
 }
 
-@Suppress("UnstableApiUsage")
 tasks.withType<ProcessResources> {
   dependsOn(tasks.getByName("computeHash"))
   from(
