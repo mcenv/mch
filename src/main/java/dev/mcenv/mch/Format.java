@@ -195,7 +195,7 @@ sealed interface Format permits Format.Json, Format.Md {
                 }
               }
             }
-            final var unitText = new Text(String.format("%s/op", abbreviate(mchConfig.timeUnit())));
+            final var unitString = String.format("%s/op", abbreviate(mchConfig.timeUnit()));
             for (final var runResult : runResults) {
               final var tbody = new TableBody();
               table.appendChild(tbody);
@@ -242,7 +242,7 @@ sealed interface Format permits Format.Json, Format.Md {
                   final var unit = new TableCell();
                   tr.appendChild(unit);
                   unit.setAlignment(TableCell.Alignment.LEFT);
-                  unit.appendChild(unitText);
+                  unit.appendChild(new Text(unitString));
                 }
               }
             }
