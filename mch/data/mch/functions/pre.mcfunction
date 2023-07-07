@@ -1,1 +1,1 @@
-gamerule maxCommandChainLength 2147483647
+mch:pre
