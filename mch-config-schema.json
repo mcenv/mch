@@ -49,6 +49,12 @@
       "type": "string",
       "default": "server.jar"
     },
+    "output": {
+      "title": "Output",
+      "description": "Output file name without extension",
+      "type": "string",
+      "default": "mch-results"
+    },
     "formats": {
       "title": "Formats",
       "description": "Output formats",
