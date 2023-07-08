@@ -39,7 +39,7 @@ sealed interface Options permits Options.Setup, Options.Iteration {
 
   record Iteration(
     boolean autoStart,
-    boolean lastInGroup,
+    boolean lastIterationInGroup,
     int warmupIterations,
     int measurementIterations,
     int time,
@@ -55,7 +55,7 @@ sealed interface Options permits Options.Setup, Options.Iteration {
       return String.format(
         "iteration,%b,%b,%d,%d,%d,%d,%d,%d,%f,%s,%s",
         autoStart,
-        lastInGroup,
+        lastIterationInGroup,
         warmupIterations,
         measurementIterations,
         time,

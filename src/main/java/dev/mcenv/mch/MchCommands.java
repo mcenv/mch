@@ -314,7 +314,7 @@ public final class MchCommands implements Commands {
     dispatcher.register(
       literal(POST).executes(c -> {
         try {
-          if (options.lastInGroup()) {
+          if (options.lastIterationInGroup()) {
             dispatcher.execute("function #mch:teardown", c.getSource());
           }
 
