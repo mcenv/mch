@@ -1,3 +1,3 @@
 mch:noop
 mch:post
-stop
+function mch:stop
