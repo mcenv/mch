@@ -2,6 +2,12 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "properties": {
+    "auto_start": {
+      "title": "Auto Start",
+      "description": "Automatically start benchmarking",
+      "type": "boolean",
+      "default": true
+    },
     "warmup_iterations": {
       "title": "Warmup Iterations",
       "description": "Number of warmup iterations",

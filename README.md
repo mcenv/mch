@@ -39,6 +39,7 @@ See [samples](https://github.com/mcenv/mch/tree/main/samples) for more details.
 
 | Name                     | Description                                   | Default       |
 |:-------------------------|:----------------------------------------------|:--------------|
+| `auto_start`             | Automatically start benchmarking              | `true`        |
 | `warmup_iterations`      | Number of warmup iterations                   | `5`           |
 | `measurement_iterations` | Number of measurement iterations              | `5`           |
 | `time`                   | Duration of iterations in seconds             | `10`          |
