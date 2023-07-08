@@ -45,8 +45,8 @@ public final class MchCommands implements Commands {
     registerConst(dispatcher, NOOP);
 
     final var options = Options.parse(args);
-    if (options instanceof Options.Setup) {
-      registerSetup(dispatcher);
+    if (options instanceof Options.Setup setupOptions) {
+      registerSetup(dispatcher, setupOptions);
     } else if (options instanceof Options.Iteration iterationOptions) {
       try {
         socket = new Socket((String) null, iterationOptions.port());
@@ -62,16 +62,30 @@ public final class MchCommands implements Commands {
   }
 
   private void registerSetup(
-    final CommandDispatcher<Object> dispatcher
+    final CommandDispatcher<Object> dispatcher,
+    final Options.Setup options
   ) {
-    dispatcher.register(literal(LIMIT).executes(c -> {
-      final var source = c.getSource();
-      switch (limited++) {
-        case 0, 2 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
-        case 1 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
-      }
-      return 0;
-    }));
+    if (options.dry()) {
+      dispatcher.register(literal(LIMIT).executes(c -> {
+        final var source = c.getSource();
+        switch (limited++) {
+          case 0 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
+          case 2 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
+          case 1 -> {
+          }
+        }
+        return 0;
+      }));
+    } else {
+      dispatcher.register(literal(LIMIT).executes(c -> {
+        final var source = c.getSource();
+        switch (limited++) {
+          case 0, 2 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
+          case 1 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
+        }
+        return 0;
+      }));
+    }
     dispatcher.register(literal(SETUP).executes(c -> dispatcher.execute("function #mch:setup", c.getSource())));
     registerConst(dispatcher, START);
     registerConst(dispatcher, CHECK);

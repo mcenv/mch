@@ -41,7 +41,7 @@ final class Runner {
   }
 
   public void run() throws InterruptedException, IOException {
-    setupRun();
+    setupRun(true);
 
     final var benchmarkDataPacks = collectBenchmarkDataPacks();
     final var benchmarksByDataPack = new LinkedHashMap<String, List<String>>();
@@ -77,7 +77,7 @@ final class Runner {
         final var dataPack = entry.getKey();
         final var benchmarks = entry.getValue();
         modifyLevelStorage(benchmarkDataPacks, dataPack);
-        setupRun();
+        setupRun(false);
         for (var i = 0; i < benchmarks.size(); ++i) {
           iterationRun(benchmarks.get(i), Options.Iteration.Mode.FUNCTION, dataPack.substring(FILE_PREFIX.length()), i == benchmarks.size() - 1);
         }
@@ -184,8 +184,10 @@ final class Runner {
     Nbt.write(levelStorage, levelDat);
   }
 
-  private void setupRun() throws IOException, InterruptedException {
-    final var options = Options.Setup.INSTANCE.toString();
+  private void setupRun(
+    final boolean dry
+  ) throws IOException, InterruptedException {
+    final var options = new Options.Setup(dry).toString();
     final var process = Spy.create(
       Paths.get(mchConfig.mc()),
       MchCommands.class,

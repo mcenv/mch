@@ -7,7 +7,9 @@ sealed interface Options permits Options.Setup, Options.Iteration {
     final var args = string.split(",");
     final var tag = args[0];
     return switch (tag) {
-      case "setup" -> Setup.INSTANCE;
+      case "setup" -> new Setup(
+        Boolean.parseBoolean(args[1])
+      );
       case "iteration" -> new Iteration(
         Boolean.parseBoolean(args[1]),
         Boolean.parseBoolean(args[2]),
@@ -25,15 +27,12 @@ sealed interface Options permits Options.Setup, Options.Iteration {
     };
   }
 
-  final class Setup implements Options {
-    public static final Setup INSTANCE = new Setup();
-
-    private Setup() {
-    }
-
+  record Setup(
+    boolean dry
+  ) implements Options {
     @Override
     public String toString() {
-      return "setup";
+      return String.format("setup,%b", dry);
     }
   }
 
