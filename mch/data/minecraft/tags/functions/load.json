@@ -6,6 +6,7 @@
     "mch:setup.trial",
     "mch:start",
     "mch:teardown.trial",
+    "mch:limit2",
     "mch:post"
   ]
 }
