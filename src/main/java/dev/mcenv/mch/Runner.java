@@ -224,7 +224,7 @@ final class Runner {
         thread.start();
 
         final var port = server.getLocalPort();
-        final var progress = (float) (done++) / (float) total;
+        final var progress = 100.0f * done++ / total;
         final var options = new Options.Iteration(
           mchConfig.autoStart(),
           lastInGroup,
