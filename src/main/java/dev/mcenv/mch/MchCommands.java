@@ -45,8 +45,8 @@ public final class MchCommands implements Commands {
     registerConst(dispatcher, NOOP);
 
     final var options = Options.parse(args);
-    if (options instanceof Options.Dry) {
-      registerDry(dispatcher);
+    if (options instanceof Options.Setup) {
+      registerSetup(dispatcher);
     } else if (options instanceof Options.Iteration iterationOptions) {
       try {
         socket = new Socket((String) null, iterationOptions.port());
@@ -61,7 +61,7 @@ public final class MchCommands implements Commands {
     }
   }
 
-  private void registerDry(
+  private void registerSetup(
     final CommandDispatcher<Object> dispatcher
   ) {
     dispatcher.register(literal(LIMIT).executes(c -> {
