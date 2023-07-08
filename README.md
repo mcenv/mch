@@ -45,6 +45,7 @@ See [samples](https://github.com/mcenv/mch/tree/main/samples) for more details.
 | `forks`                  | Number of forks                               | `5`           |
 | `time_unit`              | Output time unit (`ns`, `us`, `ms`, `s`, `m`) | `s`           |
 | `mc`                     | Path to Minecraft server                      | `server.jar`  |
+| `output`                 | Output file name without extension            | `mch-results` |
 | `formats`                | Output formats (`json`, `md`)                 | <code></code> |
 | `jvm_args`               | JVM arguments to use with forks               | <code></code> |
 | `mc_args`                | Minecraft arguments to use with forks         | `nogui`       |
@@ -54,14 +55,14 @@ See [samples](https://github.com/mcenv/mch/tree/main/samples) for more details.
 
 ## Fixtures
 
-| Function tag              | Description                                               |
-|:--------------------------|:----------------------------------------------------------|
-| `#mch:setup`              | To be run once before the function benchmarks             |
-| `#mch:setup.trial`        | To be run before each run of the function benchmark       |
-| `#mch:setup.iteration`    | To be run before each iteration of the function benchmark |
-| `#mch:teardown.trial`     | To be run after each run of the function benchmark        |
-| `#mch:teardown.iteration` | To be run after each iteration of the function benchmark  |
-| `#mch:teardown`           | To be run once after the function benchmarks              |
+| Function tag              | Description                                                 |
+|:--------------------------|:------------------------------------------------------------|
+| `#mch:setup`              | To be run once before each group of the function benchmarks |
+| `#mch:setup.trial`        | To be run before each run of the group                      |
+| `#mch:setup.iteration`    | To be run before each iteration of the run                  |
+| `#mch:teardown.iteration` | To be run after each iteration of the run                   |
+| `#mch:teardown.trial`     | To be run after each run of the group                       |
+| `#mch:teardown`           | To be run once after each group of the function benchmarks  |
 
 ## Commands
 

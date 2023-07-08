@@ -51,7 +51,7 @@ sealed interface Format permits Format.Json, Format.Md {
       final Collection<RunResult> runResults
     ) throws IOException {
       final var unit = String.format("%s/op", abbreviate(mchConfig.timeUnit()));
-      try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.json")))) {
+      try (final var out = new BufferedOutputStream(Files.newOutputStream(Paths.get(mchConfig.output() + ".json")))) {
         final String mchVersion;
         try (final var version = Main.class.getClassLoader().getResourceAsStream("version")) {
           mchVersion = new String(Objects.requireNonNull(version).readAllBytes(), StandardCharsets.UTF_8).trim();
@@ -127,7 +127,7 @@ sealed interface Format permits Format.Json, Format.Md {
       final String mcVersion,
       final Collection<RunResult> runResults
     ) throws IOException {
-      try (final var out = new OutputStreamWriter(new BufferedOutputStream(Files.newOutputStream(Paths.get("mch-results.md"))))) {
+      try (final var out = new OutputStreamWriter(new BufferedOutputStream(Files.newOutputStream(Paths.get(mchConfig.output() + ".md"))))) {
         final var document = new Document();
         {
           {
