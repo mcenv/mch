@@ -10,14 +10,14 @@ sealed interface Options permits Options.Setup, Options.Iteration {
       case "setup" -> Setup.INSTANCE;
       case "iteration" -> new Iteration(
         Boolean.parseBoolean(args[1]),
-        Integer.parseInt(args[2]),
+        Boolean.parseBoolean(args[2]),
         Integer.parseInt(args[3]),
         Integer.parseInt(args[4]),
         Integer.parseInt(args[5]),
         Integer.parseInt(args[6]),
         Integer.parseInt(args[7]),
         Integer.parseInt(args[8]),
-        Integer.parseInt(args[9]),
+        Float.parseFloat(args[9]),
         Iteration.Mode.parse(args[10]),
         args[11]
       );
@@ -39,30 +39,30 @@ sealed interface Options permits Options.Setup, Options.Iteration {
 
   record Iteration(
     boolean autoStart,
+    boolean lastInGroup,
     int warmupIterations,
     int measurementIterations,
     int time,
     int forks,
     int fork,
     int port,
-    int done,
-    int total,
+    float progress,
     Mode mode,
     String benchmark
   ) implements Options {
     @Override
     public String toString() {
       return String.format(
-        "iteration,%b,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s",
+        "iteration,%b,%b,%d,%d,%d,%d,%d,%d,%f,%s,%s",
         autoStart,
+        lastInGroup,
         warmupIterations,
         measurementIterations,
         time,
         forks,
         fork,
         port,
-        done,
-        total,
+        progress,
         mode,
         benchmark
       );

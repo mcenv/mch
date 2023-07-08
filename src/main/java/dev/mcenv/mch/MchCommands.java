@@ -67,12 +67,8 @@ public final class MchCommands implements Commands {
     dispatcher.register(literal(LIMIT).executes(c -> {
       final var source = c.getSource();
       switch (limited++) {
-        case 0, 2 -> {
-          dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
-        }
-        case 1 -> {
-          dispatcher.execute("gamerule maxCommandChainLength 0", source);
-        }
+        case 0, 2 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
+        case 1 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
       }
       return 0;
     }));
@@ -318,7 +314,7 @@ public final class MchCommands implements Commands {
     dispatcher.register(
       literal(POST).executes(c -> {
         try {
-          if (options.done() + 1 == options.total()) {
+          if (options.lastInGroup()) {
             dispatcher.execute("function #mch:teardown", c.getSource());
           }
 
@@ -349,7 +345,6 @@ public final class MchCommands implements Commands {
   private void printIteration(
     final Options.Iteration options
   ) {
-    final var progress = 100.0 * options.done() / (double) options.total();
-    System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks() + " (" + String.format("%.2f", progress) + "%)");
+    System.out.println(options.mode() + " " + options.benchmark() + " " + (options.fork() + 1) + "/" + options.forks() + " (" + String.format("%.2f", options.progress()) + "%)");
   }
 }
