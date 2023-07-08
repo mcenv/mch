@@ -223,11 +223,12 @@ final class Runner {
         });
         thread.start();
 
+        final var lastIterationInGroup = lastInGroup && fork == mchConfig.forks() - 1;
         final var port = server.getLocalPort();
         final var progress = 100.0f * done++ / total;
         final var options = new Options.Iteration(
           mchConfig.autoStart(),
-          lastInGroup,
+          lastIterationInGroup,
           mchConfig.warmupIterations(),
           mchConfig.measurementIterations(),
           mchConfig.time(),
