@@ -27,8 +27,8 @@ final class Runner {
   private final String levelName;
   private final String mcVersion;
   private final Collection<RunResult> runResults = new ArrayList<>();
-  private int total = 1; // for baseline
   private int done = 0;
+  private int total = 1; // 1 for baseline
 
   public Runner(
     final MchConfig mchConfig,
@@ -44,7 +44,7 @@ final class Runner {
     setupRun();
 
     final var benchmarkDataPacks = collectBenchmarkDataPacks();
-    final var benchmarksByDataPack = new LinkedHashMap<String, Collection<String>>();
+    final var benchmarksByDataPack = new LinkedHashMap<String, List<String>>();
 
     total += mchConfig.parsingBenchmarks().size();
     total += mchConfig.executeBenchmarks().size();
@@ -63,23 +63,23 @@ final class Runner {
     modifyLevelStorage(benchmarkDataPacks, null);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.PARSING, "");
+      iterationRun(benchmark, Options.Iteration.Mode.PARSING, "", false);
     }
 
     for (final var benchmark : mchConfig.executeBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, "");
+      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, "", false);
     }
 
     if (!benchmarksByDataPack.isEmpty()) {
-      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, "");
+      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, "", false);
 
       for (final var entry : benchmarksByDataPack.entrySet()) {
         final var dataPack = entry.getKey();
         final var benchmarks = entry.getValue();
         modifyLevelStorage(benchmarkDataPacks, dataPack);
         setupRun();
-        for (final var benchmark : benchmarks) {
-          iterationRun(benchmark, Options.Iteration.Mode.FUNCTION, dataPack.substring(FILE_PREFIX.length()));
+        for (var i = 0; i < benchmarks.size(); ++i) {
+          iterationRun(benchmarks.get(i), Options.Iteration.Mode.FUNCTION, dataPack.substring(FILE_PREFIX.length()), i == benchmarks.size() - 1);
         }
       }
     }
@@ -115,7 +115,7 @@ final class Runner {
     }
   }
 
-  private Collection<String> collectBenchmarkFunctions(
+  private List<String> collectBenchmarkFunctions(
     final String dataPack
   ) throws IOException {
     final var functions = new ArrayList<String>();
@@ -200,7 +200,8 @@ final class Runner {
   private void iterationRun(
     final String benchmark,
     final Options.Iteration.Mode mode,
-    final String group
+    final String group,
+    final boolean lastInGroup
   ) throws IOException, InterruptedException {
     final var scores = new ArrayList<Double>();
     for (var fork = 0; fork < mchConfig.forks(); ++fork) {
@@ -223,16 +224,17 @@ final class Runner {
         thread.start();
 
         final var port = server.getLocalPort();
+        final var progress = (float) (done++) / (float) total;
         final var options = new Options.Iteration(
           mchConfig.autoStart(),
+          lastInGroup,
           mchConfig.warmupIterations(),
           mchConfig.measurementIterations(),
           mchConfig.time(),
           mchConfig.forks(),
           fork,
           port,
-          done++,
-          total,
+          progress,
           mode,
           benchmark
         ).toString();
