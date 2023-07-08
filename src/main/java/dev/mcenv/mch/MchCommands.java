@@ -15,7 +15,7 @@ import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
 @Keep
 @SuppressWarnings("unused")
 public final class MchCommands implements Commands {
-  private static final String PRE = "mch:pre";
+  private static final String LIMIT = "mch:limit";
   private static final String SETUP = "mch:setup";
   private static final String START = "mch:start";
   private static final String CHECK = "mch:check";
@@ -24,7 +24,7 @@ public final class MchCommands implements Commands {
   private static final String NOOP = "mch:noop";
 
   private Socket socket;
-  private boolean skipped = false;
+  private int limited = 0;
   private boolean maxCommandChainLengthExceeded = true;
   private long startTime;
   private int iterationCount;
@@ -64,7 +64,14 @@ public final class MchCommands implements Commands {
   private void registerDry(
     final CommandDispatcher<Object> dispatcher
   ) {
-    dispatcher.register(literal(PRE).executes(c -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource())));
+    dispatcher.register(literal(LIMIT).executes(c -> {
+      if (limited++ == 0) {
+        dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource());
+      } else {
+        dispatcher.execute("gamerule maxCommandChainLength 0", c.getSource());
+      }
+      return 0;
+    }));
     dispatcher.register(literal(SETUP).executes(c -> dispatcher.execute("function #mch:setup", c.getSource())));
     registerConst(dispatcher, START);
     registerConst(dispatcher, CHECK);
@@ -83,7 +90,7 @@ public final class MchCommands implements Commands {
 
     final var command = options.benchmark();
 
-    dispatcher.register(literal(PRE).executes(c -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource())));
+    dispatcher.register(literal(LIMIT).executes(c -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource())));
 
     registerConst(dispatcher, SETUP);
 
@@ -148,7 +155,7 @@ public final class MchCommands implements Commands {
     final var time = TimeUnit.SECONDS.toNanos(options.time());
     scores = new double[options.measurementIterations()];
 
-    dispatcher.register(literal(PRE).executes(c -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource())));
+    dispatcher.register(literal(LIMIT).executes(c -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource())));
 
     registerConst(dispatcher, SETUP);
 
@@ -218,13 +225,12 @@ public final class MchCommands implements Commands {
     scores = new double[options.measurementIterations()];
 
     dispatcher.register(
-      literal(PRE).executes(c -> {
-        if (skipped || options.autoStart()) {
+      literal(LIMIT).executes(c -> {
+        if (options.autoStart() || limited++ >= 2) {
           dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource());
-        } else {
+        } else if (limited == 1) {
           dispatcher.execute("gamerule maxCommandChainLength 0", c.getSource());
           System.out.println("Execute `/function #load` to start the benchmark");
-          skipped = true;
         }
         return 0;
       })
