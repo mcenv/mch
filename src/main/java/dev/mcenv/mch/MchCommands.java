@@ -70,7 +70,7 @@ public final class MchCommands implements Commands {
         dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
       } else {
         dispatcher.execute("gamerule maxCommandChainLength 0", source);
-        dispatcher.execute("function stop", source);
+        dispatcher.execute("stop", source);
       }
       return 0;
     }));
