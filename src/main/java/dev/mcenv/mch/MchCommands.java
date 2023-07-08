@@ -69,8 +69,8 @@ public final class MchCommands implements Commands {
       dispatcher.register(literal(LIMIT).executes(c -> {
         final var source = c.getSource();
         switch (limited++) {
-          case 0 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
-          case 2 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
+          case 0 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
+          case 2 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
           case 1 -> {
           }
         }
