@@ -1,8 +1,8 @@
 {
   "values": [
-    "mch:limit",
+    "mch:limit0",
     "mch:setup",
-    "mch:limit",
+    "mch:limit1",
     "mch:setup.trial",
     "mch:start",
     "mch:teardown.trial",
