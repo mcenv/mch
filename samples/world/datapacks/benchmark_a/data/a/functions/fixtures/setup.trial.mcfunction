@@ -1,1 +1,1 @@
-say setup.trial
+say setup.trial for a

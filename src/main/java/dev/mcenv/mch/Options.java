@@ -1,13 +1,13 @@
 package dev.mcenv.mch;
 
-sealed interface Options permits Options.Dry, Options.Iteration {
+sealed interface Options permits Options.Setup, Options.Iteration {
   static Options parse(
     final String string
   ) {
     final var args = string.split(",");
     final var tag = args[0];
     return switch (tag) {
-      case "dry" -> Dry.INSTANCE;
+      case "setup" -> Setup.INSTANCE;
       case "iteration" -> new Iteration(
         Boolean.parseBoolean(args[1]),
         Integer.parseInt(args[2]),
@@ -25,15 +25,15 @@ sealed interface Options permits Options.Dry, Options.Iteration {
     };
   }
 
-  final class Dry implements Options {
-    public static final Dry INSTANCE = new Dry();
+  final class Setup implements Options {
+    public static final Setup INSTANCE = new Setup();
 
-    private Dry() {
+    private Setup() {
     }
 
     @Override
     public String toString() {
-      return "dry";
+      return "setup";
     }
   }
 
