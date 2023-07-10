@@ -244,7 +244,7 @@ public final class MchCommands implements Commands {
           dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource());
         } else if (limited == 1) {
           dispatcher.execute("gamerule maxCommandChainLength 0", c.getSource());
-          System.out.println("Execute `/function #load` to start the benchmark");
+          System.out.println("Execute `/function #load` to start benchmarking " + options.benchmark());
         }
         ++limited;
         return 0;
