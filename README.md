@@ -12,8 +12,6 @@
 
 ## [Supported versions](https://github.com/mcenv/mch/blob/versions/versions.csv)
 
-Automatically updated every day.
-
 ## Usage
 
 1. Download [<samp>mch.jar</samp>](https://github.com/mcenv/mch/releases/latest/download/mch.jar) into the same directory as <samp>server.jar</samp>.
