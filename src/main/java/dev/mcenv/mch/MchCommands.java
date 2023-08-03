@@ -10,7 +10,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
+import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
+import static com.mojang.brigadier.builder.RequiredArgumentBuilder.argument;
 
 @Keep
 @SuppressWarnings("unused")
@@ -21,7 +23,6 @@ public final class MchCommands implements Commands {
   private static final String CHECK = "mch:check";
   private static final String LOOP = "mch:loop";
   private static final String POST = "mch:post";
-  private static final String NOOP = "mch:noop";
 
   private Socket socket;
   private int limited = 0;
@@ -42,7 +43,8 @@ public final class MchCommands implements Commands {
     final CommandDispatcher<Object> dispatcher,
     final String args
   ) {
-    registerConst(dispatcher, NOOP);
+    registerConst(dispatcher, "mch:noop");
+    dispatcher.register(literal("_").then(argument("string", string()).executes(c -> 0)));
 
     final var options = Options.parse(args);
     if (options instanceof Options.Setup setupOptions) {
