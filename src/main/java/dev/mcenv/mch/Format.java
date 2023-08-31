@@ -79,7 +79,8 @@ sealed interface Format permits Format.Json, Format.Md {
                 mchConfig.measurementIterations() * mchConfig.forks(),
                 convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
                 convert(Statistics.error(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
-                unit
+                unit,
+                runResult.scores()
               );
             } catch (NotStrictlyPositiveException e) {
               throw new RuntimeException(e);
