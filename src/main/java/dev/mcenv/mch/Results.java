@@ -28,7 +28,8 @@ record Results(
     @Keep int count,
     @Keep double score,
     @Keep double error,
-    @Keep String unit
+    @Keep String unit,
+    @Keep Collection<Double> scores
   ) {
   }
 }
