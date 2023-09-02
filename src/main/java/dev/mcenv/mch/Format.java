@@ -80,7 +80,7 @@ sealed interface Format permits Format.Json, Format.Md {
                 convert(Statistics.mean(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
                 convert(Statistics.error(runResult.scores()), TimeUnit.NANOSECONDS, mchConfig.timeUnit()),
                 unit,
-                runResult.scores()
+                runResult.scores().stream().map(score -> convert(score, TimeUnit.NANOSECONDS, mchConfig.timeUnit())).toList()
               );
             } catch (NotStrictlyPositiveException e) {
               throw new RuntimeException(e);
