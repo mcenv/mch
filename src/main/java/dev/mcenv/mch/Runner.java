@@ -140,6 +140,7 @@ final class Runner {
       }
     };
     Files.walkFileTree(root, visitor);
+    functions.sort(null);
     return functions;
   }
 
@@ -217,6 +218,7 @@ final class Runner {
             return Stream.of();
           }
         })
+        .sorted()
         .toList();
     }
   }
