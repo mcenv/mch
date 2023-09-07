@@ -43,8 +43,13 @@ public final class MchCommands implements Commands {
     final CommandDispatcher<Object> dispatcher,
     final String args
   ) {
-    registerConst(dispatcher, "mch:noop");
-    dispatcher.register(literal("_").then(argument("string", string()).executes(c -> 0)));
+    dispatcher.register(
+      literal("_")
+        .executes(c -> 0)
+        .then(
+          argument("string", string())
+            .executes(c -> 0))
+    );
 
     final var options = Options.parse(args);
     if (options instanceof Options.Setup setupOptions) {

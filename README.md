@@ -66,7 +66,7 @@ See [samples](https://github.com/mcenv/mch/tree/main/samples) for more details.
 
 | Command      | Description                    |
 |:-------------|:-------------------------------|
-| `mch:noop`   | Returns `0`                    |
+| `_`          | Returns `0`                    |
 | `_ <string>` | Takes a string and returns `0` |
 
 [^1]: NOT OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG.
