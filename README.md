@@ -50,7 +50,6 @@ See [samples](https://github.com/mcenv/mch/tree/main/samples) for more details.
 | `mc_args`                | Minecraft arguments to use with forks         | `nogui`       |
 | `parsing_benchmarks`     | Commands for parsing benchmark                | <code></code> |
 | `execute_benchmarks`     | Commands for execute benchmark                | <code></code> |
-| `function_benchmarks`    | Data pack names for function benchmark        | <code></code> |
 
 ## Fixtures
 
