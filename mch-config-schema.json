@@ -111,15 +111,6 @@
         "type": "string"
       },
       "default": []
-    },
-    "function_benchmarks": {
-      "title": "Function Benchmarks",
-      "description": "Data pack names for function benchmark",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": []
     }
   }
 }
