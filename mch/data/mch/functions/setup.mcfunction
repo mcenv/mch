@@ -1,2 +1,2 @@
-mch:noop
+_
 mch:setup
