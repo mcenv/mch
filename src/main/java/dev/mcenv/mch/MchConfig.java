@@ -27,8 +27,7 @@ record MchConfig(
   @Keep Collection<String> jvmArgs,
   @Keep Collection<String> mcArgs,
   @Keep Collection<String> parsingBenchmarks,
-  @Keep Collection<String> executeBenchmarks,
-  @Keep Collection<String> functionBenchmarks
+  @Keep Collection<String> executeBenchmarks
 ) {
   public static final String AUTO_START = "auto_start";
   public static final String WARMUP_ITERATIONS = "warmup_iterations";
@@ -43,7 +42,6 @@ record MchConfig(
   public static final String MC_ARGS = "mc_args";
   public static final String PARSING_BENCHMARKS = "parsing_benchmarks";
   public static final String EXECUTE_BENCHMARKS = "execute_benchmarks";
-  public static final String FUNCTION_BENCHMARKS = "function_benchmarks";
 
   public static final boolean AUTO_START_DEFAULT = true;
   public static final int WARMUP_ITERATIONS_DEFAULT = 5;
@@ -71,7 +69,6 @@ record MchConfig(
     private Collection<String> mcArgs = List.of(MC_ARGS_DEFAULT);
     private Collection<String> parsingBenchmarks = List.of();
     private Collection<String> executeBenchmarks = List.of();
-    private Collection<String> functionBenchmarks = List.of();
 
     public Builder(final String[] args) {
       this.args = args;
@@ -92,7 +89,6 @@ record MchConfig(
       final var mcArgsSpec = parser.accepts(MC_ARGS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var parsingBenchmarksSpec = parser.accepts(PARSING_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var executeBenchmarksSpec = parser.accepts(EXECUTE_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
-      final var functionBenchmarksSpec = parser.accepts(FUNCTION_BENCHMARKS).withOptionalArg().ofType(String.class).withValuesSeparatedBy(',');
       final var options = parser.parse(args);
 
       if (options.has(autoStartSpec)) {
@@ -146,9 +142,6 @@ record MchConfig(
       if (options.has(executeBenchmarksSpec)) {
         executeBenchmarks = options.valuesOf(executeBenchmarksSpec);
       }
-      if (options.has(functionBenchmarksSpec)) {
-        functionBenchmarks = options.valuesOf(functionBenchmarksSpec);
-      }
 
       return new MchConfig(
         autoStart,
@@ -163,8 +156,7 @@ record MchConfig(
         jvmArgs,
         mcArgs,
         parsingBenchmarks,
-        executeBenchmarks,
-        functionBenchmarks
+        executeBenchmarks
       );
     }
   }
@@ -220,9 +212,6 @@ record MchConfig(
       }
       if (object.get(EXECUTE_BENCHMARKS) != null) {
         super.executeBenchmarks = object.get(EXECUTE_BENCHMARKS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
-      }
-      if (object.get(FUNCTION_BENCHMARKS) != null) {
-        super.functionBenchmarks = object.get(FUNCTION_BENCHMARKS).getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList();
       }
 
       return build();

@@ -18,7 +18,8 @@ import java.util.stream.Stream;
 
 final class Runner {
   private final static String FILE_PREFIX = "file/";
-  private final static String BASELINE = "mch:baseline";
+  private final static String MCH_GROUP = "mch";
+  private final static String MCH_BASELINE = "mch:baseline";
   private final static Pattern RESOURCE_LOCATION = Pattern.compile("^([a-z0-9_.-]+)/functions/([a-z0-9/._-]+)\\.mcfunction$");
   private final static FileSystem FILE_SYSTEM = FileSystems.getDefault();
   private final static PathMatcher MCFUNCTION_MATCHER = FILE_SYSTEM.getPathMatcher("glob:*/functions/**.mcfunction");
@@ -40,43 +41,64 @@ final class Runner {
     this.mcVersion = mcVersion;
   }
 
+  private static Thread runIterationThread(
+    final ServerSocket server,
+    final ArrayList<Double> scores
+  ) {
+    final var thread = new Thread(() -> {
+      try {
+        final var client = server.accept();
+        try (final var in = new ObjectInputStream(client.getInputStream())) {
+          final var object = in.readObject();
+          if (object instanceof Message.RunResult runResult) {
+            for (final var score : runResult.scores()) {
+              scores.add(score);
+            }
+          }
+        }
+      } catch (final IOException | ClassNotFoundException e) {
+        throw new IllegalStateException(e);
+      }
+    });
+    thread.start();
+    return thread;
+  }
+
   public void run() throws InterruptedException, IOException {
     setupRun(true);
 
-    final var benchmarkDataPacks = collectBenchmarkDataPacks();
     final var benchmarksByDataPack = new LinkedHashMap<String, List<String>>();
+    final var benchmarkDataPacks = collectBenchmarkDataPacks();
+    final var prefixedBenchmarkDataPacks = benchmarkDataPacks.stream()
+      .map(dataPack -> FILE_PREFIX + dataPack)
+      .collect(Collectors.toSet());
 
     total += mchConfig.parsingBenchmarks().size();
     total += mchConfig.executeBenchmarks().size();
-    for (final var dataPack : mchConfig.functionBenchmarks()) {
-      final var prefixedDataPack = FILE_PREFIX + dataPack;
-      if (benchmarkDataPacks.contains(prefixedDataPack)) {
-        final var benchmarks = collectBenchmarkFunctions(dataPack);
-        total += benchmarks.size();
-        benchmarksByDataPack.put(prefixedDataPack, benchmarks);
-      } else {
-        System.err.println("Warning: Data pack " + dataPack + " is not for benchmarking");
-      }
+    for (final var benchmarkDataPack : benchmarkDataPacks) {
+      final var benchmarks = collectBenchmarkFunctions(benchmarkDataPack);
+      total += benchmarks.size();
+      benchmarksByDataPack.put(FILE_PREFIX + benchmarkDataPack, benchmarks);
     }
     total *= mchConfig.forks();
 
-    modifyLevelStorage(benchmarkDataPacks, null);
+    modifyLevelStorage(prefixedBenchmarkDataPacks, null);
 
     for (final var benchmark : mchConfig.parsingBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.PARSING, "", false);
+      iterationRun(benchmark, Options.Iteration.Mode.PARSING, MCH_GROUP, false);
     }
 
     for (final var benchmark : mchConfig.executeBenchmarks()) {
-      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, "", false);
+      iterationRun(benchmark, Options.Iteration.Mode.EXECUTE, MCH_GROUP, false);
     }
 
     if (!benchmarksByDataPack.isEmpty()) {
-      iterationRun(BASELINE, Options.Iteration.Mode.FUNCTION, "", false);
+      iterationRun(MCH_BASELINE, Options.Iteration.Mode.FUNCTION, MCH_GROUP, false);
 
       for (final var entry : benchmarksByDataPack.entrySet()) {
         final var dataPack = entry.getKey();
         final var benchmarks = entry.getValue();
-        modifyLevelStorage(benchmarkDataPacks, dataPack);
+        modifyLevelStorage(prefixedBenchmarkDataPacks, dataPack);
         setupRun(false);
         for (var i = 0; i < benchmarks.size(); ++i) {
           iterationRun(benchmarks.get(i), Options.Iteration.Mode.FUNCTION, dataPack.substring(FILE_PREFIX.length()), i == benchmarks.size() - 1);
@@ -86,32 +108,6 @@ final class Runner {
 
     for (final var format : mchConfig.formats()) {
       format.write(mchConfig, mcVersion, runResults);
-    }
-  }
-
-  private Set<String> collectBenchmarkDataPacks() throws IOException {
-    final var gson = new GsonBuilder()
-      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-      .create();
-
-    final var dataPacksRoot = Paths.get(levelName, "datapacks");
-    try (final var dataPacks = Files.list(dataPacksRoot)) {
-      return dataPacks
-        .map(dataPackRoot -> dataPackRoot.resolve("pack.mcmeta"))
-        .filter(Files::isRegularFile)
-        .flatMap(packMetadataPath -> {
-          try (final var reader = Files.newBufferedReader(packMetadataPath)) {
-            final var packMetadata = gson.fromJson(reader, PackMetadata.class);
-            if (Boolean.TRUE.equals(packMetadata.pack.mch)) {
-              return Stream.of(FILE_PREFIX + dataPacksRoot.relativize(packMetadataPath.getParent()));
-            } else {
-              return Stream.of();
-            }
-          } catch (IOException e) {
-            return Stream.of();
-          }
-        })
-        .collect(Collectors.toSet());
     }
   }
 
@@ -199,6 +195,32 @@ final class Runner {
     process.waitFor();
   }
 
+  private List<String> collectBenchmarkDataPacks() throws IOException {
+    final var gson = new GsonBuilder()
+      .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+      .create();
+
+    final var dataPacksRoot = Paths.get(levelName, "datapacks");
+    try (final var dataPacks = Files.list(dataPacksRoot)) {
+      return dataPacks
+        .map(dataPackRoot -> dataPackRoot.resolve("pack.mcmeta"))
+        .filter(Files::isRegularFile)
+        .flatMap(packMetadataPath -> {
+          try (final var reader = Files.newBufferedReader(packMetadataPath)) {
+            final var packMetadata = gson.fromJson(reader, PackMetadata.class);
+            if (Boolean.TRUE.equals(packMetadata.pack.mch)) {
+              return Stream.of(dataPacksRoot.relativize(packMetadataPath.getParent()).toString());
+            } else {
+              return Stream.of();
+            }
+          } catch (IOException e) {
+            return Stream.of();
+          }
+        })
+        .toList();
+    }
+  }
+
   private void iterationRun(
     final String benchmark,
     final Options.Iteration.Mode mode,
@@ -208,22 +230,7 @@ final class Runner {
     final var scores = new ArrayList<Double>();
     for (var fork = 0; fork < mchConfig.forks(); ++fork) {
       try (final var server = new ServerSocket(0)) {
-        final var thread = new Thread(() -> {
-          try {
-            final var client = server.accept();
-            try (final var in = new ObjectInputStream(client.getInputStream())) {
-              final var object = in.readObject();
-              if (object instanceof Message.RunResult runResult) {
-                for (final var score : runResult.scores()) {
-                  scores.add(score);
-                }
-              }
-            }
-          } catch (final IOException | ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-          }
-        });
-        thread.start();
+        final var thread = runIterationThread(server, scores);
 
         final var lastIterationInGroup = lastInGroup && fork == mchConfig.forks() - 1;
         final var port = server.getLocalPort();

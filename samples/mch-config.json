@@ -7,17 +7,5 @@
   "formats": [
     "json",
     "md"
-  ],
-  "parsing_benchmarks": [
-    "seed",
-    "execute run seed"
-  ],
-  "execute_benchmarks": [
-    "seed",
-    "data modify storage _ _ set value '|'"
-  ],
-  "function_benchmarks": [
-    "benchmark_a",
-    "benchmark_b"
   ]
 }
