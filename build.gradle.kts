@@ -27,7 +27,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("dev.mcenv:spy:0.5.0")
   implementation("net.sf.jopt-simple:jopt-simple:5.0.4")
-  implementation("org.ow2.asm:asm:9.5")
+  implementation("org.ow2.asm:asm:9.6")
   implementation("org.apache.commons:commons-math3:3.6.1")
   implementation("org.commonmark:commonmark:0.21.0")
   implementation("org.commonmark:commonmark-ext-gfm-tables:0.21.0")
