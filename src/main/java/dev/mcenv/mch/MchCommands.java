@@ -277,6 +277,7 @@ public final class MchCommands implements Commands {
         startTime = System.nanoTime();
 
         try {
+          run.getExceptions().forEach((k, v) -> System.out.println(v.getMessage()));
           final var r = dispatcher.execute(run);
           System.out.println("run " + r);
         } catch (final CommandSyntaxException e1) {
