@@ -10,10 +10,6 @@
 > - Remember that the benchmark results may be affected by Minecraft/JVM/OS/HW.
 > - Do not replace functions in `mch` namespace.
 
-## Supported versions
-
-- <samp>23w44a..</samp>
-
 ## Usage
 
 1. Download [<samp>mch.jar</samp>](https://github.com/mcenv/mch/releases/latest/download/mch.jar) into the same directory as <samp>server.jar</samp>.
@@ -33,6 +29,7 @@ See [samples](https://github.com/mcenv/mch/tree/main/samples) for more details.
 
 ## Requirements
 
+- Minecraft 23w44a+
 - Java 17+
 
 ## Options
