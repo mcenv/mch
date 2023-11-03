@@ -76,7 +76,7 @@ public final class MchCommands implements Commands {
       dispatcher.register(literal(LIMIT).executes(c -> {
         final var source = c.getSource();
         switch (limited++) {
-          case 0 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
+          case 0 -> dispatcher.execute("gamerule maxCommandChainLength 2", source);
           case 2 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
           case 1 -> {
           }
@@ -88,7 +88,7 @@ public final class MchCommands implements Commands {
         final var source = c.getSource();
         switch (limited++) {
           case 0, 2 -> dispatcher.execute("gamerule maxCommandChainLength 2147483647", source);
-          case 1 -> dispatcher.execute("gamerule maxCommandChainLength 0", source);
+          case 1 -> dispatcher.execute("gamerule maxCommandChainLength 2", source);
         }
         return 0;
       }));
@@ -250,7 +250,7 @@ public final class MchCommands implements Commands {
         if (options.autoStart() || limited >= 3) {
           dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource());
         } else if (limited == 1) {
-          dispatcher.execute("gamerule maxCommandChainLength 0", c.getSource());
+          dispatcher.execute("gamerule maxCommandChainLength 2", c.getSource());
           System.out.println("Execute `/function #load` to start benchmarking " + options.benchmark());
         }
         ++limited;
