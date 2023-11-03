@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
-  implementation("dev.mcenv:spy:0.5.0")
+  implementation("dev.mcenv:spy:0.7.0")
   implementation("net.sf.jopt-simple:jopt-simple:5.0.4")
   implementation("org.ow2.asm:asm:9.6")
   implementation("org.apache.commons:commons-math3:3.6.1")
