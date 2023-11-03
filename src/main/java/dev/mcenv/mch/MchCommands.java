@@ -277,7 +277,8 @@ public final class MchCommands implements Commands {
         startTime = System.nanoTime();
 
         try {
-          dispatcher.execute(run);
+          final var r = dispatcher.execute(run);
+          System.out.println("run " + r);
         } catch (final CommandSyntaxException e1) {
           System.out.println(e1.getMessage());
           try {
@@ -287,7 +288,8 @@ public final class MchCommands implements Commands {
             throw new RuntimeException(e2);
           }
         }
-        dispatcher.execute(loop);
+        final var l = dispatcher.execute(loop);
+        System.out.println("loop " + l);
         ++operationCount;
         return 0;
       })
