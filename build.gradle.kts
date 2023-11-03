@@ -113,6 +113,7 @@ fun ProGuardTask.optimizeJar(optimizationPasses: Int) {
   optimizationpasses(optimizationPasses)
   repackageclasses("mch")
   dontwarn("java.lang.invoke.MethodHandle")
+  dontwarn("org.jetbrains.annotations.**")
 }
 
 tasks.register<ProGuardTask>("optimizeJar") {
