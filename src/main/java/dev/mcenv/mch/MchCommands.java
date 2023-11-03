@@ -265,33 +265,36 @@ public final class MchCommands implements Commands {
       literal(START).executes(c -> {
         printIteration(options);
 
-        final var source = c.getSource();
-        run = dispatcher.parse("function " + options.benchmark(), source);
-        loop = dispatcher.parse("function mch:loop", source);
-        post = dispatcher.parse("function mch:post", source);
-        setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
-        teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
-
-        dispatcher.execute(setupIteration);
-
-        startTime = System.nanoTime();
-
         try {
-          run.getExceptions().forEach((k, v) -> System.out.println(v.getMessage()));
-          final var r = dispatcher.execute(run);
-          System.out.println("run " + r);
-        } catch (final CommandSyntaxException e1) {
-          System.out.println(e1.getMessage());
+          final var source = c.getSource();
+          run = dispatcher.parse("function " + options.benchmark(), source);
+          loop = dispatcher.parse("function mch:loop", source);
+          post = dispatcher.parse("function mch:post", source);
+          setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
+          teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
+
+          dispatcher.execute(setupIteration);
+
+          startTime = System.nanoTime();
+
           try {
-            socket.close();
-            dispatcher.execute(post);
-          } catch (IOException e2) {
-            throw new RuntimeException(e2);
+            final var r = dispatcher.execute(run);
+            System.out.println("run " + r);
+          } catch (final CommandSyntaxException e1) {
+            System.out.println(e1.getMessage());
+            try {
+              socket.close();
+              dispatcher.execute(post);
+            } catch (IOException e2) {
+              throw new RuntimeException(e2);
+            }
           }
+          final var l = dispatcher.execute(loop);
+          System.out.println("loop " + l);
+          ++operationCount;
+        } catch (final Throwable t) {
+          t.printStackTrace();
         }
-        final var l = dispatcher.execute(loop);
-        System.out.println("loop " + l);
-        ++operationCount;
         return 0;
       })
     );
