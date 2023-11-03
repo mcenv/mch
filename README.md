@@ -10,7 +10,9 @@
 > - Remember that the benchmark results may be affected by Minecraft/JVM/OS/HW.
 > - Do not replace functions in `mch` namespace.
 
-## [Supported versions](https://github.com/mcenv/mch/blob/versions/versions.csv)
+## Supported versions
+
+- <samp>23w44a..</samp>
 
 ## Usage
 
