@@ -11,6 +11,12 @@ group = "dev.mcenv"
 version = "0.16.0"
 val brigadierVersion = "1.2.9"
 
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
+
 repositories {
   mavenCentral()
   maven("https://libraries.minecraft.net")
@@ -31,11 +37,6 @@ dependencies {
   implementation("org.apache.commons:commons-math3:3.6.1")
   implementation("org.commonmark:commonmark:0.21.0")
   implementation("org.commonmark:commonmark-ext-gfm-tables:0.21.0")
-}
-
-tasks.withType(JavaCompile::class) {
-  options.encoding = "UTF-8"
-  options.release.set(17)
 }
 
 tasks.jar {
