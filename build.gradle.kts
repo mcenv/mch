@@ -9,7 +9,7 @@ plugins {
 
 group = "dev.mcenv"
 version = "0.16.0"
-val brigadierVersion = "1.1.8"
+val brigadierVersion = "1.2.9"
 
 repositories {
   mavenCentral()

@@ -249,7 +249,6 @@ public final class MchCommands implements Commands {
       literal(LIMIT).executes(c -> {
         if (options.autoStart() || limited >= 3) {
           dispatcher.execute("gamerule maxCommandChainLength 2147483647", c.getSource());
-          dispatcher.execute("say test", c.getSource());
         } else if (limited == 1) {
           dispatcher.execute("gamerule maxCommandChainLength 3", c.getSource());
           System.out.println("Execute `/function #load` to start benchmarking " + options.benchmark());
@@ -265,36 +264,30 @@ public final class MchCommands implements Commands {
       literal(START).executes(c -> {
         printIteration(options);
 
+        final var source = c.getSource();
+        run = dispatcher.parse("function " + options.benchmark(), source);
+        loop = dispatcher.parse("function mch:loop", source);
+        post = dispatcher.parse("function mch:post", source);
+        setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
+        teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
+
+        dispatcher.execute(setupIteration);
+
+        startTime = System.nanoTime();
+
         try {
-          final var source = c.getSource();
-          run = dispatcher.parse("function " + options.benchmark(), source);
-          loop = dispatcher.parse("function mch:loop", source);
-          post = dispatcher.parse("function mch:post", source);
-          setupIteration = dispatcher.parse("function #mch:setup.iteration", source);
-          teardownIteration = dispatcher.parse("function #mch:teardown.iteration", source);
-
-          dispatcher.execute(setupIteration);
-
-          startTime = System.nanoTime();
-
+          dispatcher.execute(run);
+        } catch (final CommandSyntaxException e1) {
+          System.out.println(e1.getMessage());
           try {
-            final var r = dispatcher.execute(run);
-            System.out.println("run " + r);
-          } catch (final CommandSyntaxException e1) {
-            System.out.println(e1.getMessage());
-            try {
-              socket.close();
-              dispatcher.execute(post);
-            } catch (IOException e2) {
-              throw new RuntimeException(e2);
-            }
+            socket.close();
+            dispatcher.execute(post);
+          } catch (IOException e2) {
+            throw new RuntimeException(e2);
           }
-          final var l = dispatcher.execute(loop);
-          System.out.println("loop " + l);
-          ++operationCount;
-        } catch (final Throwable t) {
-          t.printStackTrace();
         }
+        dispatcher.execute(loop);
+        ++operationCount;
         return 0;
       })
     );
