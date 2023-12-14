@@ -33,7 +33,7 @@ jobs:
       - run: |
           cd samples
           java -jar ../build/libs/mch.jar --mc=$MINECRAFT
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.minecraft.outputs.version }}
           path: |
